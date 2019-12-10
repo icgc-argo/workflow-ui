@@ -26,6 +26,12 @@ const WORKFLOWS = [
     version: "1.0.0",
     name: "tutorial",
     url: "https://github.com/hlminh2000/hello.git"
+  },
+  {
+    id: "nextflow-dna-seq-alignment",
+    version: "1.0.0",
+    name: "DNA Sequence Alignment",
+    url: "https://github.com/icgc-argo/nextflow-dna-seq-alignment.git"
   }
 ];
 
