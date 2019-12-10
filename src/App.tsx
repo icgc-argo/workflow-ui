@@ -46,7 +46,8 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 const App: React.FC = () => {
   const client = new ApolloClient({
     link: new SchemaLink({ schema }),
-    cache: new InMemoryCache()
+    cache: new InMemoryCache(),
+    connectToDevTools: true
   });
   return (
     <ApolloProvider client={client}>
