@@ -45,6 +45,27 @@ export default gql`
     workflow: Workflow
     runs(pageSize: Int = 10, pageToken: String): RunsPage
     donors: [Donor]
+    infraFailure: InfraError
+    workflowError: WorkflowError
+    dataError: DataError
+  }
+  interface Error {
+    id: ID!
+    message: String
+  }
+  type InfraError implements Error {
+    id: ID!
+    message: String
+  }
+  type WorkflowError implements Error {
+    id: ID!
+    message: String
+    workflow: Workflow
+  }
+  type DataError implements Error {
+    id: ID!
+    message: String
+    analysis: Analysis
   }
   type Workflow {
     id: ID!
