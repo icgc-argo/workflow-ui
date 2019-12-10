@@ -102,28 +102,36 @@ export default ({ workflowId }: { workflowId: string }) => {
    * modal stuff
    */
   const [loading, setLoading] = React.useState(false);
-  const [runWorkflow] = useMutation(
+  const [runWorkflow] = useMutation<
+    any,
+    { workflow_url: string; analysis_id: string; api_token: string }
+  >(
     gql`
       mutation($workflow_url: String!) {
         runWorkflow(workflow_url: $workflow_url) {
           run_id
         }
       }
-    `,
-    {
-      variables: {
-        workflow_url: data ? data.workflow.url : ""
-      }
-    }
+    `
   );
   const [newRunModalShown, setNewRunModalShown] = React.useState(false);
   const onNewRunClick: React.ComponentProps<typeof Button>["onClick"] = () => {
     setNewRunModalShown(true);
   };
+  const [analysisId, setAnalysisId] = React.useState("");
+  const [apiToken, setApiToken] = React.useState("");
   const onNewRunConfirmed: React.ComponentProps<
     typeof Modal
   >["onActionClick"] = async () => {
-    runWorkflow();
+    if (data) {
+      runWorkflow({
+        variables: {
+          workflow_url: data.workflow.id,
+          analysis_id: analysisId,
+          api_token: apiToken
+        }
+      });
+    }
     setLoading(true);
     await new Promise(resolve => {
       setTimeout(() => {
@@ -175,10 +183,22 @@ export default ({ workflowId }: { workflowId: string }) => {
             >
               <InputLabel>
                 Input Analysis ID
-                <Input aria-label="test" />
+                <Input
+                  aria-label="analysis_id"
+                  value={analysisId}
+                  onChange={e => setAnalysisId(e.target.value)}
+                />
               </InputLabel>
               <InputLabel>
-                Some other params?
+                API Token
+                <Input
+                  aria-label="test"
+                  value={apiToken}
+                  onChange={e => setApiToken(e.target.value)}
+                />
+              </InputLabel>
+              <InputLabel>
+                Some other params:
                 <Input aria-label="test" />
               </InputLabel>
             </Modal>
