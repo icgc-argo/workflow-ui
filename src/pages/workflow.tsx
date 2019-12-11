@@ -66,7 +66,7 @@ export default ({ workflowId }: { workflowId: string }) => {
       variables: {
         workflowId
       },
-      pollInterval: 5000
+      pollInterval: 1000
     }
   );
 
