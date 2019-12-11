@@ -37,7 +37,6 @@ spec:
                 }
                 script {
                     version = sh(returnStdout: true, script: 'cat ./package.json | grep version | cut -d \':\' -f2 | sed -e \'s/"//\' -e \'s/",//\'').trim()
-                    sh "cat ${commit}"
                 }
             }
         }
@@ -51,9 +50,9 @@ spec:
         }
 
         stage('Deploy to argo-dev') {
-            when {
-                branch "develop"
-            }
+            // when {
+            //     branch "develop"
+            // }
             steps {
                 container('docker') {
                     withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -61,8 +60,8 @@ spec:
                     }
                     // DNS error if --network is default
                     sh "docker build --network=host . -t ${dockerHubRepo}:edge -t ${dockerHubRepo}:${version}-${commit}"
-                    sh "docker push ${dockerHubRepo}:${version}-${commit}"
-                    sh "docker push ${dockerHubRepo}:edge"
+                    // sh "docker push ${dockerHubRepo}:${version}-${commit}"
+                    // sh "docker push ${dockerHubRepo}:edge"
                 }
             }
         }
