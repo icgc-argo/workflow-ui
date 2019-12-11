@@ -39,7 +39,7 @@ const getSingleRun = async (runId: string): Promise<RunDetail> =>
   fetch(urlJoin(SEARCH_API, `runs/${runId}`)).then(res => res.json());
 
 const triggerWorkFlow = ({
-  workflow_url = "https://github.com/nextflow-io/hello.git",
+  workflow_url,
   analysis_id,
   api_token
 }: {
