@@ -39,7 +39,8 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test-dev": "react-scripts test",
+    "test": "echo 'no test yet'",
     "eject": "react-scripts eject",
     "proxy": "nodemon ./proxy.js",
     "start-prod": "npm run build && serve -s build"
