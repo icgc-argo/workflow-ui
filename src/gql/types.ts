@@ -1,8 +1,18 @@
-type Log = {
+type RunLog = {
   cmd: string[];
   end_time: string;
   exit_code: number;
   name: string;
+  start_time: string;
+  stderr: string;
+  stdout: string;
+};
+type TaskLog = {
+  cmd: string[];
+  end_time: string;
+  exit_code: number;
+  name: string;
+  container: string;
   start_time: string;
   stderr: string;
   stdout: string;
@@ -16,9 +26,9 @@ export type RunDetail = {
     workflow_url: string;
   };
   run_id: string;
-  run_log: Log;
+  run_log: RunLog;
   state: string;
-  task_logs: Log[];
+  task_logs: TaskLog[];
 };
 
 export type RunStatus = {

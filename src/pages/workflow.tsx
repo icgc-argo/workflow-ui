@@ -66,7 +66,7 @@ export default ({ workflowId }: { workflowId: string }) => {
       variables: {
         workflowId
       },
-      pollInterval: 500
+      pollInterval: 0
     }
   );
 
@@ -107,9 +107,18 @@ export default ({ workflowId }: { workflowId: string }) => {
     { workflow_url: string; analysis_id: string; api_token: string }
   >(
     gql`
-      mutation($workflow_url: String!) {
-        runWorkflow(workflow_url: $workflow_url) {
+      mutation(
+        $workflow_url: String!
+        $analysis_id: String!
+        $api_token: String!
+      ) {
+        runWorkflow(
+          workflow_url: $workflow_url
+          analysis_id: $analysis_id
+          api_token: $api_token
+        ) {
           run_id
+          __typename
         }
       }
     `
@@ -126,7 +135,7 @@ export default ({ workflowId }: { workflowId: string }) => {
     if (data) {
       runWorkflow({
         variables: {
-          workflow_url: data.workflow.id,
+          workflow_url: data.workflow.url,
           analysis_id: analysisId,
           api_token: apiToken
         }

@@ -8,12 +8,22 @@ export default gql`
     supported_filesystem_protocols: [String]
     supported_wes_versions: [String]
   }
-  type Log {
+  type RunLog {
     cmd: [String]
     end_time: String
     start_time: String
     exit_code: Int
     name: String
+    sttderr: String
+    stdout: String
+  }
+  type TaskLog {
+    cmd: [String]
+    end_time: String
+    start_time: String
+    exit_code: Int
+    name: String
+    container: String
     sttderr: String
     stdout: String
   }
@@ -27,9 +37,9 @@ export default gql`
   type Run {
     run_id: ID!
     state: String
-    log: Log
+    log: RunLog
     request: RunRequest
-    task_log: [Log]
+    task_log: [TaskLog]
   }
   type RunsPage {
     runs: [Run]

@@ -5,33 +5,16 @@ import { RunDetail, RunStatus } from "./types";
 import GraphQLJSON from "graphql-type-json";
 
 const SEARCH_API =
-  process.env.REACT_APP_SEARCH_API || `http://localhost:7000/search`;
+  process.env.REACT_APP_SEARCH_API || `http://wes.light.overture.bio/api/v1`;
 const MANAGEMENT_API =
-  process.env.REACT_APP_MANAGEMENT_API || `http://localhost:7000/relay`;
+  process.env.REACT_APP_MANAGEMENT_API || `http://wes.light.overture.bio/api/v1`;
 const WORKFLOWS = [
-  {
-    id: "nextflow-hello",
-    version: "1.0.0",
-    name: "hello world",
-    url: "https://github.com/nextflow-io/hello.git"
-  },
-  {
-    id: "nextflow-hello",
-    version: "1.0.1",
-    name: "hello world",
-    url: "https://github.com/nextflow-io/hello.git"
-  },
-  {
-    id: "minh-hello",
-    version: "1.0.0",
-    name: "tutorial",
-    url: "https://github.com/hlminh2000/hello.git"
-  },
   {
     id: "nextflow-dna-seq-alignment",
     version: "1.0.0",
     name: "DNA Sequence Alignment",
-    url: "https://github.com/icgc-argo/nextflow-dna-seq-alignment.git"
+    url: "https://github.com/icgc-argo/nextflow-dna-seq-alignment.git",
+    workflow_url: "icgc-argo/nextflow-dna-seq-alignment"
   }
 ];
 
