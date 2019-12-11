@@ -36,10 +36,11 @@ spec:
                     commit = sh(returnStdout: true, script: 'git describe --always').trim()
                 }
                 script {
-                    version = sh(returnStdout: true, script: 'cat ./package.json | grep version | cut -d \':\' -f2 | sed -e \'s/"//\' -e \'s/",//\'').trim()
+                    version = sh(returnStdout: true, script: 'cat ./package.json | grep \"version\"  | cut -d \':\' -f2 | sed -e \'s/"//\' -e \'s/",//\'').trim()
                 }
                 script {
                     sh "echo ${commit}"
+                    sh "echo ${version}"
                 }
             }
         }
