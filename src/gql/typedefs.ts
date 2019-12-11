@@ -18,14 +18,25 @@ export default gql`
     stdout: String
   }
   type TaskLog {
-    cmd: [String]
-    end_time: String
-    start_time: String
-    exit_code: Int
+    task_id: Int
     name: String
+    process: String
+    tag: String
     container: String
+    attempt: Int
+    state: String
+    cmd: [String]
+    submit_time: String
+    start_time: String
+    end_time: String
     sttderr: String
     stdout: String
+    exit_code: Int
+    workdir: String
+    cpus: Int
+    memory: Int
+    duration: Int
+    realtime: Int
   }
   type RunRequest {
     workflow_params: JSON
