@@ -1,4 +1,4 @@
-type RunLog = {
+export type RunLog = {
   cmd: string[];
   end_time: string;
   exit_code: number;
@@ -7,16 +7,29 @@ type RunLog = {
   stderr: string;
   stdout: string;
 };
-type TaskLog = {
-  cmd: string[];
-  end_time: string;
-  exit_code: number;
+
+export type TaskLog = {
+  task_id: number;
   name: string;
+  process: string;
+  tag: string;
   container: string;
+  attempt: number;
+  state: string;
+  cmd: [string];
+  submit_time: string;
   start_time: string;
-  stderr: string;
+  end_time: string;
+  sttderr: string;
   stdout: string;
+  exit_code: number;
+  workdir: string;
+  cpus: number;
+  memory: number;
+  duration: number;
+  realtime: number;
 };
+
 export type RunDetail = {
   outputs: {};
   request?: {
