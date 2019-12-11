@@ -38,6 +38,9 @@ spec:
                 script {
                     version = sh(returnStdout: true, script: 'cat ./package.json | grep version | cut -d \':\' -f2 | sed -e \'s/"//\' -e \'s/",//\'').trim()
                 }
+                script {
+                    sh "echo ${commit}"
+                }
             }
         }
         stage('Test') {
@@ -49,7 +52,7 @@ spec:
             }
         }
 
-        stage('Deploy to argo-dev') {
+        stage('Build edge') {
             // when {
             //     branch "develop"
             // }
@@ -66,7 +69,7 @@ spec:
             }
         }
 
-        stage('Deploy to argo-qa') {
+        stage('Build latest') {
             when {
                 branch "master"
             }
