@@ -94,6 +94,10 @@ export default gql`
   }
 
   type Mutation {
-    runWorkflow(workflow_url: String!): Run
+    runWorkflow(
+      workflow_url: String!
+      api_token: String!
+      analysis_id: String!
+    ): Run
   }
 `;
