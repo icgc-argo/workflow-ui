@@ -36,7 +36,11 @@ spec:
                     commit = sh(returnStdout: true, script: 'git describe --always').trim()
                 }
                 script {
-                    version = sh(returnStdout: true, script: 'cat ./package.json | grep version | cut -d \':\' -f2 | sed -e \'s/"//\' -e \'s/",//\'').trim()
+                    version = sh(returnStdout: true, script: 'cat ./package.json | grep \\"version\\" | cut -d \':\' -f2 | sed -e \'s/"//\' -e \'s/",//\'').trim()
+                }
+                script {
+                    sh "echo ${commit}"
+                    sh "echo ${version}"
                 }
             }
         }
@@ -49,7 +53,7 @@ spec:
             }
         }
 
-        stage('Deploy to argo-dev') {
+        stage('Build edge') {
             when {
                 branch "develop"
             }
@@ -66,7 +70,7 @@ spec:
             }
         }
 
-        stage('Deploy to argo-qa') {
+        stage('Build latest') {
             when {
                 branch "master"
             }
