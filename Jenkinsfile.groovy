@@ -54,9 +54,9 @@ spec:
         }
 
         stage('Build edge') {
-            // when {
-            //     branch "develop"
-            // }
+            when {
+                branch "develop"
+            }
             steps {
                 container('docker') {
                     withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
@@ -65,8 +65,8 @@ spec:
                     // DNS error if --network is default
                     sh "echo ${commit}"
                     sh "docker build --network=host . -t ${dockerHubRepo}:edge -t ${dockerHubRepo}:${version}-${commit}"
-                    // sh "docker push ${dockerHubRepo}:${version}-${commit}"
-                    // sh "docker push ${dockerHubRepo}:edge"
+                    sh "docker push ${dockerHubRepo}:${version}-${commit}"
+                    sh "docker push ${dockerHubRepo}:edge"
                 }
             }
         }
