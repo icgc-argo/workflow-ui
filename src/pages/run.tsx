@@ -76,7 +76,7 @@ export default ({ runId }: { runId: string }) => {
       variables: {
         runId
       },
-      pollInterval: 1000
+      pollInterval: 500
     }
   );
   const theme = useTheme();

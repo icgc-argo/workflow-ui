@@ -51,7 +51,7 @@ export default () => {
         }
       }
     `,
-    { pollInterval: 0 }
+    { pollInterval: 1000 }
   );
 
   const [selectedRunIds, setSelectedRunIds] = React.useState<string[]>([]);
