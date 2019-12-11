@@ -28,6 +28,7 @@ type SingleRunQuery = {
     task_log: {
       cmd: string[];
       name: string;
+      container: string;
       start_time: string;
     }[];
     request: {
@@ -57,6 +58,7 @@ export default ({ runId }: { runId: string }) => {
             cmd
             start_time
             name
+            container
             sttderr
             stdout
           }
