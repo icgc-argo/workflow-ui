@@ -62,6 +62,7 @@ spec:
                         sh 'docker login -u $USERNAME -p $PASSWORD'
                     }
                     // DNS error if --network is default
+                    sh "echo ${commit}"
                     sh "docker build --network=host . -t ${dockerHubRepo}:edge -t ${dockerHubRepo}:${version}-${commit}"
                     // sh "docker push ${dockerHubRepo}:${version}-${commit}"
                     // sh "docker push ${dockerHubRepo}:edge"
