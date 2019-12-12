@@ -81,7 +81,7 @@ export default ({ workflowId }: { workflowId: string }) => {
         .map(r => r.run_id)
         .every(id => selectedRunIds.includes(id));
     return output;
-  }, [selectedRunIds]);
+  }, [selectedRunIds, data]);
   const toggleAll = () => {
     if (!!data) {
       if (selectAll) {

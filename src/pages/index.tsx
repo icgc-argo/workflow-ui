@@ -3,7 +3,6 @@ import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
-import Button from "@icgc-argo/uikit/Button";
 import Typography from "@icgc-argo/uikit/Typography";
 import RunsTable from "../components/RunsTable";
 
@@ -55,6 +54,7 @@ export default () => {
   );
 
   const [selectedRunIds, setSelectedRunIds] = React.useState<string[]>([]);
+
   const selectAll = React.useMemo(() => {
     const output =
       !!data &&
@@ -62,7 +62,8 @@ export default () => {
         .map(r => r.run_id)
         .every(id => selectedRunIds.includes(id));
     return output;
-  }, [selectedRunIds]);
+  }, [selectedRunIds, data]);
+
   const toggleAll = () => {
     if (!!data) {
       if (selectAll) {
@@ -72,6 +73,7 @@ export default () => {
       }
     }
   };
+  
   const toggleSelection = (selectionString: string) => {
     const runId = selectionString.split("select-").join("");
     selectedRunIds.includes(runId)
