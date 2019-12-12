@@ -3,7 +3,6 @@ import ApolloClient from "apollo-client";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { createPortal } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import { Voyager } from "graphql-voyager";
 import AppBar, {
   Section,
   Logo,
@@ -21,7 +20,6 @@ import Run from "./pages/run";
 import Voyagers from "./pages/voyagers";
 import Workflow from "./pages/workflow";
 import { css } from "emotion";
-import gql from "graphql-tag";
 
 const modalPortalRef = React.createRef<HTMLDivElement>();
 export const ModalPortal: React.ComponentType = ({ children }) => {
