@@ -5,9 +5,9 @@ import { RunDetail, RunStatus } from "./types";
 import GraphQLJSON from "graphql-type-json";
 
 const SEARCH_API =
-  process.env.REACT_APP_SEARCH_API || `http://wes.light.overture.bio/api/v1`;
+  process.env.REACT_APP_SEARCH_API || `/api/v1`;
 const MANAGEMENT_API =
-  process.env.REACT_APP_MANAGEMENT_API || `http://wes.light.overture.bio/api/v1`;
+  process.env.REACT_APP_MANAGEMENT_API || `/api/v1`;
 const WORKFLOWS = [
   {
     id: "nextflow-dna-seq-alignment",

@@ -4,14 +4,11 @@ import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import Typography from "@icgc-argo/uikit/Typography";
-import Button from "@icgc-argo/uikit/Button";
 import { css } from "emotion";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import Tabs, { Tab } from "@icgc-argo/uikit/Tabs";
 import Icon from "@icgc-argo/uikit/Icon";
 import groupBy from "lodash/groupBy";
-import orderBy from "lodash/orderBy";
-import last from "lodash/last";
 import { RunLog, TaskLog } from "../gql/types";
 
 type SingleRunQuery = {
@@ -145,10 +142,10 @@ export default ({ runId }: { runId: string }) => {
                 .map(
                   ([task_id, tasks]) => {
                     const lastTask = tasks.reduce((acc, curr) => {
-                      if (curr.state == "COMPLETE") {
+                      if (curr.state === "COMPLETE") {
                         acc = curr;
                         return acc;
-                      } else if (curr.state == "RUNNING" && acc.state !=  "COMPLETE") {
+                      } else if (curr.state === "RUNNING" && acc.state !==  "COMPLETE") {
                         acc = curr;
                         return curr;
                       }
