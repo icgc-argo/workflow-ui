@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import AppBar, {
   Section,
-  Logo,
   MenuGroup,
   MenuItem
 } from "@icgc-argo/uikit/AppBar";
@@ -20,6 +19,7 @@ import Run from "./pages/run";
 import Voyagers from "./pages/voyagers";
 import Workflow from "./pages/workflow";
 import { css } from "emotion";
+import logo from './logo.svg';
 
 const modalPortalRef = React.createRef<HTMLDivElement>();
 export const ModalPortal: React.ComponentType = ({ children }) => {
@@ -60,7 +60,7 @@ const App: React.FC = () => {
           >
             <AppBar>
               <Section>
-                <Logo></Logo>
+                <img className={css`padding: 16px;`} src={logo} alt="cargo logo"></img>
                 <MenuGroup>
                   <Link to="/">
                     <MenuItem>Runs</MenuItem>
