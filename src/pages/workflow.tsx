@@ -11,6 +11,7 @@ import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import Input from "@icgc-argo/uikit/form/Input";
 import InputLabel from "@icgc-argo/uikit/form/InputLabel";
 import { ModalPortal } from "../App";
+import { useAppContext } from "../context/App";
 
 type WorkflowQueryResponse = {
   workflow: {
@@ -36,6 +37,7 @@ type WorkflowQueryResponse = {
   };
 };
 export default ({ workflowId }: { workflowId: string }) => {
+  const { doesPoll } = useAppContext();
   const { data } = useQuery<WorkflowQueryResponse>(
     gql`
       query WORKFLOW_QUERY($workflowId: ID!) {
@@ -66,7 +68,7 @@ export default ({ workflowId }: { workflowId: string }) => {
       variables: {
         workflowId
       },
-      pollInterval: 1000
+      pollInterval: doesPoll ? 1000 : 0
     }
   );
 

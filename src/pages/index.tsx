@@ -5,6 +5,7 @@ import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
 import Typography from "@icgc-argo/uikit/Typography";
 import RunsTable from "../components/RunsTable";
+import { useAppContext } from "../context/App";
 
 export type Run = {
   run_id: string;
@@ -28,6 +29,7 @@ export type RunListQueryResponse = {
 };
 
 export default () => {
+  const { doesPoll } = useAppContext();
   const { data } = useQuery<RunListQueryResponse>(
     gql`
       {
@@ -50,7 +52,7 @@ export default () => {
         }
       }
     `,
-    { pollInterval: 1000 }
+    { pollInterval: doesPoll ? 1000 : 0 }
   );
 
   const [selectedRunIds, setSelectedRunIds] = React.useState<string[]>([]);
@@ -73,7 +75,7 @@ export default () => {
       }
     }
   };
-  
+
   const toggleSelection = (selectionString: string) => {
     const runId = selectionString.split("select-").join("");
     selectedRunIds.includes(runId)

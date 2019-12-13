@@ -10,6 +10,7 @@ import Tabs, { Tab } from "@icgc-argo/uikit/Tabs";
 import Icon from "@icgc-argo/uikit/Icon";
 import groupBy from "lodash/groupBy";
 import { RunLog, TaskLog } from "../gql/types";
+import { useAppContext } from "../context/App";
 
 type SingleRunQuery = {
   run: {
@@ -26,6 +27,7 @@ type SingleRunQuery = {
 };
 
 export default ({ runId }: { runId: string }) => {
+  const { doesPoll } = useAppContext();
   const { data, loading } = useQuery<SingleRunQuery, { runId: string }>(
     gql`
       query SINGLE_RUN_QUERY($runId: ID!) {
@@ -73,7 +75,7 @@ export default ({ runId }: { runId: string }) => {
       variables: {
         runId
       },
-      pollInterval: 500
+      pollInterval: doesPoll ? 500 : 0
     }
   );
   const theme = useTheme();
@@ -138,14 +140,19 @@ export default ({ runId }: { runId: string }) => {
             {activeTab === "logs" && (
               <div>
                 {Object.entries(groupBy(data.run.task_log, "task_id"))
-                .sort(([taskId], [otherTaskId]) => parseInt(taskId) - parseInt(otherTaskId))
-                .map(
-                  ([task_id, tasks]) => {
+                  .sort(
+                    ([taskId], [otherTaskId]) =>
+                      parseInt(taskId) - parseInt(otherTaskId)
+                  )
+                  .map(([task_id, tasks]) => {
                     const lastTask = tasks.reduce((acc, curr) => {
                       if (curr.state === "COMPLETE") {
                         acc = curr;
                         return acc;
-                      } else if (curr.state === "RUNNING" && acc.state !==  "COMPLETE") {
+                      } else if (
+                        curr.state === "RUNNING" &&
+                        acc.state !== "COMPLETE"
+                      ) {
                         acc = curr;
                         return curr;
                       }
@@ -193,12 +200,30 @@ export default ({ runId }: { runId: string }) => {
                               }
                             `}
                           >
-                            <div><span>Name: </span>{lastTask.name}</div>
-                            <div><span>State: </span>{lastTask.state}</div>
-                            <div><span>Container: </span>{lastTask.container}</div>
-                            <div><span>Process: </span>{lastTask.process}</div>
-                            <div><span>Tag: </span>{lastTask.tag}</div>
-                            <div><span>Duration: </span>{Math.floor(lastTask.duration / 1000)} seconds</div>
+                            <div>
+                              <span>Name: </span>
+                              {lastTask.name}
+                            </div>
+                            <div>
+                              <span>State: </span>
+                              {lastTask.state}
+                            </div>
+                            <div>
+                              <span>Container: </span>
+                              {lastTask.container}
+                            </div>
+                            <div>
+                              <span>Process: </span>
+                              {lastTask.process}
+                            </div>
+                            <div>
+                              <span>Tag: </span>
+                              {lastTask.tag}
+                            </div>
+                            <div>
+                              <span>Duration: </span>
+                              {Math.floor(lastTask.duration / 1000)} seconds
+                            </div>
                           </Typography>
                           <pre
                             className={css`
@@ -219,8 +244,7 @@ export default ({ runId }: { runId: string }) => {
                         </div>
                       </div>
                     );
-                  }
-                )}
+                  })}
               </div>
             )}
             {activeTab === "params" && <div>nothing to see!</div>}
