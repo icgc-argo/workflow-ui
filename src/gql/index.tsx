@@ -9,16 +9,6 @@ const SEARCH_API =
 
 const MANAGEMENT_API =
   process.env.REACT_APP_MANAGEMENT_API || `/api/v1`;
-  
-const WORKFLOWS = [
-  {
-    id: "nextflow-dna-seq-alignment",
-    version: "1.0.0",
-    name: "DNA Sequence Alignment",
-    url: "https://github.com/icgc-argo/nextflow-dna-seq-alignment.git",
-    workflow_url: "icgc-argo/nextflow-dna-seq-alignment"
-  }
-];
 
 const getSingleRun = async (runId: string): Promise<RunDetail> =>
   fetch(urlJoin(SEARCH_API, `runs/${runId}`)).then(res => res.json());

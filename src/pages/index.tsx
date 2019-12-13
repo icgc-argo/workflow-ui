@@ -8,6 +8,7 @@ import RunsTable from "../components/RunsTable";
 import { useAppContext } from "../context/App";
 import Button from "@icgc-argo/uikit/Button";
 import Modal from "@icgc-argo/uikit/Modal";
+import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import { ModalPortal } from "../App";
 import InputLabel from "@icgc-argo/uikit/form/InputLabel";
 import Input from "@icgc-argo/uikit/form/Input";
@@ -151,6 +152,11 @@ export default () => {
         padding: 20px;
       `}
     >
+      {loading && (
+        <ModalPortal>
+          <DNALoader />
+        </ModalPortal>
+      )}
       <div
         className={css`
           margin: 10px 0px;
