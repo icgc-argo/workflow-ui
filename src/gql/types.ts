@@ -32,17 +32,19 @@ export type TaskLog = {
 
 export type RunDetail = {
   outputs: {};
-  request?: {
-    workflow_params: {};
-    workflow_type: string;
-    workflow_type_version: string;
-    workflow_url: string;
-  };
+  request: RunRequest;
   run_id: string;
   run_log: RunLog;
   state: string;
   task_logs: TaskLog[];
 };
+
+export type RunRequest = {
+  workflow_params: {};
+  workflow_type: string;
+  workflow_type_version: string;
+  workflow_url: string;
+}
 
 export type RunStatus = {
   run_id: string;
@@ -68,3 +70,10 @@ export type ServiceInfo = {
     [k: string]: string;
   };
 };
+
+export type Workflow = {
+  name: string;
+  full_name: string;
+  description: string;
+  html_url: string;
+}

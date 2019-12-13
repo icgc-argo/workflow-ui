@@ -1,13 +1,15 @@
 import { makeExecutableSchema } from "graphql-tools";
 import urlJoin from "url-join";
 import typeDefs from "./typedefs";
-import { RunDetail, RunStatus } from "./types";
+import { RunDetail, RunStatus, RunRequest, Workflow } from "./types";
 import GraphQLJSON from "graphql-type-json";
 
 const SEARCH_API =
   process.env.REACT_APP_SEARCH_API || `/api/v1`;
+
 const MANAGEMENT_API =
   process.env.REACT_APP_MANAGEMENT_API || `/api/v1`;
+  
 const WORKFLOWS = [
   {
     id: "nextflow-dna-seq-alignment",
@@ -20,6 +22,9 @@ const WORKFLOWS = [
 
 const getSingleRun = async (runId: string): Promise<RunDetail> =>
   fetch(urlJoin(SEARCH_API, `runs/${runId}`)).then(res => res.json());
+
+const getWorkflowRepo = async (githubUrl: string): Promise<Workflow> =>
+  fetch('http://api.github.com/repos/icgc-argo/nextflow-dna-seq-alignment').then(res => res.json());
 
 const triggerWorkFlow = ({
   workflow_url,
@@ -81,8 +86,13 @@ const listRuns = ({
 const resolvers = {
   JSON: GraphQLJSON,
   RunRequest: {
-    workflow: (obj: { workflow_url: string }) =>
-      WORKFLOWS.find(w => w.url === obj.workflow_url)
+    workflow: async (obj: RunRequest) => {
+      const repo = await getWorkflowRepo(obj.workflow_url);
+      return {
+        ...repo,
+        id: repo.full_name
+      };
+    }
   },
   Run: {
     log: async (obj: RunStatus) => {
@@ -101,23 +111,6 @@ const resolvers = {
       return obj.state || (await getSingleRun(obj.run_id)).state;
     }
   },
-  Workflow: {
-    runs: async (obj: { url: string }) => {
-      const runPage = await listRuns({ pageSize: 1000 });
-      return {
-        ...runPage,
-        runs: Promise.all(runPage.runs.map(r => getSingleRun(r.run_id))).then(
-          runs =>
-            runs.filter(run => {
-              const workflow_url = run.request
-                ? run.request.workflow_url
-                : null;
-              return workflow_url === obj.url;
-            })
-        )
-      };
-    }
-  },
   Query: {
     run: async (obj: any, args: { id: string }) => getSingleRun(args.id),
     listRuns: async (
@@ -129,10 +122,7 @@ const resolvers = {
     }> => {
       const { pageSize, pageToken } = args;
       return listRuns({ pageSize, pageToken });
-    },
-    workflows: () => WORKFLOWS,
-    workflow: (obj: any, args: { id: string }) =>
-      WORKFLOWS.find(({ id }) => id === args.id)
+    }
   },
   Mutation: {
     runWorkflow: async (

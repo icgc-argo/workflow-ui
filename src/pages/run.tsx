@@ -1,5 +1,4 @@
 import React from "react";
-import { Link } from "react-router-dom";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
@@ -97,12 +96,6 @@ export default ({ runId }: { runId: string }) => {
           </Typography>
           <Typography variant="label" as="div">
             <strong>completed:</strong> {data.run.log.end_time}
-          </Typography>
-          <Typography variant="label" as="div">
-            <strong>workflow:</strong>{" "}
-            <Link to={`/workflows/${data.run.request.workflow.id}`}>
-              {data.run.request.workflow.name}
-            </Link>
           </Typography>
         </div>
       )}

@@ -54,11 +54,7 @@ export default ({
               original: RunListQueryResponse["runList"]["runs"][0];
             }) => (
               <div>
-                {original.request ? (
-                  <Link to={`/workflows/${original.request.workflow.id}`}>
-                    {original.request.workflow.name}
-                  </Link>
-                ) : null}
+                {original.request ? original.request.workflow.name : null}
               </div>
             )
           }

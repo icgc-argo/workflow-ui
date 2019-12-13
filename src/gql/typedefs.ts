@@ -56,19 +56,19 @@ export default gql`
     runs: [Run]
     nextPageToken: String
   }
-  type AnalysisType {
+  type Workflow {
     id: ID!
-    name: String!
+    name: String
+    description: String
+    html_url: String
   }
-  type Analysis {
+  type Donor {
     id: ID!
-    analysisType: AnalysisType
-    workflow: Workflow
-    runs(pageSize: Int = 10, pageToken: String): RunsPage
-    donors: [Donor]
-    infraFailure: InfraError
-    workflowError: WorkflowError
-    dataError: DataError
+    name: String
+    files: [File]
+  }
+  type File {
+    id: ID!
   }
   interface Error {
     id: ID!
@@ -86,39 +86,17 @@ export default gql`
   type DataError implements Error {
     id: ID!
     message: String
-    analysis: Analysis
   }
-  type Workflow {
-    id: ID!
-    name: String
-    version: String
-    url: String
-    runs: RunsPage
-    output_analyses: [Analysis]
-    input_analysis_types: [AnalysisType]
-    output_analysis_type: AnalysisType
-  }
-  type Donor {
-    id: ID!
-    name: String
-    files: [File]
-  }
-  type File {
-    id: ID!
-  }
+
   type Query {
     listRuns(pageSize: Int = 10, pageToken: String): RunsPage
     run(id: ID!): Run
     serviceInfo: ServiceInfo
-    workflows: [Workflow]
-    workflow(id: ID!): Workflow
   }
-
   type Mutation {
     runWorkflow(
       workflow_url: String!
-      api_token: String!
-      analysis_id: String!
+      workflow_params: JSON!
     ): Run
   }
 `;

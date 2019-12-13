@@ -1,11 +1,16 @@
 import React from "react";
-import { useQuery } from "@apollo/react-hooks";
+import { useQuery, useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
 import Typography from "@icgc-argo/uikit/Typography";
 import RunsTable from "../components/RunsTable";
 import { useAppContext } from "../context/App";
+import Button from "@icgc-argo/uikit/Button";
+import Modal from "@icgc-argo/uikit/Modal";
+import { ModalPortal } from "../App";
+import InputLabel from "@icgc-argo/uikit/form/InputLabel";
+import Input from "@icgc-argo/uikit/form/Input";
 
 export type Run = {
   run_id: string;
@@ -22,6 +27,7 @@ export type Run = {
     };
   };
 };
+
 export type RunListQueryResponse = {
   runList: {
     runs: Run[];
@@ -29,7 +35,64 @@ export type RunListQueryResponse = {
 };
 
 export default () => {
+  /**
+   * modal stuff
+   */
+  const [loading, setLoading] = React.useState(false);
+
+  const [runWorkflow] = useMutation<
+    any,
+    { workflow_url: string; workflow_params: { [k: string]: any } }
+  >(
+    gql`
+      mutation($workflow_url: String!, $workflow_params: JSON!) {
+        runWorkflow(
+          workflow_url: $workflow_url
+          workflow_params: $workflow_params
+        ) {
+          run_id
+          __typename
+        }
+      }
+    `
+  );
+
+  const [newRunModalShown, setNewRunModalShown] = React.useState(false);
+
+  const onNewRunClick: React.ComponentProps<typeof Button>["onClick"] = () => {
+    setNewRunModalShown(true);
+  };
+
+  const [workflow_url, setWorkflowUrl] = React.useState("");
+  const [workflow_params, setWorkflowParams] = React.useState({});
+
+  const onNewRunConfirmed: React.ComponentProps<
+    typeof Modal
+  >["onActionClick"] = async () => {
+    runWorkflow({
+      variables: {
+        workflow_url: workflow_url,
+        workflow_params: workflow_params
+      }
+    });
+    setLoading(true);
+    await new Promise(resolve => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    });
+    setLoading(false);
+    setNewRunModalShown(false);
+  };
+
+  const onNewRunCanceled: React.ComponentProps<
+    typeof Modal
+  >["onCancelClick"] = () => {
+    setNewRunModalShown(false);
+  };
+
   const { doesPoll } = useAppContext();
+
   const { data } = useQuery<RunListQueryResponse>(
     gql`
       {
@@ -44,7 +107,6 @@ export default () => {
             request {
               workflow {
                 id
-                version
                 name
               }
             }
@@ -89,6 +151,39 @@ export default () => {
         padding: 20px;
       `}
     >
+      <div
+        className={css`
+          margin: 10px 0px;
+        `}
+      >
+        <Button onClick={onNewRunClick}>new run</Button>
+        {newRunModalShown && (
+          <ModalPortal>
+            <Modal
+              title="Some famcy form to input params"
+              onCancelClick={onNewRunCanceled}
+              onActionClick={onNewRunConfirmed}
+            >
+              <InputLabel>
+                Workflow URL
+                <Input
+                  aria-label="workflow_url"
+                  value={workflow_url}
+                  onChange={e => setWorkflowUrl(e.target.value)}
+                />
+              </InputLabel>
+              <InputLabel>
+                Workflow Params
+                <Input
+                  aria-label="workflow_params"
+                  value={JSON.stringify(workflow_params)}
+                  onChange={e => setWorkflowParams(JSON.parse(e.target.value))}
+                />
+              </InputLabel>
+            </Modal>
+          </ModalPortal>
+        )}
+      </div>
       <Container
         className={css`
           padding: 10px;

@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import AppBar, { Section, MenuGroup, MenuItem } from "@icgc-argo/uikit/AppBar";
 import { ThemeProvider } from "@icgc-argo/uikit";
-import Container from "@icgc-argo/uikit/Container";
 import Modal from "@icgc-argo/uikit/Modal";
 import { SchemaLink } from "apollo-link-schema";
 import { InMemoryCache } from "apollo-cache-inmemory";
@@ -14,7 +13,6 @@ import schema from "./gql";
 import Home from "./pages";
 import Run from "./pages/run";
 import Voyagers from "./pages/voyagers";
-import Workflow from "./pages/workflow";
 import { css } from "emotion";
 import logo from "./logo.svg";
 
@@ -73,9 +71,6 @@ const App: React.FC = () => {
                     <Link to="/">
                       <MenuItem>Runs</MenuItem>
                     </Link>
-                    <Link to="/workflows">
-                      <MenuItem>Workflows</MenuItem>
-                    </Link>
                     <Link to="/voyager">
                       <MenuItem>Voyager</MenuItem>
                     </Link>
@@ -90,16 +85,6 @@ const App: React.FC = () => {
                 <Route exact path="/runs">
                   <Home />
                 </Route>
-                <Route exact path="/workflows">
-                  <Container
-                    className={css`
-                      margin: 10px;
-                      padding: 10px;
-                    `}
-                  >
-                    List of available workflows
-                  </Container>
-                </Route>
                 <Route exact path="/voyager">
                   <Voyagers client={client} />
                 </Route>
@@ -107,12 +92,6 @@ const App: React.FC = () => {
                   path="/runs/:id"
                   component={(props: { match: { params: { id: string } } }) => (
                     <Run runId={props.match.params.id} />
-                  )}
-                />
-                <Route
-                  path="/workflows/:id"
-                  component={(props: { match: { params: { id: string } } }) => (
-                    <Workflow workflowId={props.match.params.id} />
                   )}
                 />
               </Switch>
