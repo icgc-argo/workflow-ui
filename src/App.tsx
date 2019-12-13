@@ -3,25 +3,23 @@ import ApolloClient from "apollo-client";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { createPortal } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import AppBar, {
-  Section,
-  MenuGroup,
-  MenuItem
-} from "@icgc-argo/uikit/AppBar";
+import AppBar, { Section, MenuGroup, MenuItem } from "@icgc-argo/uikit/AppBar";
 import { ThemeProvider } from "@icgc-argo/uikit";
 import Container from "@icgc-argo/uikit/Container";
 import Modal from "@icgc-argo/uikit/Modal";
 import { SchemaLink } from "apollo-link-schema";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import { AppContext, useInitialAppContextState } from './context/App';
 import schema from "./gql";
 import Home from "./pages";
 import Run from "./pages/run";
 import Voyagers from "./pages/voyagers";
 import Workflow from "./pages/workflow";
 import { css } from "emotion";
-import logo from './logo.svg';
+import logo from "./logo.svg";
 
 const modalPortalRef = React.createRef<HTMLDivElement>();
+
 export const ModalPortal: React.ComponentType = ({ children }) => {
   if (modalPortalRef.current) {
     return createPortal(
@@ -47,78 +45,89 @@ const App: React.FC = () => {
     cache: new InMemoryCache(),
     connectToDevTools: true
   });
-  return (
-    <ApolloProvider client={client}>
-      <ThemeProvider>
-        <Router>
-          <div
-            className={css`
-              position: absolute;
-              height: 100%;
-              width: 100%;
-            `}
-          >
-            <AppBar>
-              <Section>
-                <img className={css`padding: 16px;`} src={logo} alt="cargo logo"></img>
-                <MenuGroup>
-                  <Link to="/">
-                    <MenuItem>Runs</MenuItem>
-                  </Link>
-                  <Link to="/workflows">
-                    <MenuItem>Workflows</MenuItem>
-                  </Link>
-                  <Link to="/voyager">
-                    <MenuItem>Voyager</MenuItem>
-                  </Link>
-                </MenuGroup>
-              </Section>
-            </AppBar>
 
-            <Switch>
-              <Route exact path="/">
-                <Home />
-              </Route>
-              <Route exact path="/runs">
-                <Home />
-              </Route>
-              <Route exact path="/workflows">
-                <Container
-                  className={css`
-                    margin: 10px;
-                    padding: 10px;
-                  `}
-                >
-                  List of available workflows
-                </Container>
-              </Route>
-              <Route exact path="/voyager">
-                <Voyagers client={client} />
-              </Route>
-              <Route
-                path="/runs/:id"
-                component={(props: { match: { params: { id: string } } }) => (
-                  <Run runId={props.match.params.id} />
-                )}
-              />
-              <Route
-                path="/workflows/:id"
-                component={(props: { match: { params: { id: string } } }) => (
-                  <Workflow workflowId={props.match.params.id} />
-                )}
-              />
-            </Switch>
-          </div>
-          <div
-            className={css`
-              position: absolute;
-              top: 0px;
-            `}
-            ref={modalPortalRef}
-          />
-        </Router>
-      </ThemeProvider>
-    </ApolloProvider>
+  const globalState = useInitialAppContextState();
+
+  return (
+    <AppContext.Provider value={globalState}>
+      <ApolloProvider client={client}>
+        <ThemeProvider>
+          <Router>
+            <div
+              className={css`
+                position: absolute;
+                height: 100%;
+                width: 100%;
+              `}
+            >
+              <AppBar>
+                <Section>
+                  <img
+                    className={css`
+                      padding: 16px;
+                    `}
+                    src={logo}
+                    alt="cargo logo"
+                  ></img>
+                  <MenuGroup>
+                    <Link to="/">
+                      <MenuItem>Runs</MenuItem>
+                    </Link>
+                    <Link to="/workflows">
+                      <MenuItem>Workflows</MenuItem>
+                    </Link>
+                    <Link to="/voyager">
+                      <MenuItem>Voyager</MenuItem>
+                    </Link>
+                  </MenuGroup>
+                </Section>
+              </AppBar>
+
+              <Switch>
+                <Route exact path="/">
+                  <Home />
+                </Route>
+                <Route exact path="/runs">
+                  <Home />
+                </Route>
+                <Route exact path="/workflows">
+                  <Container
+                    className={css`
+                      margin: 10px;
+                      padding: 10px;
+                    `}
+                  >
+                    List of available workflows
+                  </Container>
+                </Route>
+                <Route exact path="/voyager">
+                  <Voyagers client={client} />
+                </Route>
+                <Route
+                  path="/runs/:id"
+                  component={(props: { match: { params: { id: string } } }) => (
+                    <Run runId={props.match.params.id} />
+                  )}
+                />
+                <Route
+                  path="/workflows/:id"
+                  component={(props: { match: { params: { id: string } } }) => (
+                    <Workflow workflowId={props.match.params.id} />
+                  )}
+                />
+              </Switch>
+            </div>
+            <div
+              className={css`
+                position: absolute;
+                top: 0px;
+              `}
+              ref={modalPortalRef}
+            />
+          </Router>
+        </ThemeProvider>
+      </ApolloProvider>
+    </AppContext.Provider>
   );
 };
 
