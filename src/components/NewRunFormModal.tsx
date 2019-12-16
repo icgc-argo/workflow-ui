@@ -8,7 +8,7 @@ import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import AceEditor from "react-ace";
 
-import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
 
 export default ({
@@ -91,7 +91,7 @@ export default ({
             <AceEditor
                 aria-label="workflow_params"
                 name="workflow_params"
-                mode="javascript"
+                mode="json"
                 theme="github"
                 value={workflow_params}
                 onChange={setWorkflowParams}
