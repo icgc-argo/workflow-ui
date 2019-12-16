@@ -42,7 +42,13 @@ const triggerWorkFlow = ({
       workflow_url,
       workflow_params
     })
-  }).then(res => res.json());
+  }).then(async res => {
+    if (res.ok) {
+      return res.json()
+    } else {
+      throw Error((await res.json()).msg)
+    }
+  });
 
 const listRuns = ({
   pageSize,
@@ -75,7 +81,8 @@ const resolvers = {
       } catch (error) {
         console.log(error);
         return {
-          id: "Unknown Repo (check logs for error)"
+          id: "NA",
+          name: "Unknown Repo (check logs for error)"
         };
       }
     }
