@@ -4,18 +4,29 @@ import typeDefs from "./typedefs";
 import { RunDetail, RunStatus, RunRequest, Workflow } from "./types";
 import GraphQLJSON from "graphql-type-json";
 
-const SEARCH_API =
-  process.env.REACT_APP_SEARCH_API || `/api/v1`;
+const SEARCH_API = process.env.REACT_APP_SEARCH_API || `/api/v1`;
 
-const MANAGEMENT_API =
-  process.env.REACT_APP_MANAGEMENT_API || `/api/v1`;
+const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || `/api/v1`;
 
 const getSingleRun = async (runId: string): Promise<RunDetail> =>
   fetch(urlJoin(SEARCH_API, `runs/${runId}`)).then(res => res.json());
 
-// TODO: Make this regex
-const getWorkflowRepo = async (githubUrl: string): Promise<Workflow> =>
-  fetch('http://api.github.com/repos/icgc-argo/nextflow-dna-seq-alignment').then(res => res.json());
+const getWorkflowRepo = async (githubUrl: string): Promise<Workflow> => {
+  const extractRepoRe = /^https:\/\/github\.com\/(.*)\.git/gm;
+  const repo = extractRepoRe.exec(githubUrl);
+
+  if (repo === null) {
+    throw Error(`Invalid Github Url: ${githubUrl}`);
+  }
+
+  return fetch(`http://api.github.com/repos/${repo[1]}`).then(res => {
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw Error(`Request rejected with status ${res.status}`);
+    }
+  });
+};
 
 const triggerWorkFlow = ({
   workflow_url,
@@ -55,11 +66,18 @@ const resolvers = {
   JSON: GraphQLJSON,
   RunRequest: {
     workflow: async (obj: RunRequest) => {
-      const repo = await getWorkflowRepo(obj.workflow_url);
-      return {
-        ...repo,
-        id: repo.full_name
-      };
+      try {
+        const repo = await getWorkflowRepo(obj.workflow_url);
+        return {
+          ...repo,
+          id: repo.full_name
+        };
+      } catch (error) {
+        console.log(error);
+        return {
+          id: "Unknown Repo (check logs for error)"
+        };
+      }
     }
   },
   Run: {
