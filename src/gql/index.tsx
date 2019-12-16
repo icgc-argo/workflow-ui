@@ -13,6 +13,7 @@ const MANAGEMENT_API =
 const getSingleRun = async (runId: string): Promise<RunDetail> =>
   fetch(urlJoin(SEARCH_API, `runs/${runId}`)).then(res => res.json());
 
+// TODO: Make this regex
 const getWorkflowRepo = async (githubUrl: string): Promise<Workflow> =>
   fetch('http://api.github.com/repos/icgc-argo/nextflow-dna-seq-alignment').then(res => res.json());
 
