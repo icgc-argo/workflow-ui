@@ -45,17 +45,12 @@ export default ({
   const onNewRunConfirmed: React.ComponentProps<
     typeof Modal
   >["onActionClick"] = async () => {
-    runWorkflow({
+    setLoading(true);
+    await runWorkflow({
       variables: {
         workflow_url: workflow_url,
         workflow_params: JSON.parse(workflow_params.trim())
       }
-    });
-    setLoading(true);
-    await new Promise(resolve => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
     });
     setLoading(false);
     setNewRunModalShown(false);
