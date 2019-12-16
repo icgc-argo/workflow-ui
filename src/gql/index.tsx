@@ -19,40 +19,17 @@ const getWorkflowRepo = async (githubUrl: string): Promise<Workflow> =>
 
 const triggerWorkFlow = ({
   workflow_url,
-  analysis_id,
-  api_token
+  workflow_params
 }: {
   workflow_url: string;
-  analysis_id: string;
-  api_token: string;
+  workflow_params: string;
 }): Promise<{ run_id: string }> =>
   fetch(urlJoin(MANAGEMENT_API, "/runs"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       workflow_url,
-      workflow_params: {
-        study_id: "TEST-PRO",
-        analysis_id: analysis_id,
-        song_url: "https://song.qa.argo.cancercollaboratory.org",
-        score_url: "https://score.qa.argo.cancercollaboratory.org",
-        api_token: api_token,
-        reference_dir:
-          "/mnt/volume/nextflow/reference/tiny-grch38-chr11-530001-537000",
-        a2_template_path:
-          "/mnt/volume/nextflow/analysis_templates/a2_template.json",
-        aligned_lane_prefix: "grch38-aligned",
-        aligned_basename: "HCC1143.3.20190726.wgs.grch38",
-        align: {
-          cpus: 2,
-          memory: 4000
-        },
-        download: {},
-        preprocess: {},
-        merge: {},
-        a2_gen_params: {},
-        upload: {}
-      }
+      workflow_params
     })
   }).then(res => res.json());
 
@@ -120,14 +97,12 @@ const resolvers = {
       obj: any,
       args: {
         workflow_url: string;
-        api_token: string;
-        analysis_id: string;
+        workflow_params: string;
       }
     ): Promise<{ run_id: string }> =>
       triggerWorkFlow({
         workflow_url: args.workflow_url,
-        api_token: args.api_token,
-        analysis_id: args.analysis_id
+        workflow_params: args.workflow_params
       })
   }
 };

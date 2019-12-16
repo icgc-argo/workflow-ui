@@ -6,14 +6,19 @@ import InputLabel from "@icgc-argo/uikit/form/InputLabel";
 import Input from "@icgc-argo/uikit/form/Input";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
+import AceEditor from "react-ace";
+
+import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/theme-github";
 
 export default ({
   setLoading
 }: {
   setLoading: (isLoading: boolean) => void;
 }) => {
+  
   const [workflow_url, setWorkflowUrl] = React.useState("");
-  const [workflow_params, setWorkflowParams] = React.useState({});
+  const [workflow_params, setWorkflowParams] = React.useState("");
   const [newRunModalShown, setNewRunModalShown] = React.useState(false);
 
   const [runWorkflow] = useMutation<
@@ -43,7 +48,7 @@ export default ({
     runWorkflow({
       variables: {
         workflow_url: workflow_url,
-        workflow_params: workflow_params
+        workflow_params: JSON.parse(workflow_params.trim())
       }
     });
     setLoading(true);
@@ -68,26 +73,29 @@ export default ({
       {newRunModalShown && (
         <ModalPortal>
           <Modal
-            title="Some famcy form to input params"
+            title="Some fancy form to input params"
             onCancelClick={onNewRunCanceled}
             onActionClick={onNewRunConfirmed}
           >
             <InputLabel>
               Workflow URL
-              <Input
+            </InputLabel>
+            <Input
                 aria-label="workflow_url"
                 value={workflow_url}
                 onChange={e => setWorkflowUrl(e.target.value)}
               />
-            </InputLabel>
             <InputLabel>
               Workflow Params
-              <Input
-                aria-label="workflow_params"
-                value={JSON.stringify(workflow_params)}
-                onChange={e => setWorkflowParams(JSON.parse(e.target.value))}
-              />
             </InputLabel>
+            <AceEditor
+                aria-label="workflow_params"
+                name="workflow_params"
+                mode="javascript"
+                theme="github"
+                value={workflow_params}
+                onChange={setWorkflowParams}
+              />
           </Modal>
         </ModalPortal>
       )}
