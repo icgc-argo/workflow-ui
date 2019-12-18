@@ -1,25 +1,22 @@
 import React, { useState } from "react";
 
 type TAppContext = {
-  doesPoll: boolean;
-  setPolling: (doesPoll: boolean) => void;
+  DEV_disablePolling: boolean;
 };
 
 const defaultState = {
-  doesPoll: false
+  DEV_disablePolling: process.env.NODE_ENV !== 'production'
 }
 
 export const AppContext = React.createContext<TAppContext>({
-  doesPoll: defaultState.doesPoll,
-  setPolling: doesPoll => doesPoll
+  DEV_disablePolling: defaultState.DEV_disablePolling
 });
 
 export const useInitialAppContextState = () => {
-  const [doesPoll, setPolling] = useState(defaultState.doesPoll);
+  const [DEV_disablePolling] = useState(defaultState.DEV_disablePolling);
 
   return {
-    doesPoll,
-    setPolling
+    DEV_disablePolling
   };
 };
 

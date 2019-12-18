@@ -26,7 +26,7 @@ type SingleRunQuery = {
 };
 
 export default ({ runId }: { runId: string }) => {
-  const { doesPoll } = useAppContext();
+  const { DEV_disablePolling } = useAppContext();
   const { data, loading } = useQuery<SingleRunQuery, { runId: string }>(
     gql`
       query SINGLE_RUN_QUERY($runId: ID!) {
@@ -74,7 +74,7 @@ export default ({ runId }: { runId: string }) => {
       variables: {
         runId
       },
-      pollInterval: doesPoll ? 500 : 0
+      pollInterval: DEV_disablePolling ? 0 : 500
     }
   );
   const theme = useTheme();

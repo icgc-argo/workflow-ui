@@ -38,7 +38,7 @@ export default () => {
    */
   const [loading, setLoading] = React.useState(false);
 
-  const { doesPoll } = useAppContext();
+  const { DEV_disablePolling } = useAppContext();
 
   const { data } = useQuery<RunListQueryResponse>(
     gql`
@@ -61,7 +61,7 @@ export default () => {
         }
       }
     `,
-    { pollInterval: doesPoll ? 1000 : 0 }
+    { pollInterval: DEV_disablePolling ? 0 : 1000 }
   );
 
   const [selectedRunIds, setSelectedRunIds] = React.useState<string[]>([]);
