@@ -40,7 +40,7 @@ export type RunDetail = {
 };
 
 export type RunRequest = {
-  workflow_params: {};
+  workflow_params: {[k: string]: any};
   workflow_type: string;
   workflow_type_version: string;
   workflow_url: string;
