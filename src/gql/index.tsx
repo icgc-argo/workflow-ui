@@ -1,3 +1,4 @@
+import { memoize } from "lodash";
 import { makeExecutableSchema } from "graphql-tools";
 import urlJoin from "url-join";
 import typeDefs from "./typedefs";
@@ -11,22 +12,24 @@ const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || `/api/v1`;
 const getSingleRun = async (runId: string): Promise<RunDetail> =>
   fetch(urlJoin(SEARCH_API, `runs/${runId}`)).then(res => res.json());
 
-const getWorkflowRepo = async (githubUrl: string): Promise<Workflow> => {
-  const extractRepoRe = /^https:\/\/github\.com\/(.*)\.git/gm;
-  const repo = extractRepoRe.exec(githubUrl);
+const getWorkflowRepo = memoize<(githubUrl: string) => Promise<Workflow>>(
+  async githubUrl => {
+    const extractRepoRe = /^https:\/\/github\.com\/(.*)\.git/gm;
+    const repo = extractRepoRe.exec(githubUrl);
 
-  if (repo === null) {
-    throw Error(`Invalid Github Url: ${githubUrl}`);
-  }
-
-  return fetch(`http://api.github.com/repos/${repo[1]}`).then(res => {
-    if (res.ok) {
-      return res.json();
-    } else {
-      throw Error(`Request rejected with status ${res.status}`);
+    if (repo === null) {
+      throw Error(`Invalid Github Url: ${githubUrl}`);
     }
-  });
-};
+
+    return fetch(`http://api.github.com/repos/${repo[1]}`).then(res => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        throw Error(`Request rejected with status ${res.status}`);
+      }
+    });
+  }
+);
 
 const triggerWorkFlow = ({
   workflow_url,
@@ -44,9 +47,9 @@ const triggerWorkFlow = ({
     })
   }).then(async res => {
     if (res.ok) {
-      return res.json()
+      return res.json();
     } else {
-      throw Error((await res.json()).msg)
+      throw Error((await res.json()).msg);
     }
   });
 
