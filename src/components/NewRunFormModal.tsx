@@ -54,7 +54,7 @@ export default ({
     setNewRunModalShown(true);
   };
 
-  const onRunAwk: React.ComponentProps<typeof Button>["onClick"] = () => {
+  const onRunAcknowledge: React.ComponentProps<typeof Button>["onClick"] = () => {
     setRunResponse(null);
   };
 
@@ -94,7 +94,7 @@ export default ({
           <Modal
             title="Workflow Run Initiated"
             actionDisabled
-            onCancelClick={onRunAwk}
+            onCancelClick={onRunAcknowledge}
             cancelText="Ok"
           >
             {"runWorkflow" in runResponse && (
