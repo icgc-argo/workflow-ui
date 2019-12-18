@@ -5,6 +5,10 @@ import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
 import Typography from "@icgc-argo/uikit/Typography";
 import RunsTable from "../components/RunsTable";
+import { useAppContext } from "../context/App";
+import DNALoader from "@icgc-argo/uikit/DnaLoader";
+import { ModalPortal } from "../App";
+import NewRunFormModal from "../components/NewRunFormModal";
 
 export type Run = {
   run_id: string;
@@ -21,6 +25,7 @@ export type Run = {
     };
   };
 };
+
 export type RunListQueryResponse = {
   runList: {
     runs: Run[];
@@ -28,6 +33,13 @@ export type RunListQueryResponse = {
 };
 
 export default () => {
+  /**
+   * modal stuff
+   */
+  const [loading, setLoading] = React.useState(false);
+
+  const { DEV_disablePolling } = useAppContext();
+
   const { data } = useQuery<RunListQueryResponse>(
     gql`
       {
@@ -42,7 +54,6 @@ export default () => {
             request {
               workflow {
                 id
-                version
                 name
               }
             }
@@ -50,7 +61,7 @@ export default () => {
         }
       }
     `,
-    { pollInterval: 1000 }
+    { pollInterval: DEV_disablePolling ? 0 : 1000 }
   );
 
   const [selectedRunIds, setSelectedRunIds] = React.useState<string[]>([]);
@@ -73,7 +84,7 @@ export default () => {
       }
     }
   };
-  
+
   const toggleSelection = (selectionString: string) => {
     const runId = selectionString.split("select-").join("");
     selectedRunIds.includes(runId)
@@ -87,6 +98,18 @@ export default () => {
         padding: 20px;
       `}
     >
+      {loading && (
+        <ModalPortal>
+          <DNALoader />
+        </ModalPortal>
+      )}
+      <div
+        className={css`
+          margin: 10px 0px;
+        `}
+      >
+        <NewRunFormModal setLoading={setLoading}/>
+      </div>
       <Container
         className={css`
           padding: 10px;
@@ -104,9 +127,6 @@ export default () => {
           <Typography variant="sectionHeader" bold color="primary">
             Workflow runs
           </Typography>
-          {/* <Button size="sm" disabled={!selectedRunIds.length}>
-            rerun
-          </Button> */}
         </div>
         <RunsTable
           runs={data ? data.runList.runs : []}
