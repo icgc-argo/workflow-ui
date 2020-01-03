@@ -1,6 +1,9 @@
 import React from "react";
 import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
+import AceEditor from "react-ace";
+import "ace-builds/src-noconflict/mode-json";
+import "ace-builds/src-noconflict/theme-solarized_dark";
 import Container from "@icgc-argo/uikit/Container";
 import Typography from "@icgc-argo/uikit/Typography";
 import { css } from "emotion";
@@ -8,7 +11,7 @@ import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import Tabs, { Tab } from "@icgc-argo/uikit/Tabs";
 import Icon from "@icgc-argo/uikit/Icon";
 import groupBy from "lodash/groupBy";
-import { RunLog, TaskLog } from "../gql/types";
+import { RunLog, TaskLog, RunRequest } from "../gql/types";
 import { useAppContext } from "../context/App";
 
 type SingleRunQuery = {
@@ -16,7 +19,7 @@ type SingleRunQuery = {
     run_id: string;
     log: RunLog;
     task_log: TaskLog[];
-    request: {
+    request: RunRequest & {
       workflow: {
         id: string;
         name: string;
@@ -66,6 +69,10 @@ export default ({ runId }: { runId: string }) => {
               name
               id
             }
+            workflow_url
+            workflow_params
+            workflow_type
+            workflow_type_version
           }
         }
       }
@@ -77,6 +84,7 @@ export default ({ runId }: { runId: string }) => {
       pollInterval: DEV_disablePolling ? 0 : 500
     }
   );
+
   const theme = useTheme();
   const [activeTab, setActiveTab] = React.useState<"logs" | "params">("logs");
 
@@ -88,6 +96,9 @@ export default ({ runId }: { runId: string }) => {
     >
       {!loading && data && (
         <div>
+          <Typography variant="title">
+            Workflow Name: <strong>{data.run.request.workflow.name}</strong>
+          </Typography>
           <Typography variant="subtitle">
             Run ID: <strong>{data.run.run_id}</strong>
           </Typography>
@@ -240,7 +251,68 @@ export default ({ runId }: { runId: string }) => {
                   })}
               </div>
             )}
-            {activeTab === "params" && <div>nothing to see!</div>}
+            {activeTab === "params" && (
+              <div
+                className={css`
+                  overflow: hidden;
+                  margin: 10px;
+                  background: ${theme.colors.success};
+                  display: flex;
+                  flex-direction: column;
+                  border: solid 1px ${theme.colors.success};
+                `}
+              >
+                <div
+                  className={css`
+                    flex: 1;
+                    background: white;
+                  `}
+                >
+                  <Typography
+                    color="success_dark"
+                    bold
+                    variant="label"
+                    className={css`
+                      padding: 2px;
+                      padding-left: 5px;
+                      display: flex;
+                      flex-direction: column;
+                      align-items: flex-start;
+
+                      span {
+                        color: black;
+                      }
+                    `}
+                  >
+                    <div>
+                      <span>Workflow URL: </span>
+                      {data.run.request.workflow_url}
+                    </div>
+                    <div>
+                      <span>Workflow Type: </span>
+                      {data.run.request.workflow_type}
+                    </div>
+                    <div>
+                      <span>Workflow Version: </span>
+                      {data.run.request.workflow_type_version}
+                    </div>
+                  </Typography>
+                </div>
+                <AceEditor
+                  aria-label="workflow_params"
+                  name="workflow_params"
+                  mode="json"
+                  theme="solarized_dark"
+                  value={JSON.stringify(
+                    data.run.request.workflow_params,
+                    null,
+                    "\t"
+                  )}
+                  readOnly
+                  width="100%"
+                />
+              </div>
+            )}
           </div>
         </Container>
       )}
