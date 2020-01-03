@@ -7,7 +7,6 @@ import Input from "@icgc-argo/uikit/form/Input";
 import gql from "graphql-tag";
 import { useMutation } from "@apollo/react-hooks";
 import AceEditor from "react-ace";
-
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
 import { css } from "emotion";
@@ -54,7 +53,9 @@ export default ({
     setNewRunModalShown(true);
   };
 
-  const onRunAcknowledge: React.ComponentProps<typeof Button>["onClick"] = () => {
+  const onRunAcknowledge: React.ComponentProps<
+    typeof Button
+  >["onClick"] = () => {
     setRunResponse(null);
   };
 
@@ -99,8 +100,8 @@ export default ({
           >
             {"runWorkflow" in runResponse && (
               <p>
-                A run with ID: <strong>{runResponse.runWorkflow.run_id}</strong> has been
-                initiated, it will appear in the list momentarily.
+                A run with ID: <strong>{runResponse.runWorkflow.run_id}</strong>{" "}
+                has been initiated, it will appear in the list momentarily.
               </p>
             )}
             {"graphQLErrors" in runResponse && (
