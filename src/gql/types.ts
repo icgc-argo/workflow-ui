@@ -1,4 +1,4 @@
-type Log = {
+export type RunLog = {
   cmd: string[];
   end_time: string;
   exit_code: number;
@@ -7,19 +7,44 @@ type Log = {
   stderr: string;
   stdout: string;
 };
+
+export type TaskLog = {
+  task_id: number;
+  name: string;
+  process: string;
+  tag: string;
+  container: string;
+  attempt: number;
+  state: string;
+  cmd: [string];
+  submit_time: string;
+  start_time: string;
+  end_time: string;
+  sttderr: string;
+  stdout: string;
+  exit_code: number;
+  workdir: string;
+  cpus: number;
+  memory: number;
+  duration: number;
+  realtime: number;
+};
+
 export type RunDetail = {
   outputs: {};
-  request?: {
-    workflow_params: {};
-    workflow_type: string;
-    workflow_type_version: string;
-    workflow_url: string;
-  };
+  request: RunRequest;
   run_id: string;
-  run_log: Log;
+  run_log: RunLog;
   state: string;
-  task_logs: Log[];
+  task_logs: TaskLog[];
 };
+
+export type RunRequest = {
+  workflow_params: {[k: string]: any};
+  workflow_type: string;
+  workflow_type_version: string;
+  workflow_url: string;
+}
 
 export type RunStatus = {
   run_id: string;
@@ -45,3 +70,10 @@ export type ServiceInfo = {
     [k: string]: string;
   };
 };
+
+export type Workflow = {
+  name: string;
+  full_name: string;
+  description: string;
+  html_url: string;
+}

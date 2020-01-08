@@ -8,7 +8,7 @@ export default gql`
     supported_filesystem_protocols: [String]
     supported_wes_versions: [String]
   }
-  type Log {
+  type RunLog {
     cmd: [String]
     end_time: String
     start_time: String
@@ -16,6 +16,27 @@ export default gql`
     name: String
     sttderr: String
     stdout: String
+  }
+  type TaskLog {
+    task_id: Int
+    name: String
+    process: String
+    tag: String
+    container: String
+    attempt: Int
+    state: String
+    cmd: [String]
+    submit_time: String
+    start_time: String
+    end_time: String
+    sttderr: String
+    stdout: String
+    exit_code: Int
+    workdir: String
+    cpus: Int
+    memory: Int
+    duration: Int
+    realtime: Int
   }
   type RunRequest {
     workflow_params: JSON
@@ -27,27 +48,27 @@ export default gql`
   type Run {
     run_id: ID!
     state: String
-    log: Log
+    log: RunLog
     request: RunRequest
-    task_log: [Log]
+    task_log: [TaskLog]
   }
   type RunsPage {
     runs: [Run]
     nextPageToken: String
   }
-  type AnalysisType {
+  type Workflow {
     id: ID!
-    name: String!
+    name: String
+    description: String
+    html_url: String
   }
-  type Analysis {
+  type Donor {
     id: ID!
-    analysisType: AnalysisType
-    workflow: Workflow
-    runs(pageSize: Int = 10, pageToken: String): RunsPage
-    donors: [Donor]
-    infraFailure: InfraError
-    workflowError: WorkflowError
-    dataError: DataError
+    name: String
+    files: [File]
+  }
+  type File {
+    id: ID!
   }
   interface Error {
     id: ID!
@@ -65,39 +86,17 @@ export default gql`
   type DataError implements Error {
     id: ID!
     message: String
-    analysis: Analysis
   }
-  type Workflow {
-    id: ID!
-    name: String
-    version: String
-    url: String
-    runs: RunsPage
-    output_analyses: [Analysis]
-    input_analysis_types: [AnalysisType]
-    output_analysis_type: AnalysisType
-  }
-  type Donor {
-    id: ID!
-    name: String
-    files: [File]
-  }
-  type File {
-    id: ID!
-  }
+
   type Query {
     listRuns(pageSize: Int = 10, pageToken: String): RunsPage
     run(id: ID!): Run
     serviceInfo: ServiceInfo
-    workflows: [Workflow]
-    workflow(id: ID!): Workflow
   }
-
   type Mutation {
     runWorkflow(
       workflow_url: String!
-      api_token: String!
-      analysis_id: String!
+      workflow_params: JSON!
     ): Run
   }
 `;

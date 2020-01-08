@@ -1,81 +1,57 @@
+import { memoize } from "lodash";
 import { makeExecutableSchema } from "graphql-tools";
 import urlJoin from "url-join";
 import typeDefs from "./typedefs";
-import { RunDetail, RunStatus } from "./types";
+import { RunDetail, RunStatus, RunRequest, Workflow } from "./types";
 import GraphQLJSON from "graphql-type-json";
 
-const SEARCH_API =
-  process.env.REACT_APP_SEARCH_API || `http://localhost:7000/search`;
-const MANAGEMENT_API =
-  process.env.REACT_APP_MANAGEMENT_API || `http://localhost:7000/relay`;
-const WORKFLOWS = [
-  {
-    id: "nextflow-hello",
-    version: "1.0.0",
-    name: "hello world",
-    url: "https://github.com/nextflow-io/hello.git"
-  },
-  {
-    id: "nextflow-hello",
-    version: "1.0.1",
-    name: "hello world",
-    url: "https://github.com/nextflow-io/hello.git"
-  },
-  {
-    id: "minh-hello",
-    version: "1.0.0",
-    name: "tutorial",
-    url: "https://github.com/hlminh2000/hello.git"
-  },
-  {
-    id: "nextflow-dna-seq-alignment",
-    version: "1.0.0",
-    name: "DNA Sequence Alignment",
-    url: "https://github.com/icgc-argo/nextflow-dna-seq-alignment.git"
-  }
-];
+const SEARCH_API = process.env.REACT_APP_SEARCH_API || `/api/v1`;
+
+const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || `/api/v1`;
 
 const getSingleRun = async (runId: string): Promise<RunDetail> =>
   fetch(urlJoin(SEARCH_API, `runs/${runId}`)).then(res => res.json());
 
+const getWorkflowRepo = memoize<(githubUrl: string) => Promise<Workflow>>(
+  async githubUrl => {
+    const extractRepoRe = /^https:\/\/github\.com\/(.*)\.git/gm;
+    const repo = extractRepoRe.exec(githubUrl);
+
+    if (repo === null) {
+      throw Error(`Invalid Github Url: ${githubUrl}`);
+    }
+
+    return fetch(`http://api.github.com/repos/${repo[1]}`).then(res => {
+      if (res.ok) {
+        return res.json();
+      } else {
+        throw Error(`Request rejected with status ${res.status}`);
+      }
+    });
+  }
+);
+
 const triggerWorkFlow = ({
   workflow_url,
-  analysis_id,
-  api_token
+  workflow_params
 }: {
   workflow_url: string;
-  analysis_id: string;
-  api_token: string;
+  workflow_params: string;
 }): Promise<{ run_id: string }> =>
   fetch(urlJoin(MANAGEMENT_API, "/runs"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       workflow_url,
-      workflow_params: {
-        study_id: "TEST-PRO",
-        analysis_id: analysis_id,
-        song_url: "https://song.qa.argo.cancercollaboratory.org",
-        score_url: "https://score.qa.argo.cancercollaboratory.org",
-        api_token: api_token,
-        reference_dir:
-          "/mnt/volume/nextflow/reference/tiny-grch38-chr11-530001-537000",
-        a2_template_path:
-          "/mnt/volume/nextflow/analysis_templates/a2_template.json",
-        aligned_lane_prefix: "grch38-aligned",
-        aligned_basename: "HCC1143.3.20190726.wgs.grch38",
-        align: {
-          cpus: 2,
-          memory: 4000
-        },
-        download: {},
-        preprocess: {},
-        merge: {},
-        a2_gen_params: {},
-        upload: {}
-      }
+      workflow_params
     })
-  }).then(res => res.json());
+  }).then(async res => {
+    if (res.ok) {
+      return res.json();
+    } else {
+      throw Error((await res.json()).msg);
+    }
+  });
 
 const listRuns = ({
   pageSize,
@@ -98,8 +74,21 @@ const listRuns = ({
 const resolvers = {
   JSON: GraphQLJSON,
   RunRequest: {
-    workflow: (obj: { workflow_url: string }) =>
-      WORKFLOWS.find(w => w.url === obj.workflow_url)
+    workflow: async (obj: RunRequest) => {
+      try {
+        const repo = await getWorkflowRepo(obj.workflow_url);
+        return {
+          ...repo,
+          id: repo.full_name
+        };
+      } catch (error) {
+        console.log(error);
+        return {
+          id: "NA",
+          name: "Unknown Repo (check logs for error)"
+        };
+      }
+    }
   },
   Run: {
     log: async (obj: RunStatus) => {
@@ -118,23 +107,6 @@ const resolvers = {
       return obj.state || (await getSingleRun(obj.run_id)).state;
     }
   },
-  Workflow: {
-    runs: async (obj: { url: string }) => {
-      const runPage = await listRuns({ pageSize: 1000 });
-      return {
-        ...runPage,
-        runs: Promise.all(runPage.runs.map(r => getSingleRun(r.run_id))).then(
-          runs =>
-            runs.filter(run => {
-              const workflow_url = run.request
-                ? run.request.workflow_url
-                : null;
-              return workflow_url === obj.url;
-            })
-        )
-      };
-    }
-  },
   Query: {
     run: async (obj: any, args: { id: string }) => getSingleRun(args.id),
     listRuns: async (
@@ -146,24 +118,19 @@ const resolvers = {
     }> => {
       const { pageSize, pageToken } = args;
       return listRuns({ pageSize, pageToken });
-    },
-    workflows: () => WORKFLOWS,
-    workflow: (obj: any, args: { id: string }) =>
-      WORKFLOWS.find(({ id }) => id === args.id)
+    }
   },
   Mutation: {
     runWorkflow: async (
       obj: any,
       args: {
         workflow_url: string;
-        api_token: string;
-        analysis_id: string;
+        workflow_params: string;
       }
     ): Promise<{ run_id: string }> =>
       triggerWorkFlow({
         workflow_url: args.workflow_url,
-        api_token: args.api_token,
-        analysis_id: args.analysis_id
+        workflow_params: args.workflow_params
       })
   }
 };
