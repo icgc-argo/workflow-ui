@@ -71,6 +71,7 @@ export default ({ runId }: { runId: string }) => {
             }
             workflow_url
             workflow_params
+            workflow_engine_params
             workflow_type
             workflow_type_version
           }
@@ -86,7 +87,9 @@ export default ({ runId }: { runId: string }) => {
   );
 
   const theme = useTheme();
-  const [activeTab, setActiveTab] = React.useState<"logs" | "params">("logs");
+  const [activeTab, setActiveTab] = React.useState<
+    "logs" | "params" | "engine_params"
+  >("logs");
 
   return (
     <div
@@ -134,6 +137,11 @@ export default ({ runId }: { runId: string }) => {
               label="Params"
               value="params"
               onClick={e => setActiveTab("params")}
+            />
+            <Tab
+              label="Engine Params"
+              value="engine_params"
+              onClick={e => setActiveTab("engine_params")}
             />
           </Tabs>
           <div
@@ -305,6 +313,32 @@ export default ({ runId }: { runId: string }) => {
                   theme="solarized_dark"
                   value={JSON.stringify(
                     data.run.request.workflow_params,
+                    null,
+                    "\t"
+                  )}
+                  readOnly
+                  width="100%"
+                />
+              </div>
+            )}
+            {activeTab === "engine_params" && (
+              <div
+                className={css`
+                  overflow: hidden;
+                  margin: 10px;
+                  background: ${theme.colors.success};
+                  display: flex;
+                  flex-direction: column;
+                  border: solid 1px ${theme.colors.success};
+                `}
+              >
+                <AceEditor
+                  aria-label="workflow_engine_params"
+                  name="workflow_engine_params"
+                  mode="json"
+                  theme="solarized_dark"
+                  value={JSON.stringify(
+                    data.run.request.workflow_engine_params,
                     null,
                     "\t"
                   )}

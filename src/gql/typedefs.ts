@@ -40,6 +40,7 @@ export default gql`
   }
   type RunRequest {
     workflow_params: JSON
+    workflow_engine_params: JSON
     workflow_type: String
     workflow_type_version: String
     workflow_url: String
@@ -97,6 +98,7 @@ export default gql`
     runWorkflow(
       workflow_url: String!
       workflow_params: JSON!
+      workflow_engine_params: JSON!
     ): Run
   }
 `;

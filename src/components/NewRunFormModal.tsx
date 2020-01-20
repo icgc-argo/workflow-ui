@@ -26,6 +26,7 @@ export default ({
 }) => {
   const [workflow_url, setWorkflowUrl] = React.useState("");
   const [workflow_params, setWorkflowParams] = React.useState("");
+  const [workflow_engine_params, setWorkflowEngineParams] = React.useState("");
   const [newRunModalShown, setNewRunModalShown] = React.useState(false);
   const [runResponse, setRunResponse] = React.useState<
     RunResponse | ApolloError | undefined | null
@@ -157,6 +158,15 @@ export default ({
               theme="github"
               value={workflow_params}
               onChange={setWorkflowParams}
+            />
+            <InputLabel>Workflow Engine Params</InputLabel>
+            <AceEditor
+              aria-label="workflow_engine_params"
+              name="workflow_engine_params"
+              mode="json"
+              theme="github"
+              value={workflow_engine_params}
+              onChange={setWorkflowEngineParams}
             />
           </Modal>
         </ModalPortal>
