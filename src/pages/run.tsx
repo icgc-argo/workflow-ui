@@ -5,6 +5,7 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-solarized_dark";
 import Container from "@icgc-argo/uikit/Container";
+import Notification from "@icgc-argo/uikit/notifications/Notification";
 import Typography from "@icgc-argo/uikit/Typography";
 import { css } from "emotion";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
@@ -113,25 +114,33 @@ export default ({ runId }: { runId: string }) => {
             <strong>completed:</strong> {data.run.log.end_time}
           </Typography>
           {data?.run.log.stderr && (
-            <div className={css`
-              padding: 12px;
-              background: ${theme.colors.error_3};
-              margin: 10px 0;
-            `}>
-            <Typography variant="label" as="div">
-              <strong>Error Msg:</strong> {data.run.log.stderr}
-            </Typography>
+            <div
+              className={css`
+                padding: 12px;
+                background: ${theme.colors.error_3};
+                border-radius: 8px;
+                border: 1px solid ${theme.colors.error};
+                margin: 10px 0;
+              `}
+            >
+              <Typography variant="label" as="div">
+                <strong>Error Msg:</strong> {data.run.log.stderr}
+              </Typography>
             </div>
           )}
         </div>
       )}
       {!!data && (
-        <Container loading={loading} className={css`
-          button, button.active {
-            color: ${textColor};
-            border-color: ${highlightColor};
-          }
-        `}>
+        <Container
+          loading={loading}
+          className={css`
+            button,
+            button.active {
+              color: ${textColor};
+              border-color: ${highlightColor};
+            }
+          `}
+        >
           <Tabs value={activeTab}>
             <Tab
               label="Task Logs"
