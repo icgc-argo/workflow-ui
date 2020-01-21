@@ -20,7 +20,7 @@ export type TaskLog = {
   submit_time: string;
   start_time: string;
   end_time: string;
-  sttderr: string;
+  stderr: string;
   stdout: string;
   exit_code: number;
   workdir: string;

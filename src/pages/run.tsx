@@ -40,7 +40,7 @@ export default ({ runId }: { runId: string }) => {
             start_time
             exit_code
             name
-            sttderr
+            stderr
             stdout
           }
           task_log {
@@ -55,7 +55,7 @@ export default ({ runId }: { runId: string }) => {
             submit_time
             start_time
             end_time
-            sttderr
+            stderr
             stdout
             exit_code
             workdir
@@ -87,6 +87,9 @@ export default ({ runId }: { runId: string }) => {
   );
 
   const theme = useTheme();
+  const [highlightColor, textColor] = data?.run.log.stderr
+    ? [theme.colors.error_1, theme.colors.error]
+    : [theme.colors.success, theme.colors.success_dark];
   const [activeTab, setActiveTab] = React.useState<"logs" | "params">("logs");
 
   return (
@@ -109,10 +112,26 @@ export default ({ runId }: { runId: string }) => {
           <Typography variant="label" as="div">
             <strong>completed:</strong> {data.run.log.end_time}
           </Typography>
+          {data?.run.log.stderr && (
+            <div className={css`
+              padding: 12px;
+              background: ${theme.colors.error_3};
+              margin: 10px 0;
+            `}>
+            <Typography variant="label" as="div">
+              <strong>Error Msg:</strong> {data.run.log.stderr}
+            </Typography>
+            </div>
+          )}
         </div>
       )}
       {!!data && (
-        <Container loading={loading}>
+        <Container loading={loading} className={css`
+          button, button.active {
+            color: ${textColor};
+            border-color: ${highlightColor};
+          }
+        `}>
           <Tabs value={activeTab}>
             <Tab
               label="Task Logs"
@@ -158,9 +177,9 @@ export default ({ runId }: { runId: string }) => {
                         className={css`
                           overflow: hidden;
                           margin: 10px;
-                          background: ${theme.colors.success};
+                          background: ${highlightColor};
                           display: flex;
-                          border: solid 1px ${theme.colors.success};
+                          border: solid 1px ${highlightColor};
                         `}
                       >
                         <div
@@ -178,7 +197,7 @@ export default ({ runId }: { runId: string }) => {
                           `}
                         >
                           <Typography
-                            color="success_dark"
+                            color={textColor}
                             bold
                             variant="label"
                             className={css`
@@ -245,10 +264,10 @@ export default ({ runId }: { runId: string }) => {
                 className={css`
                   overflow: hidden;
                   margin: 10px;
-                  background: ${theme.colors.success};
+                  background: ${highlightColor};
                   display: flex;
                   flex-direction: column;
-                  border: solid 1px ${theme.colors.success};
+                  border: solid 1px ${highlightColor};
                 `}
               >
                 <div
@@ -258,7 +277,7 @@ export default ({ runId }: { runId: string }) => {
                   `}
                 >
                   <Typography
-                    color="success_dark"
+                    color={textColor}
                     bold
                     variant="label"
                     className={css`
