@@ -5,7 +5,7 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-solarized_dark";
 import Container from "@icgc-argo/uikit/Container";
-import Notification from "@icgc-argo/uikit/notifications/Notification";
+// import Banner from "@icgc-argo/uikit/notifications/Banner";
 import Typography from "@icgc-argo/uikit/Typography";
 import { css } from "emotion";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
