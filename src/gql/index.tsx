@@ -33,17 +33,20 @@ const getWorkflowRepo = memoize<(githubUrl: string) => Promise<Workflow>>(
 
 const triggerWorkFlow = ({
   workflow_url,
-  workflow_params
+  workflow_params,
+  workflow_engine_params
 }: {
   workflow_url: string;
   workflow_params: string;
+  workflow_engine_params: string;
 }): Promise<{ run_id: string }> =>
   fetch(urlJoin(MANAGEMENT_API, "/runs"), {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       workflow_url,
-      workflow_params
+      workflow_params,
+      workflow_engine_params
     })
   }).then(async res => {
     if (res.ok) {
@@ -126,11 +129,13 @@ const resolvers = {
       args: {
         workflow_url: string;
         workflow_params: string;
+        workflow_engine_params: string;
       }
     ): Promise<{ run_id: string }> =>
       triggerWorkFlow({
         workflow_url: args.workflow_url,
-        workflow_params: args.workflow_params
+        workflow_params: args.workflow_params,
+        workflow_engine_params: args.workflow_engine_params
       })
   }
 };

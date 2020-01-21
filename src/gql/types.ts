@@ -20,7 +20,7 @@ export type TaskLog = {
   submit_time: string;
   start_time: string;
   end_time: string;
-  sttderr: string;
+  stderr: string;
   stdout: string;
   exit_code: number;
   workdir: string;
@@ -41,6 +41,7 @@ export type RunDetail = {
 
 export type RunRequest = {
   workflow_params: {[k: string]: any};
+  workflow_engine_params: {[k: string]: any};
   workflow_type: string;
   workflow_type_version: string;
   workflow_url: string;

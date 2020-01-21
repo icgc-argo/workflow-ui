@@ -5,6 +5,7 @@ import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-solarized_dark";
 import Container from "@icgc-argo/uikit/Container";
+import Notification from "@icgc-argo/uikit/notifications/Notification";
 import Typography from "@icgc-argo/uikit/Typography";
 import { css } from "emotion";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
@@ -40,7 +41,7 @@ export default ({ runId }: { runId: string }) => {
             start_time
             exit_code
             name
-            sttderr
+            stderr
             stdout
           }
           task_log {
@@ -55,7 +56,7 @@ export default ({ runId }: { runId: string }) => {
             submit_time
             start_time
             end_time
-            sttderr
+            stderr
             stdout
             exit_code
             workdir
@@ -71,6 +72,7 @@ export default ({ runId }: { runId: string }) => {
             }
             workflow_url
             workflow_params
+            workflow_engine_params
             workflow_type
             workflow_type_version
           }
@@ -86,6 +88,9 @@ export default ({ runId }: { runId: string }) => {
   );
 
   const theme = useTheme();
+  const [highlightColor, textColor] = data?.run.log.stderr
+    ? [theme.colors.error_1, theme.colors.error]
+    : [theme.colors.success, theme.colors.success_dark];
   const [activeTab, setActiveTab] = React.useState<"logs" | "params">("logs");
 
   return (
@@ -108,22 +113,34 @@ export default ({ runId }: { runId: string }) => {
           <Typography variant="label" as="div">
             <strong>completed:</strong> {data.run.log.end_time}
           </Typography>
+          {data?.run.log.stderr && (
+            <div
+              className={css`
+                padding: 12px;
+                background: ${theme.colors.error_3};
+                border-radius: 8px;
+                border: 1px solid ${theme.colors.error};
+                margin: 10px 0;
+              `}
+            >
+              <Typography variant="label" as="div">
+                <strong>Error Msg:</strong> {data.run.log.stderr}
+              </Typography>
+            </div>
+          )}
         </div>
       )}
-
-      {/* <div
-        className={css`
-          padding: 5px 0px;
-          display: flex;
-          justify-content: flex-end;
-        `}
-      >
-        <Button variant="text" size={"md"}>
-          rerun
-        </Button>
-      </div> */}
       {!!data && (
-        <Container loading={loading}>
+        <Container
+          loading={loading}
+          className={css`
+            button,
+            button.active {
+              color: ${textColor};
+              border-color: ${highlightColor};
+            }
+          `}
+        >
           <Tabs value={activeTab}>
             <Tab
               label="Task Logs"
@@ -169,9 +186,9 @@ export default ({ runId }: { runId: string }) => {
                         className={css`
                           overflow: hidden;
                           margin: 10px;
-                          background: ${theme.colors.success};
+                          background: ${highlightColor};
                           display: flex;
-                          border: solid 1px ${theme.colors.success};
+                          border: solid 1px ${highlightColor};
                         `}
                       >
                         <div
@@ -189,7 +206,7 @@ export default ({ runId }: { runId: string }) => {
                           `}
                         >
                           <Typography
-                            color="success_dark"
+                            color={textColor}
                             bold
                             variant="label"
                             className={css`
@@ -256,10 +273,10 @@ export default ({ runId }: { runId: string }) => {
                 className={css`
                   overflow: hidden;
                   margin: 10px;
-                  background: ${theme.colors.success};
+                  background: ${highlightColor};
                   display: flex;
                   flex-direction: column;
-                  border: solid 1px ${theme.colors.success};
+                  border: solid 1px ${highlightColor};
                 `}
               >
                 <div
@@ -269,7 +286,7 @@ export default ({ runId }: { runId: string }) => {
                   `}
                 >
                   <Typography
-                    color="success_dark"
+                    color={textColor}
                     bold
                     variant="label"
                     className={css`
@@ -298,19 +315,80 @@ export default ({ runId }: { runId: string }) => {
                     </div>
                   </Typography>
                 </div>
-                <AceEditor
-                  aria-label="workflow_params"
-                  name="workflow_params"
-                  mode="json"
-                  theme="solarized_dark"
-                  value={JSON.stringify(
-                    data.run.request.workflow_params,
-                    null,
-                    "\t"
-                  )}
-                  readOnly
-                  width="100%"
-                />
+                <div
+                  className={css`
+                    display: flex;
+                    flex-direction: row;
+                  `}
+                >
+                  <div
+                    className={css`
+                      width: 50%;
+                    `}
+                  >
+                    <Typography
+                      color="black"
+                      bold
+                      variant="label"
+                      className={css`
+                        padding: 2px;
+                        padding-left: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        border-right: 3px solid ${theme.colors.accent1_dark};
+                      `}
+                    >
+                      Workflow Params
+                    </Typography>
+                    <AceEditor
+                      aria-label="workflow_params"
+                      name="workflow_params"
+                      mode="json"
+                      theme="solarized_dark"
+                      value={JSON.stringify(
+                        data.run.request.workflow_params,
+                        null,
+                        "\t"
+                      )}
+                      readOnly
+                      width="100%"
+                    />
+                  </div>
+                  <div
+                    className={css`
+                      width: 50%;
+                    `}
+                  >
+                    <Typography
+                      color="black"
+                      bold
+                      variant="label"
+                      className={css`
+                        padding: 2px;
+                        padding-left: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                      `}
+                    >
+                      Workflow Engine Params
+                    </Typography>
+                    <AceEditor
+                      aria-label="workflow_engine_params"
+                      name="workflow_engine_params"
+                      mode="json"
+                      theme="solarized_dark"
+                      value={JSON.stringify(
+                        data.run.request.workflow_engine_params,
+                        null,
+                        "\t"
+                      )}
+                      readOnly
+                      width="100%"
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>
