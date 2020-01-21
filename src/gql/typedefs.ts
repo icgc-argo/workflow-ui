@@ -14,7 +14,7 @@ export default gql`
     start_time: String
     exit_code: Int
     name: String
-    sttderr: String
+    stderr: String
     stdout: String
   }
   type TaskLog {
@@ -29,7 +29,7 @@ export default gql`
     submit_time: String
     start_time: String
     end_time: String
-    sttderr: String
+    stderr: String
     stdout: String
     exit_code: Int
     workdir: String
@@ -40,6 +40,7 @@ export default gql`
   }
   type RunRequest {
     workflow_params: JSON
+    workflow_engine_params: JSON
     workflow_type: String
     workflow_type_version: String
     workflow_url: String
@@ -97,6 +98,7 @@ export default gql`
     runWorkflow(
       workflow_url: String!
       workflow_params: JSON!
+      workflow_engine_params: JSON!
     ): Run
   }
 `;

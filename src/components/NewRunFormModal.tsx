@@ -26,6 +26,7 @@ export default ({
 }) => {
   const [workflow_url, setWorkflowUrl] = React.useState("");
   const [workflow_params, setWorkflowParams] = React.useState("");
+  const [workflow_engine_params, setWorkflowEngineParams] = React.useState("");
   const [newRunModalShown, setNewRunModalShown] = React.useState(false);
   const [runResponse, setRunResponse] = React.useState<
     RunResponse | ApolloError | undefined | null
@@ -34,13 +35,22 @@ export default ({
 
   const [runWorkflow] = useMutation<
     RunResponse,
-    { workflow_url: string; workflow_params: { [k: string]: any } }
+    {
+      workflow_url: string;
+      workflow_params: { [k: string]: any };
+      workflow_engine_params: { [k: string]: any };
+    }
   >(
     gql`
-      mutation($workflow_url: String!, $workflow_params: JSON!) {
+      mutation(
+        $workflow_url: String!
+        $workflow_params: JSON!
+        $workflow_engine_params: JSON!
+      ) {
         runWorkflow(
           workflow_url: $workflow_url
           workflow_params: $workflow_params
+          workflow_engine_params: $workflow_engine_params
         ) {
           run_id
           __typename
@@ -68,7 +78,13 @@ export default ({
         variables: {
           workflow_url: workflow_url,
           workflow_params:
-            workflow_params.length > 0 ? JSON.parse(workflow_params.trim()) : {}
+            workflow_params.length > 0
+              ? JSON.parse(workflow_params.trim())
+              : {},
+          workflow_engine_params:
+            workflow_engine_params.length > 0
+              ? JSON.parse(workflow_engine_params.trim())
+              : {}
         }
       });
       setLoading(false);
@@ -149,14 +165,29 @@ export default ({
               value={workflow_url}
               onChange={e => setWorkflowUrl(e.target.value)}
             />
-            <InputLabel>Workflow Params</InputLabel>
+            <InputLabel>
+              Workflow Params (equivalent to -params-file)
+            </InputLabel>
             <AceEditor
               aria-label="workflow_params"
               name="workflow_params"
               mode="json"
               theme="github"
+              height="200px"
               value={workflow_params}
               onChange={setWorkflowParams}
+            />
+            <InputLabel>
+              Workflow Engine Params (revision, resume, etc)
+            </InputLabel>
+            <AceEditor
+              aria-label="workflow_engine_params"
+              name="workflow_engine_params"
+              mode="json"
+              theme="github"
+              height="200px"
+              value={workflow_engine_params}
+              onChange={setWorkflowEngineParams}
             />
           </Modal>
         </ModalPortal>

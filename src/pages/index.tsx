@@ -69,7 +69,7 @@ export default () => {
   const selectAll = React.useMemo(() => {
     const output =
       !!data &&
-      data.runList.runs
+      (data?.runList.runs || [])
         .map(r => r.run_id)
         .every(id => selectedRunIds.includes(id));
     return output;
@@ -129,7 +129,7 @@ export default () => {
           </Typography>
         </div>
         <RunsTable
-          runs={data ? data.runList.runs : []}
+          runs={data?.runList.runs || []}
           toggleSelection={toggleSelection}
           toggleAll={toggleAll}
           selectAll={selectAll}
