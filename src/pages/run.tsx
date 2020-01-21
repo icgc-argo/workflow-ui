@@ -87,9 +87,7 @@ export default ({ runId }: { runId: string }) => {
   );
 
   const theme = useTheme();
-  const [activeTab, setActiveTab] = React.useState<
-    "logs" | "params" | "engine_params"
-  >("logs");
+  const [activeTab, setActiveTab] = React.useState<"logs" | "params">("logs");
 
   return (
     <div
@@ -113,18 +111,6 @@ export default ({ runId }: { runId: string }) => {
           </Typography>
         </div>
       )}
-
-      {/* <div
-        className={css`
-          padding: 5px 0px;
-          display: flex;
-          justify-content: flex-end;
-        `}
-      >
-        <Button variant="text" size={"md"}>
-          rerun
-        </Button>
-      </div> */}
       {!!data && (
         <Container loading={loading}>
           <Tabs value={activeTab}>
@@ -137,11 +123,6 @@ export default ({ runId }: { runId: string }) => {
               label="Params"
               value="params"
               onClick={e => setActiveTab("params")}
-            />
-            <Tab
-              label="Engine Params"
-              value="engine_params"
-              onClick={e => setActiveTab("engine_params")}
             />
           </Tabs>
           <div
@@ -306,45 +287,80 @@ export default ({ runId }: { runId: string }) => {
                     </div>
                   </Typography>
                 </div>
-                <AceEditor
-                  aria-label="workflow_params"
-                  name="workflow_params"
-                  mode="json"
-                  theme="solarized_dark"
-                  value={JSON.stringify(
-                    data.run.request.workflow_params,
-                    null,
-                    "\t"
-                  )}
-                  readOnly
-                  width="100%"
-                />
-              </div>
-            )}
-            {activeTab === "engine_params" && (
-              <div
-                className={css`
-                  overflow: hidden;
-                  margin: 10px;
-                  background: ${theme.colors.success};
-                  display: flex;
-                  flex-direction: column;
-                  border: solid 1px ${theme.colors.success};
-                `}
-              >
-                <AceEditor
-                  aria-label="workflow_engine_params"
-                  name="workflow_engine_params"
-                  mode="json"
-                  theme="solarized_dark"
-                  value={JSON.stringify(
-                    data.run.request.workflow_engine_params,
-                    null,
-                    "\t"
-                  )}
-                  readOnly
-                  width="100%"
-                />
+                <div
+                  className={css`
+                    display: flex;
+                    flex-direction: row;
+                  `}
+                >
+                  <div
+                    className={css`
+                      width: 50%;
+                    `}
+                  >
+                    <Typography
+                      color="black"
+                      bold
+                      variant="label"
+                      className={css`
+                        padding: 2px;
+                        padding-left: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                        border-right: 3px solid ${theme.colors.accent1_dark};
+                      `}
+                    >
+                      Workflow Params
+                    </Typography>
+                    <AceEditor
+                      aria-label="workflow_params"
+                      name="workflow_params"
+                      mode="json"
+                      theme="solarized_dark"
+                      value={JSON.stringify(
+                        data.run.request.workflow_params,
+                        null,
+                        "\t"
+                      )}
+                      readOnly
+                      width="100%"
+                    />
+                  </div>
+                  <div
+                    className={css`
+                      width: 50%;
+                    `}
+                  >
+                    <Typography
+                      color="black"
+                      bold
+                      variant="label"
+                      className={css`
+                        padding: 2px;
+                        padding-left: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                      `}
+                    >
+                      Workflow Engine Params
+                    </Typography>
+                    <AceEditor
+                      aria-label="workflow_engine_params"
+                      name="workflow_engine_params"
+                      mode="json"
+                      theme="solarized_dark"
+                      value={JSON.stringify(
+                        data.run.request.workflow_engine_params,
+                        null,
+                        "\t"
+                      )}
+                      readOnly
+                      width="100%"
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>

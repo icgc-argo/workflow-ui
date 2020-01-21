@@ -150,24 +150,43 @@ export default ({
               value={workflow_url}
               onChange={e => setWorkflowUrl(e.target.value)}
             />
-            <InputLabel>Workflow Params</InputLabel>
-            <AceEditor
-              aria-label="workflow_params"
-              name="workflow_params"
-              mode="json"
-              theme="github"
-              value={workflow_params}
-              onChange={setWorkflowParams}
-            />
-            <InputLabel>Workflow Engine Params</InputLabel>
-            <AceEditor
-              aria-label="workflow_engine_params"
-              name="workflow_engine_params"
-              mode="json"
-              theme="github"
-              value={workflow_engine_params}
-              onChange={setWorkflowEngineParams}
-            />
+            <div
+              className={css`
+                display: flex;
+                flex-direction: row;
+              `}
+            >
+              <div
+                className={css`
+                  width: 50%;
+                `}
+              >
+                <InputLabel>Workflow Params (equivalent to -params-file)</InputLabel>
+                <AceEditor
+                  aria-label="workflow_params"
+                  name="workflow_params"
+                  mode="json"
+                  theme="github"
+                  value={workflow_params}
+                  onChange={setWorkflowParams}
+                />
+              </div>
+              <div
+                className={css`
+                  width: 50%;
+                `}
+              >
+                <InputLabel>Workflow Engine Params (revision, resume, etc)</InputLabel>
+                <AceEditor
+                  aria-label="workflow_engine_params"
+                  name="workflow_engine_params"
+                  mode="json"
+                  theme="github"
+                  value={workflow_engine_params}
+                  onChange={setWorkflowEngineParams}
+                />
+              </div>
+            </div>
           </Modal>
         </ModalPortal>
       )}
