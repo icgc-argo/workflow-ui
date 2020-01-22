@@ -168,11 +168,18 @@ export default ({ runId }: { runId: string }) => {
                   .reverse()
                   .map(([task_id, tasks]) => {
                     const lastTask = tasks.reduce((acc, curr) => {
-                      if (curr.state === "COMPLETE") {
+                      if (curr.state === "EXECUTOR_ERROR") {
+                        acc = curr;
+                        return acc;
+                      } else if (
+                        curr.state === "COMPLETE" &&
+                        acc.state !== "EXECUTOR_ERROR"
+                      ) {
                         acc = curr;
                         return acc;
                       } else if (
                         curr.state === "RUNNING" &&
+                        acc.state !== "EXECUTOR_ERROR" &&
                         acc.state !== "COMPLETE"
                       ) {
                         acc = curr;
@@ -182,14 +189,21 @@ export default ({ runId }: { runId: string }) => {
                       return acc;
                     });
 
+                    const [taskHighlightColor, taskTextColor] =
+                      lastTask.state === "EXECUTOR_ERROR"
+                        ? [theme.colors.error_1, theme.colors.error]
+                        : lastTask.state === "COMPLETE"
+                        ? [theme.colors.success, theme.colors.success_dark]
+                        : [theme.colors.primary_4, theme.colors.primary];
+
                     return (
                       <div
                         className={css`
                           overflow: hidden;
                           margin: 10px;
-                          background: ${highlightColor};
+                          background: ${taskHighlightColor};
                           display: flex;
-                          border: solid 1px ${highlightColor};
+                          border: solid 1px ${taskHighlightColor};
                         `}
                       >
                         <div
@@ -207,7 +221,7 @@ export default ({ runId }: { runId: string }) => {
                           `}
                         >
                           <Typography
-                            color={textColor}
+                            color={taskTextColor}
                             bold
                             variant="label"
                             className={css`
@@ -244,7 +258,7 @@ export default ({ runId }: { runId: string }) => {
                             </div>
                             <div>
                               <span>Duration: </span>
-                              {Math.floor(lastTask.duration / 1000)} seconds
+                              {(lastTask.duration / 1000 / 3600).toFixed(2)} hours ({Math.floor(lastTask.duration / 1000)} seconds)
                             </div>
                           </Typography>
                           <pre
