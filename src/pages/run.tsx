@@ -165,6 +165,7 @@ export default ({ runId }: { runId: string }) => {
                     ([taskId], [otherTaskId]) =>
                       parseInt(taskId) - parseInt(otherTaskId)
                   )
+                  .reverse()
                   .map(([task_id, tasks]) => {
                     const lastTask = tasks.reduce((acc, curr) => {
                       if (curr.state === "COMPLETE") {
