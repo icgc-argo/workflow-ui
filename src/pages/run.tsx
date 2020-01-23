@@ -43,6 +43,7 @@ export default ({ runId }: { runId: string }) => {
             name
             stderr
             stdout
+            duration
           }
           task_log {
             task_id
@@ -93,6 +94,9 @@ export default ({ runId }: { runId: string }) => {
     : [theme.colors.success, theme.colors.success_dark];
   const [activeTab, setActiveTab] = React.useState<"logs" | "params">("logs");
 
+  const fmtTime = (ms: number): string =>
+    `${(ms / 1000 / 3600).toFixed(2)} hours (${Math.floor(ms / 1000)} seconds)`;
+
   return (
     <div
       className={css`
@@ -100,19 +104,32 @@ export default ({ runId }: { runId: string }) => {
       `}
     >
       {!loading && data && (
-        <div>
-          <Typography variant="title">
-            Workflow Name: <strong>{data.run.request.workflow.name}</strong>
-          </Typography>
-          <Typography variant="subtitle">
-            Run ID: <strong>{data.run.run_id}</strong>
-          </Typography>
-          <Typography variant="label" as="div">
-            <strong>started:</strong> {data.run.log.start_time}
-          </Typography>
-          <Typography variant="label" as="div">
-            <strong>completed:</strong> {data.run.log.end_time}
-          </Typography>
+        <div
+          className={css`
+            margin: 0 0 12px;
+
+            >div {
+              margin: 0 0 12px;
+            }
+          `}
+        >
+          <div>
+            <Typography variant="title">
+              Workflow Name: <strong>{data.run.request.workflow.name}</strong>
+            </Typography>
+            <Typography variant="subtitle">
+              Run ID: <strong>{data.run.run_id}</strong>
+            </Typography>
+            <Typography variant="label" as="div">
+              <strong>started:</strong> {data.run.log.start_time}
+            </Typography>
+            <Typography variant="label" as="div">
+              <strong>completed:</strong> {data.run.log.end_time}
+            </Typography>
+            <Typography variant="label" as="div">
+              <strong>duration:</strong> {fmtTime(data.run.log.duration)}
+            </Typography>
+          </div>
           {data?.run.log.stderr && (
             <div
               className={css`
@@ -258,7 +275,7 @@ export default ({ runId }: { runId: string }) => {
                             </div>
                             <div>
                               <span>Duration: </span>
-                              {(lastTask.duration / 1000 / 3600).toFixed(2)} hours ({Math.floor(lastTask.duration / 1000)} seconds)
+                              {fmtTime(lastTask.duration)}
                             </div>
                           </Typography>
                           <pre
