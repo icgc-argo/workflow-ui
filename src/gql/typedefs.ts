@@ -16,6 +16,7 @@ export default gql`
     name: String
     stderr: String
     stdout: String
+    duration: Int
   }
   type TaskLog {
     task_id: Int

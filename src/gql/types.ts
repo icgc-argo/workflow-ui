@@ -6,6 +6,7 @@ export type RunLog = {
   start_time: string;
   stderr: string;
   stdout: string;
+  duration: number;
 };
 
 export type TaskLog = {
