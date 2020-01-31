@@ -277,6 +277,10 @@ export default ({ runId }: { runId: string }) => {
                               <span>Duration: </span>
                               {fmtTime(lastTask.duration)}
                             </div>
+                            <div>
+                              <span>Realtime: </span>
+                              {fmtTime(lastTask.realtime)}
+                            </div>
                           </Typography>
                           <pre
                             className={css`
