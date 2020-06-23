@@ -21,7 +21,7 @@ const getWorkflowRepo = memoize<(githubUrl: string) => Promise<Workflow>>(
       throw Error(`Invalid Github Url: ${githubUrl}`);
     }
 
-    return fetch(`http://api.github.com/repos/${repo[1]}`).then(res => {
+    return fetch(`https://api.github.com/repos/${repo[1]}`).then(res => {
       if (res.ok) {
         return res.json();
       } else {
