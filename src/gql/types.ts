@@ -34,7 +34,7 @@ export type TaskLog = {
 export type RunDetail = {
   outputs: {};
   request: RunRequest;
-  run_id: string;
+  runId: string;
   run_log: RunLog;
   state: string;
   task_logs: TaskLog[];
@@ -49,7 +49,7 @@ export type RunRequest = {
 }
 
 export type RunStatus = {
-  run_id: string;
+  runId: string;
   state: string;
 };
 

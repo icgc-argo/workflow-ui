@@ -1,7 +1,7 @@
 import React from "react";
 import { SelectTable, TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
-import { Run, RunListQueryResponse } from "../pages";
+import { Run, RunsQueryResponse } from "../pages";
 
 export default ({
   runs,
@@ -27,34 +27,38 @@ export default ({
     },
     {
       Header: "id",
-      accessor: "run_id",
+      accessor: "runId",
       Cell: ({
         original
       }: {
-        original: RunListQueryResponse["runList"]["runs"][0];
-      }) => <Link to={`/runs/${original.run_id}`}>{original.run_id}</Link>
+        original: RunsQueryResponse["runs"][0];
+      }) => <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
+    },
+    {
+      Header: "session id",
+      accessor: "sessionId"
     },
     {
       Header: "start time",
-      accessor: "log.start_time"
+      accessor: "startTime"
     },
     {
       Header: "end time",
-      accessor: "log.end_time"
+      accessor: "completeTime"
     },
     ...(noWorkflow
       ? []
       : [
           {
             Header: "Workflow",
-            accessor: "request.workflow.name",
+            accessor: "repository",
             Cell: ({
               original
             }: {
-              original: RunListQueryResponse["runList"]["runs"][0];
+              original: RunsQueryResponse["runs"][0];
             }) => (
               <div>
-                {original.request ? original.request.workflow.name : null}
+                {original.repository}
               </div>
             )
           }
@@ -65,7 +69,7 @@ export default ({
       filterable
       parentRef={React.createRef()}
       data={runs}
-      keyField={"run_id"}
+      keyField={"runId"}
       isSelected={runId => selectedRunIds.includes(runId)}
       toggleSelection={toggleSelection}
       toggleAll={toggleAll}

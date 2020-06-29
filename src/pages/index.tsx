@@ -11,52 +11,39 @@ import { ModalPortal } from "../App";
 import NewRunFormModal from "../components/NewRunFormModal";
 
 export type Run = {
-  run_id: string;
+  runId: string;
+  sessionId: string;
   state: string;
-  log?: {
-    start_time: string;
-    end_time: string;
-  };
-  request?: {
-    workflow: {
-      id: string;
-      name: string;
-      version: string;
-    };
+  startTime: string;
+  completeTime: string;
+  repository: string;
+  engineParameters: {
+    revision: string;
   };
 };
 
-export type RunListQueryResponse = {
-  runList: {
-    runs: Run[];
-  };
+export type RunsQueryResponse = {
+  runs: Run[];
 };
 
 export default () => {
   /**
    * modal stuff
    */
-  const [loading, setLoading] = React.useState(false);
-
   const { DEV_disablePolling } = useAppContext();
 
-  const { data } = useQuery<RunListQueryResponse>(
+  const { loading: dataLoading, error, data } = useQuery<RunsQueryResponse>(
     gql`
       {
-        runList: listRuns(pageSize: 2) {
-          runs {
-            run_id
-            state
-            log {
-              start_time
-              end_time
-            }
-            request {
-              workflow {
-                id
-                name
-              }
-            }
+        runs {
+          runId
+          sessionId
+          state
+          startTime
+          completeTime
+          repository
+          engineParameters {
+            revision
           }
         }
       }
@@ -64,14 +51,16 @@ export default () => {
     { pollInterval: DEV_disablePolling ? 0 : 1000 }
   );
 
+  const [loading, setLoading] = React.useState(false);
+
   const [selectedRunIds, setSelectedRunIds] = React.useState<string[]>([]);
 
   const selectAll = React.useMemo(() => {
     const output =
       !!data &&
-      (data?.runList.runs || [])
-        .map(r => r.run_id)
-        .every(id => selectedRunIds.includes(id));
+      (data?.runs || [])
+        .map((r) => r.runId)
+        .every((id) => selectedRunIds.includes(id));
     return output;
   }, [selectedRunIds, data]);
 
@@ -80,7 +69,7 @@ export default () => {
       if (selectAll) {
         setSelectedRunIds([]);
       } else {
-        setSelectedRunIds(data.runList.runs.map(r => r.run_id));
+        setSelectedRunIds(data.runs.map((r) => r.runId));
       }
     }
   };
@@ -88,7 +77,7 @@ export default () => {
   const toggleSelection = (selectionString: string) => {
     const runId = selectionString.split("select-").join("");
     selectedRunIds.includes(runId)
-      ? setSelectedRunIds(selectedRunIds.filter(id => id !== runId))
+      ? setSelectedRunIds(selectedRunIds.filter((id) => id !== runId))
       : setSelectedRunIds([...selectedRunIds, runId]);
   };
 
@@ -98,17 +87,20 @@ export default () => {
         padding: 20px;
       `}
     >
-      {loading && (
+      {(dataLoading || loading) && (
         <ModalPortal>
           <DNALoader />
         </ModalPortal>
+      )}
+      {error && (
+        <div>Houston, we have a problem!</div>
       )}
       <div
         className={css`
           margin: 10px 0px;
         `}
       >
-        <NewRunFormModal setLoading={setLoading}/>
+        <NewRunFormModal setLoading={setLoading} />
       </div>
       <Container
         className={css`
@@ -129,7 +121,7 @@ export default () => {
           </Typography>
         </div>
         <RunsTable
-          runs={data?.runList.runs || []}
+          runs={data?.runs || []}
           toggleSelection={toggleSelection}
           toggleAll={toggleAll}
           selectAll={selectAll}

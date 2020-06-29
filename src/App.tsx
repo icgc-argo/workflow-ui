@@ -1,20 +1,19 @@
 import React from "react";
-import ApolloClient from "apollo-client";
+import ApolloClient from "apollo-boost";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { createPortal } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import AppBar, { Section, MenuGroup, MenuItem } from "@icgc-argo/uikit/AppBar";
 import { ThemeProvider } from "@icgc-argo/uikit";
 import Modal from "@icgc-argo/uikit/Modal";
-import { SchemaLink } from "apollo-link-schema";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import { AppContext, useInitialAppContextState } from './context/App';
-import schema from "./gql";
 import Home from "./pages";
 import Run from "./pages/run";
 import Voyagers from "./pages/voyagers";
 import { css } from "emotion";
 import logo from "./logo.svg";
+
 
 const modalPortalRef = React.createRef<HTMLDivElement>();
 
@@ -39,9 +38,8 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 
 const App: React.FC = () => {
   const client = new ApolloClient({
-    link: new SchemaLink({ schema }),
-    cache: new InMemoryCache(),
-    connectToDevTools: true
+    uri: process.env.RDPC_GATEWAY,
+    cache: new InMemoryCache()
   });
 
   const globalState = useInitialAppContextState();

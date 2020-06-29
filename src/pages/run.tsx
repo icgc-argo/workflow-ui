@@ -17,7 +17,7 @@ import { useAppContext } from "../context/App";
 
 type SingleRunQuery = {
   run: {
-    run_id: string;
+    runId: string;
     log: RunLog;
     task_log: TaskLog[];
     request: RunRequest & {
@@ -35,7 +35,7 @@ export default ({ runId }: { runId: string }) => {
     gql`
       query SINGLE_RUN_QUERY($runId: ID!) {
         run(id: $runId) {
-          run_id
+          runId
           log {
             end_time
             start_time
@@ -118,7 +118,7 @@ export default ({ runId }: { runId: string }) => {
               Workflow Name: <strong>{data.run.request.workflow.name}</strong>
             </Typography>
             <Typography variant="subtitle">
-              Run ID: <strong>{data.run.run_id}</strong>
+              Run ID: <strong>{data.run.runId}</strong>
             </Typography>
             <Typography variant="label" as="div">
               <strong>started:</strong> {data.run.log.start_time}
