@@ -1,7 +1,7 @@
 import React from "react";
 import { SelectTable, TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
-import { Run, RunsQueryResponse } from "../pages";
+import { RunListQueryResponse, RunCompact } from "../gql/types";
 
 export default ({
   runs,
@@ -11,14 +11,14 @@ export default ({
   selectAll,
   noWorkflow = false
 }: {
-  runs: Run[];
+  runs: RunCompact[];
   selectedRunIds: string[];
   toggleSelection: React.ComponentProps<typeof SelectTable>["toggleSelection"];
   toggleAll: React.ComponentProps<typeof SelectTable>["toggleAll"];
   selectAll: React.ComponentProps<typeof SelectTable>["selectAll"];
   noWorkflow?: boolean;
 }) => {
-  const columns: TableColumnConfig<Run> = [
+  const columns: TableColumnConfig<RunCompact> = [
     {
       Header: "State",
       accessor: "state",
@@ -31,7 +31,7 @@ export default ({
       Cell: ({
         original
       }: {
-        original: RunsQueryResponse["runs"][0];
+        original: RunListQueryResponse["runs"][0];
       }) => <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
     },
     {
@@ -55,7 +55,7 @@ export default ({
             Cell: ({
               original
             }: {
-              original: RunsQueryResponse["runs"][0];
+              original: RunListQueryResponse["runs"][0];
             }) => (
               <div>
                 {original.repository}

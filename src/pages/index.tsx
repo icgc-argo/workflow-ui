@@ -9,22 +9,7 @@ import { useAppContext } from "../context/App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import { ModalPortal } from "../App";
 import NewRunFormModal from "../components/NewRunFormModal";
-
-export type Run = {
-  runId: string;
-  sessionId: string;
-  state: string;
-  startTime: string;
-  completeTime: string;
-  repository: string;
-  engineParameters: {
-    revision: string;
-  };
-};
-
-export type RunsQueryResponse = {
-  runs: Run[];
-};
+import { RunListQueryResponse } from "../gql/types";
 
 export default () => {
   /**
@@ -32,7 +17,7 @@ export default () => {
    */
   const { DEV_disablePolling } = useAppContext();
 
-  const { loading: dataLoading, error, data } = useQuery<RunsQueryResponse>(
+  const { loading: dataLoading, error, data } = useQuery<RunListQueryResponse>(
     gql`
       {
         runs {
