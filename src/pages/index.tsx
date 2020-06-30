@@ -19,8 +19,8 @@ export default () => {
 
   const { loading: dataLoading, error, data } = useQuery<RunListQueryResponse>(
     gql`
-      {
-        runs {
+      query ($pageFrom: Int!, $pageSize: Int!) {
+        runs(page: {from: $pageFrom, size: $pageSize}) {
           runId
           sessionId
           state
@@ -33,7 +33,12 @@ export default () => {
         }
       }
     `,
-    { pollInterval: DEV_disablePolling ? 0 : 1000 }
+    { 
+      variables: {
+        pageFrom: 0,
+        pageSize: 100
+      },
+      pollInterval: DEV_disablePolling ? 0 : 1000 }
   );
 
   const [loading, setLoading] = React.useState(false);
