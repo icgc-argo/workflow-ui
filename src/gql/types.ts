@@ -1,81 +1,63 @@
-export type RunLog = {
-  cmd: string[];
-  end_time: string;
-  exit_code: number;
-  name: string;
-  start_time: string;
-  stderr: string;
-  stdout: string;
-  duration: number;
+type RunsQuery<RT = Run> = {
+  runs: RT[];
 };
 
-export type TaskLog = {
-  task_id: number;
+export type RunListQueryResponse = RunsQuery<RunCompact>;
+export type RunQueryResponse = RunsQuery<Run>;
+
+export type RunCompact = {
+  runId: string;
+  sessionId: string;
+  state: string;
+  startTime: string;
+  completeTime: string;
+  repository: string;
+  engineParameters: {
+    revision: string;
+  };
+};
+
+export type Run = {
+  runId: string;
+  sessionId: string;
+  commandLine: string[];
+  completeTime: string;
+  duration: number;
+  engineParameters: EngineParameters;
+  errorReport: string;
+  exitStatus: number;
+  parameters: { [k: string]: any };
+  repository: string;
+  startTime: string;
+  state: string;
+  success: boolean;
+  tasks: Task[];
+};
+
+export type Task = {
+  taskId: number;
+  runId: string;
+  attempt: number;
+  completeTime: string;
+  container: string;
+  cpus: number;
+  duration: number;
+  exit: number;
+  memory: number;
   name: string;
   process: string;
-  tag: string;
-  container: string;
-  attempt: number;
-  state: string;
-  cmd: [string];
-  submit_time: string;
-  start_time: string;
-  end_time: string;
-  stderr: string;
-  stdout: string;
-  exit_code: number;
-  workdir: string;
-  cpus: number;
-  memory: number;
-  duration: number;
   realtime: number;
-};
-
-export type RunDetail = {
-  outputs: {};
-  request: RunRequest;
-  run_id: string;
-  run_log: RunLog;
+  script: string;
+  startTime: string;
   state: string;
-  task_logs: TaskLog[];
+  submitTime: string;
+  tag: string;
 };
 
-export type RunRequest = {
-  workflow_params: {[k: string]: any};
-  workflow_engine_params: {[k: string]: any};
-  workflow_type: string;
-  workflow_type_version: string;
-  workflow_url: string;
-}
-
-export type RunStatus = {
-  run_id: string;
-  state: string;
+export type EngineParameters = {
+  launchDir: string;
+  projectDir: string;
+  resume: string;
+  revision: string;
+  workDir: string;
 };
-
-export type ServiceInfo = {
-  auth_instructions_url: string;
-  contact_info_url: string;
-  supported_filesystem_protocols: string[];
-  supported_wes_versions: string[];
-  default_workflow_engine_parameters: {
-    name: string;
-    type: string;
-  }[];
-  system_state_counts: {
-    [k: string]: number;
-  };
-  workflow_engine_versions: {
-    [k: string]: string;
-  };
-  workflow_type_versions: {
-    [k: string]: string;
-  };
-};
-
-export type Workflow = {
-  name: string;
-  full_name: string;
-  description: string;
-  html_url: string;
-}

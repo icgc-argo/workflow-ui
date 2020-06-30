@@ -1,11 +1,10 @@
 import React from "react";
+import urlJoin from "url-join";
 import Button from "@icgc-argo/uikit/Button";
 import { ModalPortal } from "../App";
 import Modal from "@icgc-argo/uikit/Modal";
 import InputLabel from "@icgc-argo/uikit/form/InputLabel";
 import Input from "@icgc-argo/uikit/form/Input";
-import gql from "graphql-tag";
-import { useMutation } from "@apollo/react-hooks";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
 import "ace-builds/src-noconflict/theme-github";
@@ -13,14 +12,21 @@ import { css } from "emotion";
 import { ApolloError } from "apollo-client";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 
-type RunResponse = {
-  runWorkflow: {
-    run_id: string;
-  };
+const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || "";
+
+type RunSuccess = {
+  run_id: string;
 };
 
+type RunError = {
+  msg: String;
+  status_code: Number;
+};
+
+type RunResponse = RunSuccess | RunError;
+
 export default ({
-  setLoading
+  setLoading,
 }: {
   setLoading: (isLoading: boolean) => void;
 }) => {
@@ -33,31 +39,24 @@ export default ({
   >(null);
   const theme = useTheme();
 
-  const [runWorkflow] = useMutation<
-    RunResponse,
-    {
-      workflow_url: string;
-      workflow_params: { [k: string]: any };
-      workflow_engine_params: { [k: string]: any };
-    }
-  >(
-    gql`
-      mutation(
-        $workflow_url: String!
-        $workflow_params: JSON!
-        $workflow_engine_params: JSON!
-      ) {
-        runWorkflow(
-          workflow_url: $workflow_url
-          workflow_params: $workflow_params
-          workflow_engine_params: $workflow_engine_params
-        ) {
-          run_id
-          __typename
-        }
-      }
-    `
-  );
+  const runWorkflow = ({
+    workflow_url,
+    workflow_params,
+    workflow_engine_params,
+  }: {
+    workflow_url: string;
+    workflow_params: string;
+    workflow_engine_params: string;
+  }): Promise<{ run_id: string }> =>
+    fetch(urlJoin(MANAGEMENT_API, "/runs"), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        workflow_url,
+        workflow_params,
+        workflow_engine_params,
+      }),
+    }).then(async (res) => res.json());
 
   const onNewRunClick: React.ComponentProps<typeof Button>["onClick"] = () => {
     setNewRunModalShown(true);
@@ -75,21 +74,17 @@ export default ({
     setLoading(true);
     try {
       const run = await runWorkflow({
-        variables: {
-          workflow_url: workflow_url,
-          workflow_params:
-            workflow_params.length > 0
-              ? JSON.parse(workflow_params.trim())
-              : {},
-          workflow_engine_params:
-            workflow_engine_params.length > 0
-              ? JSON.parse(workflow_engine_params.trim())
-              : {}
-        }
+        workflow_url: workflow_url,
+        workflow_params:
+          workflow_params.length > 0 ? JSON.parse(workflow_params.trim()) : {},
+        workflow_engine_params:
+          workflow_engine_params.length > 0
+            ? JSON.parse(workflow_engine_params.trim())
+            : {},
       });
       setLoading(false);
       setNewRunModalShown(false);
-      setRunResponse(run.data);
+      setRunResponse(run);
     } catch (error) {
       setLoading(false);
       setNewRunModalShown(false);
@@ -114,13 +109,13 @@ export default ({
             onCancelClick={onRunAcknowledge}
             cancelText="Ok"
           >
-            {"runWorkflow" in runResponse && (
+            {"run_id" in runResponse && (
               <p>
-                A run with ID: <strong>{runResponse.runWorkflow.run_id}</strong>{" "}
-                has been initiated, it will appear in the list momentarily.
+                A run with ID: <strong>{runResponse.run_id}</strong> has been
+                initiated, it will appear in the list momentarily.
               </p>
             )}
-            {"graphQLErrors" in runResponse && (
+            {"msg" in runResponse && (
               <>
                 <p>
                   The following error was encountered trying to run your
@@ -134,11 +129,10 @@ export default ({
                     padding: 0 10px;
                   `}
                 >
-                  {runResponse.graphQLErrors.map(e => (
-                    <p>
-                      <strong>Error:</strong> {e.message}
-                    </p>
-                  ))}
+                  <p>
+                    <strong>Status:</strong> {runResponse.status_code}
+                    <strong>Msg:</strong> {runResponse.msg}
+                  </p>
                 </div>
               </>
             )}
@@ -163,7 +157,7 @@ export default ({
             <Input
               aria-label="workflow_url"
               value={workflow_url}
-              onChange={e => setWorkflowUrl(e.target.value)}
+              onChange={(e) => setWorkflowUrl(e.target.value)}
             />
             <InputLabel>
               Workflow Params (equivalent to -params-file)

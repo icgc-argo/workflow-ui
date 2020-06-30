@@ -1,7 +1,8 @@
 import React from "react";
 import { SelectTable, TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
-import { Run, RunListQueryResponse } from "../pages";
+import { RunListQueryResponse, RunCompact } from "../gql/types";
+import { parseEpochToEST } from "../utils";
 
 export default ({
   runs,
@@ -11,14 +12,14 @@ export default ({
   selectAll,
   noWorkflow = false
 }: {
-  runs: Run[];
+  runs: RunCompact[];
   selectedRunIds: string[];
   toggleSelection: React.ComponentProps<typeof SelectTable>["toggleSelection"];
   toggleAll: React.ComponentProps<typeof SelectTable>["toggleAll"];
   selectAll: React.ComponentProps<typeof SelectTable>["selectAll"];
   noWorkflow?: boolean;
 }) => {
-  const columns: TableColumnConfig<Run> = [
+  const columns: TableColumnConfig<RunCompact> = [
     {
       Header: "State",
       accessor: "state",
@@ -26,35 +27,49 @@ export default ({
       resizable: false
     },
     {
-      Header: "id",
-      accessor: "run_id",
+      Header: "Run ID",
+      accessor: "runId",
       Cell: ({
         original
       }: {
-        original: RunListQueryResponse["runList"]["runs"][0];
-      }) => <Link to={`/runs/${original.run_id}`}>{original.run_id}</Link>
+        original: RunListQueryResponse["runs"][0];
+      }) => <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
     },
     {
-      Header: "start time",
-      accessor: "log.start_time"
+      Header: "Session ID",
+      accessor: "sessionId"
     },
     {
-      Header: "end time",
-      accessor: "log.end_time"
+      Header: "Start",
+      accessor: "startTime",
+      Cell: ({
+        original
+      }: {
+        original: RunListQueryResponse["runs"][0];
+      }) => parseEpochToEST(original.startTime)
+    },
+    {
+      Header: "Complete",
+      accessor: "completeTime",
+      Cell: ({
+        original
+      }: {
+        original: RunListQueryResponse["runs"][0];
+      }) => parseEpochToEST(original.completeTime)
     },
     ...(noWorkflow
       ? []
       : [
           {
-            Header: "Workflow",
-            accessor: "request.workflow.name",
+            Header: "Repository",
+            accessor: "repository",
             Cell: ({
               original
             }: {
-              original: RunListQueryResponse["runList"]["runs"][0];
+              original: RunListQueryResponse["runs"][0];
             }) => (
               <div>
-                {original.request ? original.request.workflow.name : null}
+                {original.repository}
               </div>
             )
           }
@@ -65,7 +80,7 @@ export default ({
       filterable
       parentRef={React.createRef()}
       data={runs}
-      keyField={"run_id"}
+      keyField={"runId"}
       isSelected={runId => selectedRunIds.includes(runId)}
       toggleSelection={toggleSelection}
       toggleAll={toggleAll}

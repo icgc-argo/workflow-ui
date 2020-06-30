@@ -12,84 +12,69 @@ import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import Tabs, { Tab } from "@icgc-argo/uikit/Tabs";
 import Icon from "@icgc-argo/uikit/Icon";
 import groupBy from "lodash/groupBy";
-import { RunLog, TaskLog, RunRequest } from "../gql/types";
+import { RunQueryResponse } from "../gql/types";
 import { useAppContext } from "../context/App";
-
-type SingleRunQuery = {
-  run: {
-    run_id: string;
-    log: RunLog;
-    task_log: TaskLog[];
-    request: RunRequest & {
-      workflow: {
-        id: string;
-        name: string;
-      };
-    };
-  };
-};
+import { parseEpochToEST } from "../utils";
 
 export default ({ runId }: { runId: string }) => {
   const { DEV_disablePolling } = useAppContext();
-  const { data, loading } = useQuery<SingleRunQuery, { runId: string }>(
+  const { data, loading } = useQuery<RunQueryResponse, { runId: string }>(
     gql`
-      query SINGLE_RUN_QUERY($runId: ID!) {
-        run(id: $runId) {
-          run_id
-          log {
-            end_time
-            start_time
-            exit_code
-            name
-            stderr
-            stdout
-            duration
+      query SINGLE_RUN_QUERY($runId: String!) {
+        runs(filter: { runId: $runId }) {
+          runId
+          sessionId
+          commandLine
+          completeTime
+          duration
+          engineParameters {
+            launchDir
+            projectDir
+            resume
+            revision
+            workDir
           }
-          task_log {
-            task_id
+          errorReport
+          exitStatus
+          parameters
+          repository
+          startTime
+          state
+          success
+          tasks {
+            taskId
+            runId
+            attempt
+            completeTime
+            container
+            cpus
+            duration
+            exit
+            memory
             name
             process
-            tag
-            container
-            attempt
-            state
-            cmd
-            submit_time
-            start_time
-            end_time
-            stderr
-            stdout
-            exit_code
-            workdir
-            cpus
-            memory
-            duration
             realtime
-          }
-          request {
-            workflow {
-              name
-              id
-            }
-            workflow_url
-            workflow_params
-            workflow_engine_params
-            workflow_type
-            workflow_type_version
+            script
+            startTime
+            state
+            submitTime
+            tag
           }
         }
       }
     `,
     {
       variables: {
-        runId
+        runId,
       },
-      pollInterval: DEV_disablePolling ? 0 : 500
+      pollInterval: DEV_disablePolling ? 0 : 500,
     }
   );
 
+  const run = data?.runs[0];
+
   const theme = useTheme();
-  const [highlightColor, textColor] = data?.run.log.stderr
+  const [highlightColor, textColor] = run?.errorReport
     ? [theme.colors.error_1, theme.colors.error]
     : [theme.colors.success, theme.colors.success_dark];
   const [activeTab, setActiveTab] = React.useState<"logs" | "params">("logs");
@@ -103,34 +88,37 @@ export default ({ runId }: { runId: string }) => {
         padding: 20px;
       `}
     >
-      {!loading && data && (
+      {!loading && run && (
         <div
           className={css`
             margin: 0 0 12px;
 
-            >div {
+            > div {
               margin: 0 0 12px;
             }
           `}
         >
           <div>
             <Typography variant="title">
-              Workflow Name: <strong>{data.run.request.workflow.name}</strong>
+              Workflow Repo: <strong>{run.repository}</strong>
             </Typography>
             <Typography variant="subtitle">
-              Run ID: <strong>{data.run.run_id}</strong>
+              Run ID: <strong>{run.runId}</strong>
+            </Typography>
+            <Typography variant="subtitle">
+              Session ID: <strong>{run.sessionId}</strong>
             </Typography>
             <Typography variant="label" as="div">
-              <strong>started:</strong> {data.run.log.start_time}
+              <strong>started:</strong> {parseEpochToEST(run.startTime)}
             </Typography>
             <Typography variant="label" as="div">
-              <strong>completed:</strong> {data.run.log.end_time}
+              <strong>completed:</strong> {parseEpochToEST(run.completeTime)}
             </Typography>
             <Typography variant="label" as="div">
-              <strong>duration:</strong> {fmtTime(data.run.log.duration)}
+              <strong>duration:</strong> {fmtTime(run.duration)}
             </Typography>
           </div>
-          {data?.run.log.stderr && (
+          {run?.errorReport && (
             <div
               className={css`
                 padding: 12px;
@@ -141,13 +129,13 @@ export default ({ runId }: { runId: string }) => {
               `}
             >
               <Typography variant="label" as="div">
-                <strong>Error Msg:</strong> {data.run.log.stderr}
+                <strong>Error Msg:</strong> {run.errorReport}
               </Typography>
             </div>
           )}
         </div>
       )}
-      {!!data && (
+      {!!run && (
         <Container
           loading={loading}
           className={css`
@@ -162,12 +150,12 @@ export default ({ runId }: { runId: string }) => {
             <Tab
               label="Task Logs"
               value="logs"
-              onClick={e => setActiveTab("logs")}
+              onClick={(e) => setActiveTab("logs")}
             />
             <Tab
               label="Params"
               value="params"
-              onClick={e => setActiveTab("params")}
+              onClick={(e) => setActiveTab("params")}
             />
           </Tabs>
           <div
@@ -177,13 +165,13 @@ export default ({ runId }: { runId: string }) => {
           >
             {activeTab === "logs" && (
               <div>
-                {Object.entries(groupBy(data.run.task_log, "task_id"))
+                {Object.entries(groupBy(run.tasks, "taskId"))
                   .sort(
                     ([taskId], [otherTaskId]) =>
                       parseInt(taskId) - parseInt(otherTaskId)
                   )
                   .reverse()
-                  .map(([task_id, tasks]) => {
+                  .map(([taskId, tasks]) => {
                     const lastTask = tasks.reduce((acc, curr) => {
                       if (curr.state === "EXECUTOR_ERROR") {
                         acc = curr;
@@ -292,11 +280,7 @@ export default ({ runId }: { runId: string }) => {
                               color: ${theme.colors.white};
                             `}
                           >
-                            {lastTask.cmd.map(
-                              cmd =>
-                                `@ ${lastTask.start_time ||
-                                  lastTask.submit_time} > ${cmd}\n`
-                            )}
+                            {lastTask.script}
                           </pre>
                         </div>
                       </div>
@@ -338,16 +322,12 @@ export default ({ runId }: { runId: string }) => {
                     `}
                   >
                     <div>
-                      <span>Workflow URL: </span>
-                      {data.run.request.workflow_url}
-                    </div>
-                    <div>
-                      <span>Workflow Type: </span>
-                      {data.run.request.workflow_type}
+                      <span>Workflow Repository: </span>
+                      {run.repository}
                     </div>
                     <div>
                       <span>Workflow Version: </span>
-                      {data.run.request.workflow_type_version}
+                      {run.engineParameters.revision}
                     </div>
                   </Typography>
                 </div>
@@ -382,11 +362,7 @@ export default ({ runId }: { runId: string }) => {
                       name="workflow_params"
                       mode="json"
                       theme="solarized_dark"
-                      value={JSON.stringify(
-                        data.run.request.workflow_params,
-                        null,
-                        "\t"
-                      )}
+                      value={JSON.stringify(run.parameters, null, "\t")}
                       readOnly
                       width="100%"
                     />
@@ -415,11 +391,7 @@ export default ({ runId }: { runId: string }) => {
                       name="workflow_engine_params"
                       mode="json"
                       theme="solarized_dark"
-                      value={JSON.stringify(
-                        data.run.request.workflow_engine_params,
-                        null,
-                        "\t"
-                      )}
+                      value={JSON.stringify(run.engineParameters, null, "\t")}
                       readOnly
                       width="100%"
                     />
