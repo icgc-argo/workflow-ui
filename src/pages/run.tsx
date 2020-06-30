@@ -14,6 +14,7 @@ import Icon from "@icgc-argo/uikit/Icon";
 import groupBy from "lodash/groupBy";
 import { RunQueryResponse } from "../gql/types";
 import { useAppContext } from "../context/App";
+import { parseEpochToEST } from "../utils";
 
 export default ({ runId }: { runId: string }) => {
   const { DEV_disablePolling } = useAppContext();
@@ -108,10 +109,10 @@ export default ({ runId }: { runId: string }) => {
               Session ID: <strong>{run.sessionId}</strong>
             </Typography>
             <Typography variant="label" as="div">
-              <strong>started:</strong> {run.startTime}
+              <strong>started:</strong> {parseEpochToEST(run.startTime)}
             </Typography>
             <Typography variant="label" as="div">
-              <strong>completed:</strong> {run.completeTime}
+              <strong>completed:</strong> {parseEpochToEST(run.completeTime)}
             </Typography>
             <Typography variant="label" as="div">
               <strong>duration:</strong> {fmtTime(run.duration)}

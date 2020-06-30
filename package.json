@@ -26,6 +26,8 @@
     "graphql-tag": "^2.10.3",
     "graphql-type-json": "^0.3.2",
     "graphql-voyager": "^1.0.0-rc.31",
+    "moment": "^2.27.0",
+    "moment-timezone": "^0.5.31",
     "react": "^16.13.1",
     "react-ace": "^9.1.1",
     "react-dom": "^16.13.1",

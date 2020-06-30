@@ -2,6 +2,7 @@ import React from "react";
 import { SelectTable, TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
 import { RunListQueryResponse, RunCompact } from "../gql/types";
+import { parseEpochToEST } from "../utils";
 
 export default ({
   runs,
@@ -26,7 +27,7 @@ export default ({
       resizable: false
     },
     {
-      Header: "id",
+      Header: "Run ID",
       accessor: "runId",
       Cell: ({
         original
@@ -35,22 +36,32 @@ export default ({
       }) => <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
     },
     {
-      Header: "session id",
+      Header: "Session ID",
       accessor: "sessionId"
     },
     {
-      Header: "start time",
-      accessor: "startTime"
+      Header: "Start",
+      accessor: "startTime",
+      Cell: ({
+        original
+      }: {
+        original: RunListQueryResponse["runs"][0];
+      }) => parseEpochToEST(original.startTime)
     },
     {
-      Header: "end time",
-      accessor: "completeTime"
+      Header: "Complete",
+      accessor: "completeTime",
+      Cell: ({
+        original
+      }: {
+        original: RunListQueryResponse["runs"][0];
+      }) => parseEpochToEST(original.completeTime)
     },
     ...(noWorkflow
       ? []
       : [
           {
-            Header: "Workflow",
+            Header: "Repository",
             accessor: "repository",
             Cell: ({
               original
