@@ -38,7 +38,7 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 
 const App: React.FC = () => {
   const client = new ApolloClient({
-    uri: process.env.RDPC_GATEWAY,
+    uri: process.env.REACT_APP_RDPC_GATEWAY,
     cache: new InMemoryCache()
   });
 
