@@ -1,5 +1,6 @@
 def dockerHubRepo = "icgcargo/workflow-ui"
 def githubRepo = "icgc-argo/workflow-ui"
+def chartVersion = "0.3.0"
 def commit = "UNKNOWN"
 def version = "UNKNOWN"
 
@@ -67,6 +68,22 @@ spec:
                     sh "docker push ${dockerHubRepo}:${version}-${commit}"
                     sh "docker push ${dockerHubRepo}:edge"
                 }
+            }
+        }
+
+        stage('deploy to rdpc-collab-dev') {
+            when {
+// Change branch to develop after successful testing
+                branch "2020-07-07-add-jenkins-deploy-stage"
+            }
+            steps {
+                build(job: "/provision/helm", parameters: [
+                    [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
+                    [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-ui'],
+                    [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'ui'],
+                    [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
+                    [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}-${commit}" ]
+                ])
             }
         }
 
