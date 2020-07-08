@@ -1,5 +1,5 @@
 def dockerHubRepo = "icgcargo/workflow-ui"
-def githubRepo = "icgc-argo/workflow-ui"
+def gitHubRepo = "icgc-argo/workflow-ui"
 def chartVersion = "0.3.0"
 def commit = "UNKNOWN"
 def version = "UNKNOWN"
@@ -94,7 +94,7 @@ spec:
                 container('docker') {
                     withCredentials([usernamePassword(credentialsId: 'argoGithub', passwordVariable: 'GIT_PASSWORD', usernameVariable: 'GIT_USERNAME')]) {
                         sh "git tag ${version}"
-                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${githubRepo} --tags"
+                        sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${gitHubRepo} --tags"
                     }
                     withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
                         sh 'docker login -u $USERNAME -p $PASSWORD'
