@@ -43,34 +43,6 @@ export default () => {
 
   const [loading, setLoading] = React.useState(false);
 
-  const [selectedRunIds, setSelectedRunIds] = React.useState<string[]>([]);
-
-  const selectAll = React.useMemo(() => {
-    const output =
-      !!data &&
-      (data?.runs || [])
-        .map((r) => r.runId)
-        .every((id) => selectedRunIds.includes(id));
-    return output;
-  }, [selectedRunIds, data]);
-
-  const toggleAll = () => {
-    if (!!data) {
-      if (selectAll) {
-        setSelectedRunIds([]);
-      } else {
-        setSelectedRunIds(data.runs.map((r) => r.runId));
-      }
-    }
-  };
-
-  const toggleSelection = (selectionString: string) => {
-    const runId = selectionString.split("select-").join("");
-    selectedRunIds.includes(runId)
-      ? setSelectedRunIds(selectedRunIds.filter((id) => id !== runId))
-      : setSelectedRunIds([...selectedRunIds, runId]);
-  };
-
   return (
     <div
       className={css`
@@ -112,10 +84,6 @@ export default () => {
         </div>
         <RunsTable
           runs={data?.runs || []}
-          toggleSelection={toggleSelection}
-          toggleAll={toggleAll}
-          selectAll={selectAll}
-          selectedRunIds={selectedRunIds}
         />
       </Container>
     </div>
