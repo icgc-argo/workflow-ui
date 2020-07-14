@@ -68,6 +68,16 @@ export default ({ taskData }: { taskData: DashboardTask[] }) => {
         <Typography variant="sectionHeader" bold color="primary">
           Latest Tasks
         </Typography>
+        {tasks.length === 0 && (
+          <div
+            className={css`
+              font-size: 14px;
+              margin: 8px 0;
+            `}
+          >
+            No running tasks!
+          </div>
+        )}
         {tasks.slice(0, 10).map((task: DashboardTask) => (
           <div
             className={css`
