@@ -9,7 +9,8 @@ import { useAppContext } from "../context/App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import { ModalPortal } from "../App";
 import NewRunFormModal from "../components/NewRunFormModal";
-import { RunListQueryResponse } from "../gql/types";
+import { DashboardQueryResponse } from "../gql/types";
+import RDPCStats from "../components/RDPCStats";
 
 export default () => {
   /**
@@ -17,10 +18,10 @@ export default () => {
    */
   const { DEV_disablePolling } = useAppContext();
 
-  const { loading: dataLoading, error, data } = useQuery<RunListQueryResponse>(
+  const { loading: dataLoading, error, data } = useQuery<DashboardQueryResponse>(
     gql`
-      query ($pageFrom: Int!, $pageSize: Int!) {
-        runs(page: {from: $pageFrom, size: $pageSize}) {
+      query($pageFrom: Int!, $pageSize: Int!) {
+        runs(page: { from: $pageFrom, size: $pageSize }) {
           runId
           sessionId
           state
@@ -31,14 +32,25 @@ export default () => {
             revision
           }
         }
+        tasks(filter: {state: "RUNNING"}, page: {from: 0, size: 500}) {
+          process
+          runId
+          cpus
+          state
+          startTime
+          run {
+            state
+          }
+        }
       }
     `,
-    { 
+    {
       variables: {
         pageFrom: 0,
-        pageSize: 100
+        pageSize: 100,
       },
-      pollInterval: DEV_disablePolling ? 0 : 1000 }
+      pollInterval: DEV_disablePolling ? 0 : 1000,
+    }
   );
 
   const [loading, setLoading] = React.useState(false);
@@ -54,9 +66,7 @@ export default () => {
           <DNALoader />
         </ModalPortal>
       )}
-      {error && (
-        <div>Houston, we have a problem!</div>
-      )}
+      {error && <div>Houston, we have a problem!</div>}
       <div
         className={css`
           margin: 10px 0px;
@@ -64,28 +74,43 @@ export default () => {
       >
         <NewRunFormModal setLoading={setLoading} />
       </div>
-      <Container
+      <div
         className={css`
-          padding: 10px;
-          padding-bottom: 0px;
+          display: flex;
         `}
       >
-        <div
+        <Container
           className={css`
-            padding-bottom: 10px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            padding: 10px;
+            padding-bottom: 0px;
+            flex: 3 1 0;
+            margin-right: 12px;
           `}
         >
-          <Typography variant="sectionHeader" bold color="primary">
-            Workflow runs
-          </Typography>
-        </div>
-        <RunsTable
-          runs={data?.runs || []}
-        />
-      </Container>
+          <div
+            className={css`
+              padding-bottom: 10px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+            `}
+          >
+            <Typography variant="sectionHeader" bold color="primary">
+              Workflow runs
+            </Typography>
+          </div>
+          <RunsTable runs={data?.runs || []} />
+        </Container>
+        <Container
+          className={css`
+            padding: 10px;
+            padding-bottom: 0px;
+            flex: 1 3 0;
+          `}
+        >
+          <RDPCStats taskData={data?.tasks || []} />
+        </Container>
+      </div>
     </div>
   );
 };
