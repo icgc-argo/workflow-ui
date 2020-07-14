@@ -2,7 +2,12 @@ type RunsQuery<RT = Run> = {
   runs: RT[];
 };
 
-export type RunListQueryResponse = RunsQuery<RunCompact>;
+type RunsTaskQuery<RT = Run, TT = Task> = {
+  runs: RT[];
+  tasks: TT[];
+};
+
+export type DashboardQueryResponse = RunsTaskQuery<RunCompact, DashboardTask>;
 export type RunQueryResponse = RunsQuery<Run>;
 
 export type RunCompact = {
@@ -33,6 +38,17 @@ export type Run = {
   success: boolean;
   tasks: Task[];
 };
+
+export type DashboardTask = {
+  runId: string;
+  process: string;
+  cpus: number;
+  state: string;
+  startTime: string;
+  run: {
+    state: string;
+  }
+}
 
 export type Task = {
   taskId: number;

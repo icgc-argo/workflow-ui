@@ -1,22 +1,14 @@
 import React from "react";
-import { SelectTable, TableColumnConfig } from "@icgc-argo/uikit/Table";
+import Table, { TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
-import { RunListQueryResponse, RunCompact } from "../gql/types";
+import { DashboardQueryResponse, RunCompact } from "../gql/types";
 import { parseEpochToEST } from "../utils";
 
 export default ({
   runs,
-  selectedRunIds,
-  toggleSelection,
-  toggleAll,
-  selectAll,
   noWorkflow = false
 }: {
   runs: RunCompact[];
-  selectedRunIds: string[];
-  toggleSelection: React.ComponentProps<typeof SelectTable>["toggleSelection"];
-  toggleAll: React.ComponentProps<typeof SelectTable>["toggleAll"];
-  selectAll: React.ComponentProps<typeof SelectTable>["selectAll"];
   noWorkflow?: boolean;
 }) => {
   const columns: TableColumnConfig<RunCompact> = [
@@ -32,7 +24,7 @@ export default ({
       Cell: ({
         original
       }: {
-        original: RunListQueryResponse["runs"][0];
+        original: DashboardQueryResponse["runs"][0];
       }) => <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
     },
     {
@@ -45,7 +37,7 @@ export default ({
       Cell: ({
         original
       }: {
-        original: RunListQueryResponse["runs"][0];
+        original: DashboardQueryResponse["runs"][0];
       }) => parseEpochToEST(original.startTime)
     },
     {
@@ -54,7 +46,7 @@ export default ({
       Cell: ({
         original
       }: {
-        original: RunListQueryResponse["runs"][0];
+        original: DashboardQueryResponse["runs"][0];
       }) => parseEpochToEST(original.completeTime)
     },
     ...(noWorkflow
@@ -66,7 +58,7 @@ export default ({
             Cell: ({
               original
             }: {
-              original: RunListQueryResponse["runs"][0];
+              original: DashboardQueryResponse["runs"][0];
             }) => (
               <div>
                 {original.repository}
@@ -76,16 +68,12 @@ export default ({
         ])
   ];
   return (
-    <SelectTable
+    <Table
       filterable
       parentRef={React.createRef()}
       data={runs}
-      keyField={"runId"}
-      isSelected={runId => selectedRunIds.includes(runId)}
-      toggleSelection={toggleSelection}
-      toggleAll={toggleAll}
-      selectAll={selectAll}
       columns={columns}
+      defaultPageSize={25}
     />
   );
 };
