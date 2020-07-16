@@ -19,18 +19,36 @@
 import React from "react";
 import { css } from "emotion";
 import { Link } from "react-router-dom";
-import { DashboardTask } from "../gql/types";
+import { DashboardTask, RunCompact } from "../gql/types";
 import Typography from "@icgc-argo/uikit/Typography";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 
-export default ({ taskData }: { taskData: DashboardTask[] }) => {
+export default ({
+  runData,
+  taskData,
+}: {
+  runData: RunCompact[];
+  taskData: DashboardTask[];
+}) => {
   const theme = useTheme();
 
-  // TODO: this is because we don't have the same task appending like we do for
-  // workflow entities, this will be fixed soon
+  const sortByDate = (
+    a: RunCompact | DashboardTask,
+    b: RunCompact | DashboardTask
+  ) => (a.startTime < b.startTime ? 1 : -1);
+
+  const runs = runData
+    .filter((run) => run.state === "RUNNING")
+    .sort(sortByDate);
+
+  const activeRunIds = runs.map((run) => run.runId);
+
+  // TODO: the filter is required because we don't have the
+  // same task appending like we do for workflow entities,
+  // this will be fixed soon ...
   const tasks = taskData
-    .filter((task) => task.run.state === "RUNNING")
-    .sort((a, b) => (a.startTime < b.startTime ? 1 : -1));
+    .filter((task) => activeRunIds.includes(task.runId))
+    .sort(sortByDate);
 
   return (
     <>
@@ -46,7 +64,22 @@ export default ({ taskData }: { taskData: DashboardTask[] }) => {
       >
         <div>
           <Typography variant="label" bold color="primary">
-            Number of Tasks Running:
+            Workflows Running:
+          </Typography>
+          <span
+            className={css`
+              font-weight: bold;
+              font-size: 16px;
+              margin-left: 6px;
+              color: ${theme.colors.secondary_dark};
+            `}
+          >
+            {runs.length}
+          </span>
+        </div>
+        <div>
+          <Typography variant="label" bold color="primary">
+            Tasks Running:
           </Typography>
           <span
             className={css`
@@ -102,7 +135,7 @@ export default ({ taskData }: { taskData: DashboardTask[] }) => {
               font-size: 14px;
               padding: 6px;
               background: ${theme.colors.grey_4};
-              margin: 8px 0;
+              margin: 7px 0;
               border-radius: 4px;
 
               div {
@@ -126,9 +159,20 @@ export default ({ taskData }: { taskData: DashboardTask[] }) => {
             <div
               className={css`
                 margin-bottom: 4px;
+                display: flex;
+                flex-direction: row;
+
+                > div:first-of-type {
+                  margin-right: 16px;
+                }
               `}
             >
-              <span>Process:</span> {task.process}
+              <div>
+                <span>Process:</span> {task.process}
+              </div>
+              <div>
+                <span>CPUs Requested:</span> {task.cpus}
+              </div>
             </div>
             <div>
               <span>RunId:</span>{" "}

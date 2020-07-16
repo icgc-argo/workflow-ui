@@ -56,9 +56,6 @@ export default () => {
           cpus
           state
           startTime
-          run {
-            state
-          }
         }
       }
     `,
@@ -126,7 +123,7 @@ export default () => {
             flex: 1 3 0;
           `}
         >
-          <RDPCStats taskData={data?.tasks || []} />
+          <RDPCStats runData={data?.runs || []} taskData={data?.tasks || []} />
         </Container>
       </div>
     </div>

@@ -63,9 +63,6 @@ export type DashboardTask = {
   cpus: number;
   state: string;
   startTime: string;
-  run: {
-    state: string;
-  }
 }
 
 export type Task = {
