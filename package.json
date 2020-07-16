@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "version": "2.2.1-SNAPSHOT",
+  "version": "2.2.1",
   "private": true,
   "proxy": "https://wes.rdpc-dev.cancercollaboratory.org",
   "dependencies": {
