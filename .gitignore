@@ -27,3 +27,5 @@ nextflow
 work
 .nextflow
 .env
+.idea
+*.iml
