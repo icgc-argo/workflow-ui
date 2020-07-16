@@ -50,6 +50,13 @@ export default ({
     .filter((task) => activeRunIds.includes(task.runId))
     .sort(sortByDate);
 
+
+  const totalCPUs = 1535; // TODO either get this from somewhere or move to env
+  const cpusInUse = tasks.reduce((acc, curr) => (acc += curr.cpus), 0);
+  const cpusInUseAsPerc = parseFloat(
+    ((cpusInUse / totalCPUs) * 100).toFixed(2)
+  );
+
   return (
     <>
       <Typography variant="sectionHeader" bold color="primary">
@@ -101,10 +108,14 @@ export default ({
               font-weight: bold;
               font-size: 16px;
               margin-left: 6px;
-              color: ${theme.colors.secondary_dark};
+              color: ${cpusInUseAsPerc >= 100
+                ? theme.colors.error
+                : cpusInUseAsPerc >= 80
+                ? theme.colors.warning
+                : theme.colors.secondary_dark};
             `}
           >
-            {tasks.reduce((acc, curr) => (acc += curr.cpus), 0)}
+            {cpusInUse}/{totalCPUs} CPUs ({cpusInUseAsPerc}%)
           </span>
         </div>
       </div>
