@@ -20,6 +20,10 @@ type RunsQuery<RT = Run> = {
   runs: RT[];
 };
 
+type AnalysesQuery<AT = Analysis> = {
+  runs: AT[];
+};
+
 type RunsTaskQuery<RT = Run, TT = Task> = {
   runs: RT[];
   tasks: TT[];
@@ -27,6 +31,8 @@ type RunsTaskQuery<RT = Run, TT = Task> = {
 
 export type DashboardQueryResponse = RunsTaskQuery<RunCompact, DashboardTask>;
 export type RunQueryResponse = RunsQuery<Run>;
+export type GraphRunsQueryResponse = RunsQuery<GraphRun>;
+export type GraphAnalysesQueryResponse = AnalysesQuery<GraphAnalysis>;
 
 export type RunCompact = {
   runId: string;
@@ -63,7 +69,7 @@ export type DashboardTask = {
   cpus: number;
   state: string;
   startTime: string;
-}
+};
 
 export type Task = {
   taskId: number;
@@ -91,4 +97,43 @@ export type EngineParameters = {
   resume: string;
   revision: string;
   workDir: string;
+};
+
+export type Analysis = {
+  analysisId: String;
+  analysisType: String;
+  analysisState: String;
+  donors: JSON[]; // TODO make donor type
+  experiment: JSON;
+}
+
+export type AnalysisCompact = {
+  analysisId: String;
+  analysisType: String;
+};
+
+export type GraphRun = {
+  runId: string;
+  repository: string;
+  state: string;
+  inputAnalyses: AnalysisCompact[];
+  producedAnalyses: (AnalysisCompact & { inputForRuns: GraphRun[] })[]; // recursive types ;)
+};
+
+export type GraphAnalysis = {
+  analysisId: String;
+  studyId: String;
+  donors: { donorId: String }[];
+  workflow: {
+    run: {
+      runId: string;
+      repository: string;
+    }
+  };
+  inputForRuns: {
+    runId: string;
+    repository: string;
+    state: string;
+    producedAnalyses: AnalysisCompact[]
+  }
 };

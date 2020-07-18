@@ -28,6 +28,7 @@ import { InMemoryCache } from "apollo-cache-inmemory";
 import { AppContext, useInitialAppContextState } from './context/App';
 import Home from "./pages";
 import Run from "./pages/run";
+import Graph from "./pages/graph";
 import Voyagers from "./pages/voyagers";
 import { css } from "emotion";
 import logo from "./logo.svg";
@@ -87,6 +88,9 @@ const App: React.FC = () => {
                     <Link to="/">
                       <MenuItem>Runs</MenuItem>
                     </Link>
+                    <Link to="/graph">
+                      <MenuItem>Graph</MenuItem>
+                    </Link>
                     <Link to="/voyager">
                       <MenuItem>Voyager</MenuItem>
                     </Link>
@@ -100,6 +104,9 @@ const App: React.FC = () => {
                 </Route>
                 <Route exact path="/runs">
                   <Home />
+                </Route>
+                <Route exact path="/graph">
+                  <Graph />
                 </Route>
                 <Route exact path="/voyager">
                   <Voyagers client={client} />
