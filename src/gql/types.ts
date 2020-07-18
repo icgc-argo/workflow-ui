@@ -103,13 +103,13 @@ export type Analysis = {
   analysisId: String;
   analysisType: String;
   analysisState: String;
-  donors: JSON[]; // TODO make donor type
+  analysisVersion: Number;
+  donors: Donor[];
   experiment: JSON;
-}
-
-export type AnalysisCompact = {
-  analysisId: String;
-  analysisType: String;
+  files: AnalysisFile[];
+  studyId: String;
+  workflow: Workflow;
+  inputForRuns: [Run];
 };
 
 export type GraphRun = {
@@ -122,18 +122,77 @@ export type GraphRun = {
 
 export type GraphAnalysis = {
   analysisId: String;
+  analysisType: String;
   studyId: String;
-  donors: { donorId: String }[];
-  workflow: {
-    run: {
-      runId: string;
-      repository: string;
-    }
-  };
+  donors: DonorCompact[];
   inputForRuns: {
     runId: string;
     repository: string;
     state: string;
-    producedAnalyses: AnalysisCompact[]
-  }
+    producedAnalyses: AnalysisCompact[];
+  };
+};
+
+type AnalysisCompact = {
+  analysisId: String;
+  analysisType: String;
+};
+
+type DonorCompact = {
+  donorId: String;
+  specimens: SpecimenCompact[];
+}
+
+type Donor = {
+  donorId: String;
+  gender: String;
+  specimens: Specimen[];
+  submitterDonorId: String;
+};
+
+type Specimen = {
+  specimenId: String;
+  samples: Sample[];
+  specimenTissueSource: String;
+  specimenType: String;
+  submitterSpecimenId: String;
+  tumourNormalDesignation: String;
+};
+
+type SpecimenCompact = {
+  specimenId: String;
+  samples: SampleCompact[];
+  tumourNormalDesignation: String;
+};
+
+type Sample = {
+  sampleId: String;
+  matchedNormalSubmitterSampleId: String;
+  sampleType: String;
+  submitterSampleId: String;
+};
+
+type SampleCompact = {
+  sampleId: String;
+  matchedNormalSubmitterSampleId: String;
+};
+
+type AnalysisFile = {
+  dataType: String;
+  fileAccess: String;
+  fileType: String;
+  md5Sum: String;
+  name: String;
+  objectId: String;
+  size: Number;
+};
+
+type Workflow = {
+  analysisTools: String[];
+  genomeBuild: String;
+  inputs: JSON[];
+  runId: String;
+  workflowName: String;
+  workflowVersion: String;
+  run: Run;
 };

@@ -34,20 +34,28 @@ export default () => {
     GraphAnalysesQueryResponse
   >(
     gql`
-      query($pageFrom: Int!, $pageSize: Int!, $analysisType: String!) {
+      query(
+        $pageFrom: Int!
+        $pageSize: Int!
+        $analysisType: String!
+        $studyId: String!
+      ) {
         analyses(
           page: { from: $pageFrom, size: $pageSize }
-          filter: { analysisType: $analysisType }
+          filter: { analysisType: $analysisType, studyId: $studyId }
         ) {
           analysisId
+          analysisType
           studyId
           donors {
             donorId
-          }
-          workflow {
-            run {
-              runId
-              repository
+            specimens {
+              specimenId
+              tumourNormalDesignation
+              samples {
+                sampleId
+                matchedNormalSubmitterSampleId
+              }
             }
           }
           inputForRuns {
@@ -57,6 +65,15 @@ export default () => {
             producedAnalyses {
               analysisId
               analysisType
+              inputForRuns {
+                runId
+                repository
+                state
+                producedAnalyses {
+                  analysisId
+                  analysisType
+                }
+              }
             }
           }
         }
@@ -64,10 +81,11 @@ export default () => {
     `,
     {
       variables: {
-        analysisType: "sequencing_alignment",
+        analysisType: "sequencing_experiment",
+        studyId: "PTC-SA",
         pageFrom: 0,
         pageSize: 10,
-      }
+      },
     }
   );
 
