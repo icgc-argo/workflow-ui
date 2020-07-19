@@ -22,14 +22,12 @@ import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
 import Typography from "@icgc-argo/uikit/Typography";
-import { useAppContext } from "../context/App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import { GraphAnalysesQueryResponse } from "../gql/types";
 import { ModalPortal } from "../App";
+import GraphTable from "../components/GraphTable";
 
 export default () => {
-  const { DEV_disablePolling } = useAppContext();
-
   const { loading: dataLoading, error, data } = useQuery<
     GraphAnalysesQueryResponse
   >(
@@ -38,11 +36,10 @@ export default () => {
         $pageFrom: Int!
         $pageSize: Int!
         $analysisType: String!
-        $studyId: String!
       ) {
         analyses(
           page: { from: $pageFrom, size: $pageSize }
-          filter: { analysisType: $analysisType, studyId: $studyId }
+          filter: { analysisType: $analysisType }
         ) {
           analysisId
           analysisType
@@ -54,6 +51,7 @@ export default () => {
               tumourNormalDesignation
               samples {
                 sampleId
+                submitterSampleId
                 matchedNormalSubmitterSampleId
               }
             }
@@ -65,6 +63,9 @@ export default () => {
             producedAnalyses {
               analysisId
               analysisType
+              files {
+                dataType
+              }
               inputForRuns {
                 runId
                 repository
@@ -72,6 +73,9 @@ export default () => {
                 producedAnalyses {
                   analysisId
                   analysisType
+                  files {
+                    dataType
+                  }
                 }
               }
             }
@@ -82,14 +86,13 @@ export default () => {
     {
       variables: {
         analysisType: "sequencing_experiment",
-        studyId: "PTC-SA",
         pageFrom: 0,
         pageSize: 10,
       },
     }
   );
 
-  const [loading, setLoading] = React.useState(false);
+  const [loading] = React.useState(false);
 
   return (
     <div
@@ -128,6 +131,7 @@ export default () => {
               Workflow Graph
             </Typography>
           </div>
+          <GraphTable data={data} />
         </Container>
       </div>
     </div>

@@ -1,0 +1,219 @@
+/*
+ * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
+ *
+ * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
+ * You should have received a copy of the GNU Affero General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
+ * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT
+ * SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
+ * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;
+ * OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
+ * IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
+
+import React from "react";
+import Table, { TableColumnConfig } from "@icgc-argo/uikit/Table";
+import { Link } from "react-router-dom";
+import { GraphAnalysesQueryResponse } from "../gql/types";
+
+type GraphTableData = {
+  studyId: String;
+  donorId: String;
+  specimenId: String;
+  tumourNormalDesignation: String;
+  sampleId: String;
+  submitterSampleId: String;
+  matchedNormalSubmitterSampleId: String;
+  seqExpAnalysisId: String;
+  alignRun: RunInfo;
+  seqAlignAnalysis: AnalysisInfo;
+  sangerRun: RunInfo;
+  varCallingAnalysis: AnalysisInfo;
+};
+
+type AnalysisInfo = { analysisId: String; type: String };
+type RunInfo = { runId: String; state: String };
+
+export default ({ data }: { data?: GraphAnalysesQueryResponse }) => {
+  const columns: TableColumnConfig<GraphTableData> = [
+    {
+      Header: "Study",
+      accessor: "studyId",
+      width: 80,
+      resizable: false,
+    },
+    {
+      Header: "Donor",
+      accessor: "donorId",
+      width: 80,
+      resizable: false,
+    },
+    {
+      Header: "Specimen",
+      accessor: "specimenId",
+      width: 80,
+      resizable: false,
+    },
+    {
+      Header: "Tumour/Normal",
+      accessor: "tumourNormalDesignation",
+      width: 80,
+      resizable: false,
+    },
+    {
+      Header: "Sample",
+      accessor: "sampleId",
+      width: 80,
+      resizable: false,
+    },
+    {
+      Header: "Submitter Sample ID",
+      accessor: "submitterSampleId",
+      width: 160,
+    },
+    {
+      Header: "Matched Normal SS-ID",
+      accessor: "matchedNormalSubmitterSampleId",
+      width: 160,
+    },
+    {
+      Header: "SeqExp Analysis",
+      accessor: "seqExpAnalysisId",
+      width: 300,
+    },
+    {
+      Header: "Alignment Run",
+      accessor: "alignRun",
+      width: 340,
+      Cell: ({ original }: { original: GraphTableData }) => (
+        <Link to={`/runs/${original.alignRun.runId}`}>
+          ({original.alignRun.state}) {original.alignRun.runId}
+        </Link>
+      ),
+    },
+    {
+      Header: "SeqAlignment Analysis",
+      accessor: "seqAlignAnalysis",
+      width: 340,
+      Cell: ({ original }: { original: GraphTableData }) => (
+        <>
+          ({original.seqAlignAnalysis.type}){" "}
+          {original.seqAlignAnalysis.analysisId}
+        </>
+      ),
+    },
+    {
+      Header: "Sanger Run",
+      accessor: "sangerRun",
+      width: 340,
+      Cell: ({ original }: { original: GraphTableData }) => (
+        <Link to={`/runs/${original.sangerRun.runId}`}>
+          ({original.sangerRun.state}) {original.sangerRun.runId}
+        </Link>
+      ),
+    },
+    {
+      Header: "VarCalling Analysis",
+      accessor: "varCallingAnalysis",
+      width: 340,
+      Cell: ({ original }: { original: GraphTableData }) => (
+        <>
+          ({original.varCallingAnalysis.type}){" "}
+          {original.varCallingAnalysis.analysisId}
+        </>
+      ),
+    },
+  ];
+
+  //   TODO: look into this ... there are 3 "variant_calling" analysis types per run and each have different files
+  const visibleDataTypes = [
+    "Aligned Reads",
+    "Raw SNV Calls",
+    "Raw CNV Calls",
+    "Raw SV Calls",
+  ];
+
+  const tableData =
+    data?.analyses.reduce((collection, analysis) => {
+      // Basic fields
+      const { studyId, analysisId } = analysis;
+      const donor = analysis.donors[0];
+      const specimen = donor.specimens[0];
+      const sample = specimen.samples[0];
+      const { donorId } = donor;
+      const { specimenId, tumourNormalDesignation } = specimen;
+      const {
+        sampleId,
+        submitterSampleId,
+        matchedNormalSubmitterSampleId,
+      } = sample;
+
+      // Inception (TODO: this needs a rethink)
+      analysis.inputForRuns.map((alignRun) =>
+        alignRun.producedAnalyses.map((alignAnalysis) =>
+          alignAnalysis.inputForRuns.map((sangerRun) =>
+            sangerRun.producedAnalyses.map((varCallAnalysis) => {
+              const alignDataType = alignAnalysis.files[0].dataType;
+              const sangerDataType = varCallAnalysis.files[0].dataType;
+              if (
+                !visibleDataTypes.includes(alignDataType) ||
+                !visibleDataTypes.includes(sangerDataType)
+              ) {
+                return false;
+              }
+
+              const row = {
+                studyId,
+                donorId,
+                specimenId,
+                tumourNormalDesignation,
+                sampleId,
+                submitterSampleId,
+                matchedNormalSubmitterSampleId,
+                seqExpAnalysisId: analysisId,
+                alignRun: {
+                  runId: alignRun.runId,
+                  state: alignRun.state,
+                },
+                seqAlignAnalysis: {
+                  analysisId: alignAnalysis.analysisId,
+                  type: alignDataType,
+                },
+                sangerRun: {
+                  runId: sangerRun.runId,
+                  state: sangerRun.state,
+                },
+                varCallingAnalysis: {
+                  analysisId: varCallAnalysis.analysisId,
+                  type: varCallAnalysis.files[0].dataType,
+                },
+              };
+              
+              collection = [
+                  ...collection,
+                  row
+              ]
+              return true;
+            })
+          )
+        )
+      );
+
+      return collection;
+    }, [] as GraphTableData[]) || [];
+
+  return (
+    <Table
+      filterable
+      parentRef={React.createRef()}
+      data={tableData}
+      columns={columns}
+      defaultPageSize={25}
+    />
+  );
+};

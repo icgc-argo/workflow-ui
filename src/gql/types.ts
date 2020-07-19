@@ -21,7 +21,7 @@ type RunsQuery<RT = Run> = {
 };
 
 type AnalysesQuery<AT = Analysis> = {
-  runs: AT[];
+  analyses: AT[];
 };
 
 type RunsTaskQuery<RT = Run, TT = Task> = {
@@ -100,14 +100,14 @@ export type EngineParameters = {
 };
 
 export type Analysis = {
-  analysisId: String;
-  analysisType: String;
-  analysisState: String;
+  analysisId: string;
+  analysisType: string;
+  analysisState: string;
   analysisVersion: Number;
   donors: Donor[];
   experiment: JSON;
   files: AnalysisFile[];
-  studyId: String;
+  studyId: string;
   workflow: Workflow;
   inputForRuns: [Run];
 };
@@ -121,78 +121,92 @@ export type GraphRun = {
 };
 
 export type GraphAnalysis = {
-  analysisId: String;
-  analysisType: String;
-  studyId: String;
+  analysisId: string;
+  analysisType: string;
+  studyId: string;
   donors: DonorCompact[];
   inputForRuns: {
     runId: string;
     repository: string;
     state: string;
-    producedAnalyses: AnalysisCompact[];
-  };
+    producedAnalyses: (AnalysisCompact & InputForRunsLoop)[];
+  }[];
+};
+
+type InputForRunsLoop = {
+  runId: string;
+  repository: string;
+  state: string;
+  producedAnalyses: AnalysisCompact[];
+  inputForRuns: InputForRunsLoop[];
 };
 
 type AnalysisCompact = {
-  analysisId: String;
-  analysisType: String;
+  analysisId: string;
+  analysisType: string;
+  files: AnalysisFileCompact[];
 };
 
 type DonorCompact = {
-  donorId: String;
+  donorId: string;
   specimens: SpecimenCompact[];
-}
+};
 
 type Donor = {
-  donorId: String;
-  gender: String;
+  donorId: string;
+  gender: string;
   specimens: Specimen[];
-  submitterDonorId: String;
+  submitterDonorId: string;
 };
 
 type Specimen = {
-  specimenId: String;
+  specimenId: string;
   samples: Sample[];
-  specimenTissueSource: String;
-  specimenType: String;
-  submitterSpecimenId: String;
-  tumourNormalDesignation: String;
+  specimenTissueSource: string;
+  specimenType: string;
+  submitterSpecimenId: string;
+  tumourNormalDesignation: string;
 };
 
 type SpecimenCompact = {
-  specimenId: String;
+  specimenId: string;
   samples: SampleCompact[];
-  tumourNormalDesignation: String;
+  tumourNormalDesignation: string;
 };
 
 type Sample = {
-  sampleId: String;
-  matchedNormalSubmitterSampleId: String;
-  sampleType: String;
-  submitterSampleId: String;
+  sampleId: string;
+  matchedNormalSubmitterSampleId: string;
+  sampleType: string;
+  submitterSampleId: string;
 };
 
 type SampleCompact = {
-  sampleId: String;
-  matchedNormalSubmitterSampleId: String;
+  sampleId: string;
+  submitterSampleId: string;
+  matchedNormalSubmitterSampleId: string;
 };
 
 type AnalysisFile = {
-  dataType: String;
-  fileAccess: String;
-  fileType: String;
-  md5Sum: String;
-  name: String;
-  objectId: String;
+  dataType: string;
+  fileAccess: string;
+  fileType: string;
+  md5Sum: string;
+  name: string;
+  objectId: string;
   size: Number;
 };
 
+type AnalysisFileCompact = {
+  dataType: string;
+};
+
 type Workflow = {
-  analysisTools: String[];
-  genomeBuild: String;
+  analysisTools: string[];
+  genomeBuild: string;
   inputs: JSON[];
-  runId: String;
-  workflowName: String;
-  workflowVersion: String;
+  runId: string;
+  workflowName: string;
+  workflowVersion: string;
   run: Run;
 };
