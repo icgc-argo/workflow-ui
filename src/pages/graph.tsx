@@ -63,9 +63,6 @@ export default () => {
             producedAnalyses {
               analysisId
               analysisType
-              files {
-                dataType
-              }
               inputForRuns {
                 runId
                 repository

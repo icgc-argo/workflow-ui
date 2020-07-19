@@ -30,10 +30,10 @@ type GraphTableData = {
   submitterSampleId: String;
   matchedNormalSubmitterSampleId: String;
   seqExpAnalysisId: String;
-  alignRun: RunInfo;
-  seqAlignAnalysis: AnalysisInfo;
-  sangerRun: RunInfo;
-  varCallingAnalysis: AnalysisInfo;
+  alignRun?: RunInfo;
+  seqAlignAnalysisId?: String;
+  sangerRun?: RunInfo;
+  varCallingAnalysis?: AnalysisInfo;
 };
 
 type AnalysisInfo = { analysisId: String; type: String };
@@ -90,53 +90,53 @@ export default ({ data }: { data?: GraphAnalysesQueryResponse }) => {
       Header: "Alignment Run",
       accessor: "alignRun",
       width: 340,
-      Cell: ({ original }: { original: GraphTableData }) => (
-        <Link to={`/runs/${original.alignRun.runId}`}>
-          ({original.alignRun.state}) {original.alignRun.runId}
-        </Link>
-      ),
+      Cell: ({ original }: { original: GraphTableData }) =>
+        original.alignRun ? (
+          <Link to={`/runs/${original.alignRun.runId}`}>
+            ({original.alignRun.state}) {original.alignRun.runId}
+          </Link>
+        ) : (
+          "N/A"
+        ),
     },
     {
       Header: "SeqAlignment Analysis",
-      accessor: "seqAlignAnalysis",
+      accessor: "seqAlignAnalysisId",
       width: 340,
-      Cell: ({ original }: { original: GraphTableData }) => (
-        <>
-          ({original.seqAlignAnalysis.type}){" "}
-          {original.seqAlignAnalysis.analysisId}
-        </>
-      ),
+      Cell: ({ original }: { original: GraphTableData }) =>
+        original.seqAlignAnalysisId ? original.seqAlignAnalysisId : "N/A",
     },
     {
       Header: "Sanger Run",
       accessor: "sangerRun",
       width: 340,
-      Cell: ({ original }: { original: GraphTableData }) => (
-        <Link to={`/runs/${original.sangerRun.runId}`}>
-          ({original.sangerRun.state}) {original.sangerRun.runId}
-        </Link>
-      ),
+      Cell: ({ original }: { original: GraphTableData }) =>
+        original.sangerRun ? (
+          <Link to={`/runs/${original.sangerRun.runId}`}>
+            ({original.sangerRun.state}) {original.sangerRun.runId}
+          </Link>
+        ) : (
+          "N/A"
+        ),
     },
     {
       Header: "VarCalling Analysis",
       accessor: "varCallingAnalysis",
       width: 340,
-      Cell: ({ original }: { original: GraphTableData }) => (
-        <>
-          ({original.varCallingAnalysis.type}){" "}
-          {original.varCallingAnalysis.analysisId}
-        </>
-      ),
+      Cell: ({ original }: { original: GraphTableData }) =>
+        original.varCallingAnalysis ? (
+          <>
+            ({original.varCallingAnalysis.type}){" "}
+            {original.varCallingAnalysis.analysisId}
+          </>
+        ) : (
+          "N/A"
+        ),
     },
   ];
 
   //   TODO: look into this ... there are 3 "variant_calling" analysis types per run and each have different files
-  const visibleDataTypes = [
-    "Aligned Reads",
-    "Raw SNV Calls",
-    "Raw CNV Calls",
-    "Raw SV Calls",
-  ];
+  const visibleDataTypes = ["Raw SNV Calls", "Raw CNV Calls", "Raw SV Calls"];
 
   const tableData =
     data?.analyses.reduce((collection, analysis) => {
@@ -153,56 +153,112 @@ export default ({ data }: { data?: GraphAnalysesQueryResponse }) => {
         matchedNormalSubmitterSampleId,
       } = sample;
 
-      // Inception (TODO: this needs a rethink)
-      analysis.inputForRuns.map((alignRun) =>
-        alignRun.producedAnalyses.map((alignAnalysis) =>
-          alignAnalysis.inputForRuns.map((sangerRun) =>
-            sangerRun.producedAnalyses.map((varCallAnalysis) => {
-              const alignDataType = alignAnalysis.files[0].dataType;
-              const sangerDataType = varCallAnalysis.files[0].dataType;
-              if (
-                !visibleDataTypes.includes(alignDataType) ||
-                !visibleDataTypes.includes(sangerDataType)
-              ) {
-                return false;
+      // base row data
+      const row = {
+        studyId,
+        donorId,
+        specimenId,
+        tumourNormalDesignation,
+        sampleId,
+        submitterSampleId,
+        matchedNormalSubmitterSampleId,
+        seqExpAnalysisId: analysisId,
+      };
+
+      ///
+      // Inception
+      ///
+
+      // Level 1: stop here if no produced analysis from alignment
+      analysis.inputForRuns.forEach((alignRun) => {
+        if (!alignRun.producedAnalyses.length) {
+          collection = [
+            ...collection,
+            {
+              ...row,
+              alignRun: {
+                runId: alignRun.runId,
+                state: alignRun.state,
+              },
+            },
+          ];
+        }
+
+        // Level 2: filter for "sequencing_alignment" and
+        // stop here if analysis not used for variant calling
+        alignRun.producedAnalyses
+          .filter(
+            (alignAnalysis) =>
+              alignAnalysis.analysisType === "sequencing_alignment"
+          )
+          .forEach((alignAnalysis) => {
+            if (!alignAnalysis.inputForRuns.length) {
+              collection = [
+                ...collection,
+                {
+                  ...row,
+                  alignRun: {
+                    runId: alignRun.runId,
+                    state: alignRun.state,
+                  },
+                  seqAlignAnalysisId: alignAnalysis.analysisId,
+                },
+              ];
+            }
+
+            // Level 3: stop here if no produced analysis from variant calling
+            alignAnalysis.inputForRuns.forEach((sangerRun) => {
+              if (!sangerRun.producedAnalyses.length) {
+                collection = [
+                  ...collection,
+                  {
+                    ...row,
+                    alignRun: {
+                      runId: alignRun.runId,
+                      state: alignRun.state,
+                    },
+                    seqAlignAnalysisId: alignAnalysis.analysisId,
+                    sangerRun: {
+                      runId: sangerRun.runId,
+                      state: sangerRun.state,
+                    },
+                  },
+                ];
               }
 
-              const row = {
-                studyId,
-                donorId,
-                specimenId,
-                tumourNormalDesignation,
-                sampleId,
-                submitterSampleId,
-                matchedNormalSubmitterSampleId,
-                seqExpAnalysisId: analysisId,
-                alignRun: {
-                  runId: alignRun.runId,
-                  state: alignRun.state,
-                },
-                seqAlignAnalysis: {
-                  analysisId: alignAnalysis.analysisId,
-                  type: alignDataType,
-                },
-                sangerRun: {
-                  runId: sangerRun.runId,
-                  state: sangerRun.state,
-                },
-                varCallingAnalysis: {
-                  analysisId: varCallAnalysis.analysisId,
-                  type: varCallAnalysis.files[0].dataType,
-                },
-              };
-              
-              collection = [
-                  ...collection,
-                  row
-              ]
-              return true;
-            })
-          )
-        )
-      );
+              // Level 4: we have end-to-end at this point however
+              // we need to filter out some unwanted analysis types
+              // from showing here
+              sangerRun.producedAnalyses
+                .filter(
+                  (varCallAnalysis) =>
+                    varCallAnalysis.analysisType === "variant_calling" &&
+                    visibleDataTypes.includes(varCallAnalysis.files[0].dataType)
+                )
+                .forEach((varCallAnalysis) => {
+                  collection = [
+                    ...collection,
+                    {
+                      ...row,
+                      alignRun: {
+                        runId: alignRun.runId,
+                        state: alignRun.state,
+                      },
+                      seqAlignAnalysisId: alignAnalysis.analysisId,
+                      sangerRun: {
+                        runId: sangerRun.runId,
+                        state: sangerRun.state,
+                      },
+                      varCallingAnalysis: {
+                        analysisId: varCallAnalysis.analysisId,
+                        type: varCallAnalysis.files[0].dataType,
+                      },
+                    },
+                  ];
+                });
+            });
+          });
+      });
 
       return collection;
     }, [] as GraphTableData[]) || [];
