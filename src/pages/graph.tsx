@@ -35,11 +35,12 @@ export default () => {
       query(
         $pageFrom: Int!
         $pageSize: Int!
+        $studyId: String!
         $analysisType: String!
       ) {
         analyses(
           page: { from: $pageFrom, size: $pageSize }
-          filter: { analysisType: $analysisType }
+          filter: { analysisType: $analysisType, studyId: $studyId }
         ) {
           analysisId
           analysisType
@@ -82,9 +83,10 @@ export default () => {
     `,
     {
       variables: {
+        studyId: "LUCA-KR",
         analysisType: "sequencing_experiment",
         pageFrom: 0,
-        pageSize: 10,
+        pageSize: 100,
       },
     }
   );
