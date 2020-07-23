@@ -16,10 +16,33 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import moment from 'moment-timezone';
+import moment from "moment-timezone";
+import { Task } from "./gql/types";
 
-moment.updateLocale('en', {
-    invalidDate: "N/A"
-})
+moment.updateLocale("en", {
+  invalidDate: "N/A",
+});
 
-export const parseEpochToEST = (milli: string) => moment(parseInt(milli)).tz('America/Toronto').format('MMMM Do YYYY, h:mm:ss a')
+export const parseEpochToEST = (milli: string) =>
+  moment(parseInt(milli))
+    .tz("America/Toronto")
+    .format("MMMM Do YYYY, h:mm:ss a");
+
+export const sortTasks = (tasks: Task[], reverse = false) => {
+  const stateOrder = [
+    "UNKNOWN",
+    "QUEUED",
+    "RUNNING",
+    "COMPLETE",
+    "EXECUTOR_ERROR",
+  ];
+
+  const sortedTasks = tasks.sort((a, b) => {
+    const ai = stateOrder.indexOf(a.state);
+    const bi = stateOrder.indexOf(b.state);
+
+    return ai > bi ? -1 : ai < bi ? 1 : 0;
+  });
+
+  return reverse ? sortedTasks.reverse() : sortedTasks;
+};
