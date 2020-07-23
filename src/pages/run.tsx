@@ -25,6 +25,7 @@ import "ace-builds/src-noconflict/theme-solarized_dark";
 import Container from "@icgc-argo/uikit/Container";
 // import Banner from "@icgc-argo/uikit/notifications/Banner";
 import Typography from "@icgc-argo/uikit/Typography";
+import Button from "@icgc-argo/uikit/Button";
 import { css } from "emotion";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import Tabs, { Tab } from "@icgc-argo/uikit/Tabs";
@@ -33,6 +34,7 @@ import groupBy from "lodash/groupBy";
 import { RunQueryResponse } from "../gql/types";
 import { useAppContext } from "../context/App";
 import { parseEpochToEST } from "../utils";
+import { cancelWorkflow } from "../rdpc";
 
 export default ({ runId }: { runId: string }) => {
   const { DEV_disablePolling } = useAppContext();
@@ -85,7 +87,7 @@ export default ({ runId }: { runId: string }) => {
       variables: {
         runId,
       },
-      pollInterval: DEV_disablePolling ? 0 : 500,
+      pollInterval: DEV_disablePolling ? 0 : 1000,
     }
   );
 
@@ -135,6 +137,18 @@ export default ({ runId }: { runId: string }) => {
             <Typography variant="label" as="div">
               <strong>duration:</strong> {fmtTime(run.duration)}
             </Typography>
+            <Button
+              variant="primary"
+              size="md"
+              onClick={() => cancelWorkflow(run.runId)}
+              isAsync
+              disabled={run.state !== "RUNNING"}
+              className={css`
+                margin: 16px 0;
+              `}
+            >
+              Cancel
+            </Button>
           </div>
           {run?.errorReport && (
             <div
