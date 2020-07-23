@@ -33,7 +33,7 @@ import Icon from "@icgc-argo/uikit/Icon";
 import groupBy from "lodash/groupBy";
 import { RunQueryResponse } from "../gql/types";
 import { useAppContext } from "../context/App";
-import { parseEpochToEST } from "../utils";
+import { parseEpochToEST, sortTasks } from "../utils";
 import { cancelWorkflow } from "../rdpc";
 
 export default ({ runId }: { runId: string }) => {
@@ -204,27 +204,7 @@ export default ({ runId }: { runId: string }) => {
                   )
                   .reverse()
                   .map(([taskId, tasks]) => {
-                    const lastTask = tasks.reduce((acc, curr) => {
-                      if (curr.state === "EXECUTOR_ERROR") {
-                        acc = curr;
-                        return acc;
-                      } else if (
-                        curr.state === "COMPLETE" &&
-                        acc.state !== "EXECUTOR_ERROR"
-                      ) {
-                        acc = curr;
-                        return acc;
-                      } else if (
-                        curr.state === "RUNNING" &&
-                        acc.state !== "EXECUTOR_ERROR" &&
-                        acc.state !== "COMPLETE"
-                      ) {
-                        acc = curr;
-                        return curr;
-                      }
-
-                      return acc;
-                    });
+                    const lastTask = sortTasks(tasks)[0];
 
                     const [taskHighlightColor, taskTextColor] =
                       lastTask.state === "EXECUTOR_ERROR"
