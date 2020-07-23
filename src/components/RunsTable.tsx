@@ -21,69 +21,61 @@ import Table, { TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
 import { DashboardQueryResponse, RunCompact } from "../gql/types";
 import { parseEpochToEST } from "../utils";
+import Button from "@icgc-argo/uikit/Button";
+import { cancelWorkflow } from "../rdpc";
 
-export default ({
-  runs,
-  noWorkflow = false
-}: {
-  runs: RunCompact[];
-  noWorkflow?: boolean;
-}) => {
+export default ({ runs }: { runs: RunCompact[] }) => {
   const columns: TableColumnConfig<RunCompact> = [
     {
       Header: "State",
       accessor: "state",
       width: 80,
-      resizable: false
+      resizable: false,
     },
     {
       Header: "Run ID",
       accessor: "runId",
-      Cell: ({
-        original
-      }: {
-        original: DashboardQueryResponse["runs"][0];
-      }) => <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) => (
+        <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
+      ),
     },
     {
       Header: "Session ID",
-      accessor: "sessionId"
+      accessor: "sessionId",
     },
     {
       Header: "Start",
       accessor: "startTime",
-      Cell: ({
-        original
-      }: {
-        original: DashboardQueryResponse["runs"][0];
-      }) => parseEpochToEST(original.startTime)
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) =>
+        parseEpochToEST(original.startTime),
     },
     {
       Header: "Complete",
       accessor: "completeTime",
-      Cell: ({
-        original
-      }: {
-        original: DashboardQueryResponse["runs"][0];
-      }) => parseEpochToEST(original.completeTime)
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) =>
+        parseEpochToEST(original.completeTime),
     },
-    ...(noWorkflow
-      ? []
-      : [
-          {
-            Header: "Repository",
-            accessor: "repository",
-            Cell: ({
-              original
-            }: {
-              original: DashboardQueryResponse["runs"][0];
-            }) => (
-              <div>
-                {original.repository}
-              </div>
-            )
-          }
-        ])
+    {
+      Header: "Repository",
+      accessor: "repository",
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) => (
+        <div>{original.repository}</div>
+      ),
+    },
+    {
+      Header: "Action",
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) => (
+        <Button
+          variant="text"
+          size="sm"
+          onClick={() => cancelWorkflow(original.runId)}
+          isAsync
+          disabled={original.state !== "RUNNING"}
+        >
+          Cancel
+        </Button>
+      ),
+    },
   ];
   return (
     <Table
