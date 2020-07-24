@@ -114,7 +114,7 @@ export default () => {
               Workflow runs
             </Typography>
           </div>
-          <RunsTable runs={data?.runs || []} />
+          <RunsTable runs={data?.runs || []} setLoading={setLoading} />
         </Container>
         <Container
           className={css`

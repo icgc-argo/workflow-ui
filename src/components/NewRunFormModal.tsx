@@ -46,14 +46,16 @@ export default ({
 }: {
   setLoading: (isLoading: boolean) => void;
 }) => {
+  const theme = useTheme();
+
   const [workflow_url, setWorkflowUrl] = React.useState("");
   const [workflow_params, setWorkflowParams] = React.useState("");
   const [workflow_engine_params, setWorkflowEngineParams] = React.useState("");
+  
   const [newRunModalShown, setNewRunModalShown] = React.useState(false);
   const [runResponse, setRunResponse] = React.useState<
     RunResponse | ApolloError | undefined | null
   >(null);
-  const theme = useTheme();
 
   const onNewRunClick: React.ComponentProps<typeof Button>["onClick"] = () => {
     setNewRunModalShown(true);
@@ -102,7 +104,7 @@ export default ({
         <ModalPortal>
           <Modal
             title="Workflow Run Initiated"
-            actionDisabled
+            actionVisible={false}
             onCancelClick={onRunAcknowledge}
             cancelText="Ok"
           >
