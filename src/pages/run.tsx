@@ -25,7 +25,6 @@ import "ace-builds/src-noconflict/theme-solarized_dark";
 import Container from "@icgc-argo/uikit/Container";
 // import Banner from "@icgc-argo/uikit/notifications/Banner";
 import Typography from "@icgc-argo/uikit/Typography";
-import Button from "@icgc-argo/uikit/Button";
 import { css } from "emotion";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import Tabs, { Tab } from "@icgc-argo/uikit/Tabs";
@@ -34,11 +33,17 @@ import groupBy from "lodash/groupBy";
 import { RunQueryResponse } from "../gql/types";
 import { useAppContext } from "../context/App";
 import { parseEpochToEST, sortTasks } from "../utils";
-import { cancelWorkflow } from "../rdpc";
+import { CancelRunButton } from "../components/CancelRun";
+import { ModalPortal } from "../App";
+import DNALoader from "@icgc-argo/uikit/DnaLoader";
 
 export default ({ runId }: { runId: string }) => {
   const { DEV_disablePolling } = useAppContext();
-  const { data, loading } = useQuery<RunQueryResponse, { runId: string }>(
+
+  const { data, loading: dataLoading, error } = useQuery<
+    RunQueryResponse,
+    { runId: string }
+  >(
     gql`
       query SINGLE_RUN_QUERY($runId: String!) {
         runs(filter: { runId: $runId }) {
@@ -91,6 +96,8 @@ export default ({ runId }: { runId: string }) => {
     }
   );
 
+  const [loading, setLoading] = React.useState(false);
+
   const run = data?.runs[0];
 
   const theme = useTheme();
@@ -108,7 +115,13 @@ export default ({ runId }: { runId: string }) => {
         padding: 20px;
       `}
     >
-      {!loading && run && (
+      {(dataLoading || loading) && (
+        <ModalPortal>
+          <DNALoader />
+        </ModalPortal>
+      )}
+      {error && <div>Houston, we have a problem!</div>}
+      {!dataLoading && run && (
         <div
           className={css`
             margin: 0 0 12px;
@@ -137,18 +150,15 @@ export default ({ runId }: { runId: string }) => {
             <Typography variant="label" as="div">
               <strong>duration:</strong> {fmtTime(run.duration)}
             </Typography>
-            <Button
+            <CancelRunButton
               variant="primary"
               size="md"
-              onClick={() => cancelWorkflow(run.runId)}
-              isAsync
-              disabled={run.state !== "RUNNING"}
+              run={{ runId: run.runId, state: run.state }}
+              setLoading={setLoading}
               className={css`
                 margin: 16px 0;
               `}
-            >
-              Cancel
-            </Button>
+            />
           </div>
           {run?.errorReport && (
             <div
@@ -169,7 +179,7 @@ export default ({ runId }: { runId: string }) => {
       )}
       {!!run && (
         <Container
-          loading={loading}
+          loading={dataLoading}
           className={css`
             button,
             button.active {

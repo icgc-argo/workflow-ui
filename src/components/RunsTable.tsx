@@ -21,10 +21,54 @@ import Table, { TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
 import { DashboardQueryResponse, RunCompact } from "../gql/types";
 import { parseEpochToEST } from "../utils";
+import { CancelConfirmModal, CancelResponseModal, CancelResponse } from "./CancelRun";
+import Modal from "@icgc-argo/uikit/Modal";
+import { ApolloError } from "apollo-boost";
 import Button from "@icgc-argo/uikit/Button";
 import { cancelWorkflow } from "../rdpc";
 
-export default ({ runs }: { runs: RunCompact[] }) => {
+export default ({
+  runs,
+  setLoading,
+}: {
+  runs: RunCompact[];
+  setLoading: (isLoading: boolean) => void;
+}) => {
+  const [cancelModalRunId, setCancelModalRunId] = React.useState<string>("");
+  const [cancelResponse, setCancelResponse] = React.useState<
+    CancelResponse | ApolloError | undefined | null
+  >(null);
+
+  const onCancelClick = (runId: string) => {
+    setCancelModalRunId(runId);
+  };
+
+  const onCancelConfirmed = async (runId: string) => {
+    setLoading(true);
+    try {
+      const cancelledRun = await cancelWorkflow(runId);
+      setLoading(false);
+      setCancelModalRunId("");
+      setCancelResponse(cancelledRun);
+    } catch (error) {
+      setLoading(false);
+      setCancelModalRunId("");
+      setCancelResponse(error);
+    }
+  };
+
+  const onCancelCancelled: React.ComponentProps<
+    typeof Modal
+  >["onCancelClick"] = () => {
+    setCancelModalRunId("");
+  };
+
+  const onCancelAcknowledge: React.ComponentProps<
+    typeof Button
+  >["onClick"] = () => {
+    setCancelResponse(null);
+  };
+
   const columns: TableColumnConfig<RunCompact> = [
     {
       Header: "State",
@@ -66,10 +110,9 @@ export default ({ runs }: { runs: RunCompact[] }) => {
       Header: "Action",
       Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) => (
         <Button
+          onClick={() => onCancelClick(original.runId)}
           variant="text"
           size="sm"
-          onClick={() => cancelWorkflow(original.runId)}
-          isAsync
           disabled={original.state !== "RUNNING"}
         >
           Cancel
@@ -77,13 +120,29 @@ export default ({ runs }: { runs: RunCompact[] }) => {
       ),
     },
   ];
+
   return (
-    <Table
-      filterable
-      parentRef={React.createRef()}
-      data={runs}
-      columns={columns}
-      defaultPageSize={25}
-    />
+    <>
+      {cancelModalRunId && (
+        <CancelConfirmModal
+          runId={cancelModalRunId}
+          onCancelCancelled={onCancelCancelled}
+          onCancelConfirmed={() => onCancelConfirmed(cancelModalRunId)}
+        />
+      )}
+      {cancelResponse && (
+        <CancelResponseModal
+          cancelResponse={cancelResponse}
+          onCancelAcknowledge={onCancelAcknowledge}
+        />
+      )}
+      <Table
+        filterable
+        parentRef={React.createRef()}
+        data={runs}
+        columns={columns}
+        defaultPageSize={25}
+      />
+    </>
   );
 };
