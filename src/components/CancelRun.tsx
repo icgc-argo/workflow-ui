@@ -18,9 +18,9 @@
 
 import React from "react";
 import Button from "@icgc-argo/uikit/Button";
-import { ModalPortal } from "../App";
+import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
-import { cancelWorkflow } from "../rdpc";
+import { cancelWorkflow } from "rdpc";
 import Typography from "@icgc-argo/uikit/Typography";
 import { ApolloError } from "apollo-boost";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";

@@ -30,11 +30,12 @@ import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import Tabs, { Tab } from "@icgc-argo/uikit/Tabs";
 import Icon from "@icgc-argo/uikit/Icon";
 import groupBy from "lodash/groupBy";
-import { RunQueryResponse } from "../gql/types";
-import { useAppContext } from "../context/App";
-import { parseEpochToEST, sortTasks } from "../utils";
-import { CancelRunButton } from "../components/CancelRun";
-import { ModalPortal } from "../App";
+import { RunQueryResponse } from "gql/types";
+import { useAppContext } from "context/App";
+import { parseEpochToEST } from "utils/time";
+import { sortTasks } from "utils/task";
+import { CancelRunButton } from "components/CancelRun";
+import { ModalPortal } from "App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 
 export default ({ runId }: { runId: string }) => {
