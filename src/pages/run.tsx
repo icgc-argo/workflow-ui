@@ -182,11 +182,6 @@ export default ({ runId }: { runId: string }) => {
           loading={dataLoading}
           className={css`
             z-index: 0; /* Ace Editor > Modal overlap fix */
-            button,
-            button.active {
-              color: ${textColor};
-              border-color: ${highlightColor};
-            }
           `}
         >
           <Tabs value={activeTab}>
