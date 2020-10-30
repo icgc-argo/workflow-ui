@@ -17,15 +17,30 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import { AuthProvider } from "providers/Auth";
+import { css } from "emotion";
+import GoogleLogin from '@icgc-argo/uikit/Button/GoogleLogin';
 
-ReactDOM.render(<AuthProvider><App /></AuthProvider>, document.getElementById('root'));
+import { GOOGLE_AUTH_ENDPOINT } from 'config/globals';
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+export default () => (
+  <div
+    className={css`
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: 64px;
+    `}
+  >
+    <p
+      className={css`
+        max-width: 480px;
+        text-align: center;
+      `}
+    >
+      You do not have permissions to access this resource. Please login with the correct account, or contact your DCC representative.
+    </p>
+    <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />
+  </div>
+);

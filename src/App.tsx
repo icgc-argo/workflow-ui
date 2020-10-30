@@ -16,24 +16,45 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from "react";
+import React, { useEffect } from "react";
 import ApolloClient from "apollo-boost";
 import { ApolloProvider } from "@apollo/react-hooks";
 import { createPortal } from "react-dom";
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
-import AppBar, { Section, MenuGroup, MenuItem } from "@icgc-argo/uikit/AppBar";
+import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 import { ThemeProvider } from "@icgc-argo/uikit";
 import Modal from "@icgc-argo/uikit/Modal";
 import { InMemoryCache } from "apollo-cache-inmemory";
-import { AppContext, useInitialAppContextState } from './context/App';
-import Home from "./pages";
-import Run from "./pages/run";
-import Voyagers from "./pages/voyagers";
+import { AppContext, useInitialAppContextState } from 'context/App';
+import NavBar from 'components/NavBar';
+import Home from "pages/Home";
+import Login from "pages/Login";
+import LoggedIn from "pages/LoggedIn";
+import NoAccess from "pages/NoAccess";
+import NotFound from "pages/NotFound";
+import Run from "pages/Run";
+import Voyagers from "pages/Voyagers";
+import { useAuth } from "providers/Auth";
+import { setRedirectUrl } from "utils/redirectUrl";
 import { css } from "emotion";
-import logo from "./logo.svg";
-
 
 const modalPortalRef = React.createRef<HTMLDivElement>();
+
+const ProtectedRoute = ({ path, ...props }: any) => {
+  const { isLoggedIn } = useAuth();
+
+  useEffect(() => {
+    if (!isLoggedIn) {
+      setRedirectUrl(path);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn]);
+
+  return (
+    isLoggedIn
+      ? <Route path={path} {...props} />
+      : <Route render={() => <Redirect to="/login" />} />
+  );
+};
 
 export const ModalPortal: React.ComponentType = ({ children }) => {
   if (modalPortalRef.current) {
@@ -74,42 +95,25 @@ const App: React.FC = () => {
                 width: 100%;
               `}
             >
-              <AppBar>
-                <Section>
-                  <img
-                    className={css`
-                      padding: 16px;
-                    `}
-                    src={logo}
-                    alt="cargo logo"
-                  ></img>
-                  <MenuGroup>
-                    <Link to="/">
-                      <MenuItem>Runs</MenuItem>
-                    </Link>
-                    <Link to="/voyager">
-                      <MenuItem>Voyager</MenuItem>
-                    </Link>
-                  </MenuGroup>
-                </Section>
-              </AppBar>
-
+              <NavBar />
               <Switch>
-                <Route exact path="/">
-                  <Home />
-                </Route>
-                <Route exact path="/runs">
-                  <Home />
-                </Route>
-                <Route exact path="/voyager">
-                  <Voyagers client={client} />
-                </Route>
-                <Route
+                <Route exact path="/" render={() => <Redirect to="/runs" />} />
+                <ProtectedRoute exact path="/runs" component={Home} />
+                <Route exact path="/login" component={Login} />
+                <Route exact path="/logged-in" component={LoggedIn} />
+                <ProtectedRoute
+                  exact
+                  path="/explorer"
+                  render={() => <Voyagers client={client} />}
+                  />
+                <ProtectedRoute
                   path="/runs/:id"
                   component={(props: { match: { params: { id: string } } }) => (
                     <Run runId={props.match.params.id} />
                   )}
                 />
+                <Route exact path="/no-access" component={NoAccess} />
+                <Route component={NotFound} />
               </Switch>
             </div>
             <div

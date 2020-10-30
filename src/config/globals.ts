@@ -16,16 +16,9 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import { AuthProvider } from "providers/Auth";
-
-ReactDOM.render(<AuthProvider><App /></AuthProvider>, document.getElementById('root'));
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+export const EGO_API_ROOT = process.env.REACT_APP_EGO_API_ROOT;
+export const EGO_CLIENT_ID = process.env.REACT_APP_EGO_CLIENT_ID;
+export const EGO_JWT_KEY = process.env.REACT_APP_EGO_JWT_KEY || `EGO_JWT`;
+export const EGO_PUBLIC_KEY = process.env.REACT_APP_EGO_PUBLIC_KEY || `-----BEGIN PUBLIC KEY-----\r\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA0lOqMuPLCVusc6szklNXQL1FHhSkEgR7An+8BllBqTsRHM4bRYosseGFCbYPn8r8FsWuMDtxp0CwTyMQR2PCbJ740DdpbE1KC6jAfZxqcBete7gP0tooJtbvnA6X4vNpG4ukhtUoN9DzNOO0eqMU0Rgyy5HjERdYEWkwTNB30i9I+nHFOSj4MGLBSxNlnuo3keeomCRgtimCx+L/K3HNo0QHTG1J7RzLVAchfQT0lu3pUJ8kB+UM6/6NG+fVyysJyRZ9gadsr4gvHHckw8oUBp2tHvqBEkEdY+rt1Mf5jppt7JUV7HAPLB/qR5jhALY2FX/8MN+lPLmb/nLQQichVQIDAQAB\r\n-----END PUBLIC KEY-----`;
+export const EGO_TOKEN_ENDPOINT = `${EGO_API_ROOT}/oauth/ego-token?client_id=${EGO_CLIENT_ID}`;
+export const GOOGLE_AUTH_ENDPOINT = `${EGO_API_ROOT}/oauth/login/google?client_id=${EGO_CLIENT_ID}`;

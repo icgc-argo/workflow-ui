@@ -16,16 +16,46 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import { AuthProvider } from "providers/Auth";
+import React, { useEffect } from 'react';
+import { css } from "emotion";
+import GoogleLogin from '@icgc-argo/uikit/Button/GoogleLogin';
+import { RouteComponentProps } from 'react-router-dom';
 
-ReactDOM.render(<AuthProvider><App /></AuthProvider>, document.getElementById('root'));
+import { GOOGLE_AUTH_ENDPOINT } from 'config/globals';
+import { useAuth } from "providers/Auth";
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+export default ({ history }: RouteComponentProps) => {
+  const { isLoggedIn } = useAuth();
+
+  // redirect users that are already logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      history.push('/logged-in');
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div
+      className={css`
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-top: 64px;
+      `}
+    >
+      <h1>COLLAB RDPC</h1>
+      <p
+        className={css`
+          max-width: 480px;
+          text-align: center;
+        `}
+      >
+        Access is restricted to RDPC personnel. Please log in to access the collab RDPC workflow information.
+      </p>
+      <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />
+    </div>
+  );
+};
