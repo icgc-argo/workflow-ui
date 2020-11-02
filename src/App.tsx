@@ -44,7 +44,7 @@ const ProtectedRoute = ({ path, ...props }: any) => {
 
   useEffect(() => {
     if (!isLoggedIn) {
-      setRedirectUrl(path);
+      setRedirectUrl(props.location.pathname);
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
