@@ -37,3 +37,8 @@ export const isValidJwt = (egoJwt: string): boolean => !!egoJwt && !!TokenUtils.
 
 export const getPermissionsFromToken: (egoJwt: string) => string[] = (egoJwt) =>
   isValidJwt(egoJwt) ? TokenUtils.getPermissionsFromToken(egoJwt) : [];
+
+export const isDccMember = (permissions: string[]): boolean => TokenUtils.isDccMember(permissions);
+
+export const isRdpcMember = (permissions: string[]): boolean =>
+  TokenUtils.isRdpcMember(permissions);

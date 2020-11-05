@@ -18,25 +18,22 @@
 
 import React, { useState, useContext } from 'react';
 import Cookies from 'js-cookie';
-import { EGO_JWT_KEY, EGO_CLIENT_ID } from 'config/globals';
-import { decodeToken, isValidJwt, getPermissionsFromToken } from 'utils/egoJwt';
+import { EGO_JWT_KEY, RDPC_DOMAIN, RDPC_REGION } from 'config/globals';
+import { decodeToken, isValidJwt, getPermissionsFromToken, isDccMember as isDccMemberUtil } from 'utils/egoJwt';
 
 type T_EgoToken = string;
-type T_Permissions = string[]; 
 
 type T_AuthContext = [
   [T_EgoToken, React.Dispatch<React.SetStateAction<T_EgoToken>>],
-  [T_Permissions, React.Dispatch<React.SetStateAction<T_Permissions>>],
 ];
 
-export const AuthContext = React.createContext<T_AuthContext>([['', () => {}], [[], () => {}]]);
+export const AuthContext = React.createContext<T_AuthContext>([['', () => {}]]);
 
 export const AuthProvider = ({ children }: any) => {
   const [token, setToken] = useState<T_EgoToken>('');
-  const [permissions, setPermissions] = useState<T_Permissions>([]);
 
   return (
-    <AuthContext.Provider value={[[token, setToken], [permissions, setPermissions],]}>
+    <AuthContext.Provider value={[[token, setToken]]}>
       {children}
     </AuthContext.Provider>
   );
@@ -45,16 +42,39 @@ export const AuthProvider = ({ children }: any) => {
 export const useAuth = () => {
   const [
     [token, setTokenState],
-    [permissions, setPermissions]
   ] = useContext(AuthContext);
 
-  const getPermissions = () => {
-    return permissions;
+  const getPermissions = (token?: string) => {
+    if (token) {
+      return getPermissionsFromToken(token) || [];
+    }
+
+    return getPermissionsFromToken(getToken()) || [];
   };
 
-  const canRead = () => permissions.filter(permission => permission.toLowerCase().startsWith(`${EGO_CLIENT_ID}.READ`.toLowerCase())).length > 0;
+  const canRead = (token?: string) => {
+    if (token) {
+      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.READ`.toLowerCase())).length > 0;
+    }
 
-  const canWrite = () => permissions.filter(permission => permission.toLowerCase().startsWith(`${EGO_CLIENT_ID}.WRITE`.toLowerCase())).length > 0;
+    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.READ`.toLowerCase())).length > 0;
+  };
+
+  const canWrite = (token?: string) => {
+    if (token) {
+      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.WRITE`.toLowerCase())).length > 0;
+    }
+
+    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.WRITE`.toLowerCase())).length > 0;
+  };
+
+  const isDccMember = (token?: string) => {
+    if (token) {
+      return isDccMemberUtil(getPermissions(token));
+    }
+
+    return isDccMemberUtil(getPermissions());
+  };
 
   const isLoggedIn = (): boolean => {
     return isValidJwt(getToken());
@@ -75,13 +95,11 @@ export const useAuth = () => {
   const setToken = (token: string) => {
     Cookies.set(EGO_JWT_KEY, token);
     setTokenState(token);
-    setPermissions(getPermissionsFromToken(token));
   };
 
   const clearToken = () => {
     Cookies.remove(EGO_JWT_KEY);
     setTokenState('');
-    setPermissions([]);
   };
 
   const getUserModel = () => {
@@ -102,7 +120,8 @@ export const useAuth = () => {
     permissions: getPermissions(),
     userModel: getUserModel(),
     isLoggedIn: isLoggedIn(),
-    canRead,
-    canWrite,
+    isMember: canRead,
+    isAdmin: canWrite,
+    isDccMember,
   };
 };

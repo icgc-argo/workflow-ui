@@ -33,7 +33,19 @@ const activeItemStyle = {
 };
 
 const NavBar: React.FC = () => {
-  const { isLoggedIn, userModel } = useAuth();
+  const { isAdmin, isDccMember, isLoggedIn, isMember, userModel } = useAuth();
+
+  const getUserTitle = () => {
+    if (isAdmin()) {
+      return 'RDPC Admin';
+    }
+    if (isMember()) {
+      return 'RDPC Member';
+    }
+    if (isDccMember()) {
+      return 'DCC Member';
+    }
+  };
 
   const UserDropdownMenu = isLoggedIn ? (
     <DropdownMenu>
@@ -84,8 +96,7 @@ const NavBar: React.FC = () => {
                     <UserBadge
                       firstName={userModel?.firstName}
                       lastName={userModel?.lastName}
-                      // TODO: change to RDPC admin/member status
-                      title={userModel?.email}
+                      title={getUserTitle() || userModel?.email}
                     />
                   ) :
                   <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />

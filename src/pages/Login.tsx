@@ -30,7 +30,7 @@ export default ({ history }: RouteComponentProps) => {
   // redirect users that are already logged in
   useEffect(() => {
     if (isLoggedIn) {
-      history.push('/logged-in');
+      history.replace('/logged-in');
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

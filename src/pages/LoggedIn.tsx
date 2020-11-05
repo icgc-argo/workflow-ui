@@ -28,22 +28,20 @@ import { isValidJwt } from 'utils/egoJwt';
 import { getRedirectUrl, clearRedirectUrl } from "utils/redirectUrl";
 
 export default ({ history }: RouteComponentProps) => {
-  const { isLoggedIn, setToken } = useAuth();
+  const { isAdmin, isDccMember, isLoggedIn, isMember, setToken } = useAuth();
   
   const redirect = () => {
     const redirectUrl = getRedirectUrl();
-    
-    // TODO: add permission checking before redirect
     if (redirectUrl) {
       clearRedirectUrl();
-      history.push(redirectUrl);
+      history.replace(redirectUrl);
     } else {
-      history.push('/');
+      history.replace('/');
     }
   };
 
   const accessDenied = () => {
-    history.push('/no-access');
+    history.replace('/no-access');
   }
   
   useEffect(() => {
@@ -61,7 +59,7 @@ export default ({ history }: RouteComponentProps) => {
     }).then(res => {
       return res.status === 200 ? res.text() : '';
     }).then(async jwt => {
-      if (isValidJwt(jwt)) {
+      if (isValidJwt(jwt) && (isAdmin(jwt) || isDccMember(jwt) || isMember(jwt))) {
         setToken(jwt);
         redirect();
       } else {
