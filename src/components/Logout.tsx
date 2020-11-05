@@ -17,6 +17,7 @@
  */
 
 import React from 'react';
+import { css } from 'emotion';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from 'providers/Auth';
 
@@ -29,9 +30,21 @@ const Logout: React.FC = () => {
     history.push('/login');
   };
 
+  const dropdownButtonStyle = css`
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+
+    &:hover {
+      color: #24dbb4;
+      cursor: pointer;
+    }
+  `;
+
   return (
-    // TODO: style log out button
-    <button onClick={handleClick}>Log Out</button>
+    <button className={dropdownButtonStyle} onClick={handleClick}>Log Out</button>
   );
 };
 

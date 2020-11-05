@@ -37,7 +37,13 @@ const NavBar: React.FC = () => {
 
   const UserDropdownMenu = isLoggedIn ? (
     <DropdownMenu>
-      <DropdownMenuItem><Logout /></DropdownMenuItem>
+      <DropdownMenuItem
+        style={{
+          padding: 0
+        }}
+      >
+        <Logout />
+      </DropdownMenuItem>
     </DropdownMenu>
   ) : null;
 
