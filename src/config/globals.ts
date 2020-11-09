@@ -24,3 +24,4 @@ export const EGO_TOKEN_ENDPOINT = `${EGO_API_ROOT}/oauth/ego-token?client_id=${E
 export const GOOGLE_AUTH_ENDPOINT = `${EGO_API_ROOT}/oauth/login/google?client_id=${EGO_CLIENT_ID}`;
 export const RDPC_DOMAIN = process.env.RDPC_DOMAIN || `RDPC`;
 export const RDPC_REGION = process.env.RDPC_REGION || 'collab';
+export const RDPC_POLICY_NAME = `${RDPC_DOMAIN}-${RDPC_REGION}`;

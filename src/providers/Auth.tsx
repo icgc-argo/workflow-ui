@@ -18,7 +18,7 @@
 
 import React, { useState, useContext } from 'react';
 import Cookies from 'js-cookie';
-import { EGO_JWT_KEY, RDPC_DOMAIN, RDPC_REGION } from 'config/globals';
+import { EGO_JWT_KEY, RDPC_POLICY_NAME } from 'config/globals';
 import { decodeToken, isValidJwt, getPermissionsFromToken, isDccMember as isDccMemberUtil } from 'utils/egoJwt';
 
 type T_EgoToken = string;
@@ -54,18 +54,18 @@ export const useAuth = () => {
 
   const canRead = (token?: string) => {
     if (token) {
-      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.READ`.toLowerCase())).length > 0;
+      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.READ`.toLowerCase())).length > 0;
     }
 
-    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.READ`.toLowerCase())).length > 0;
+    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.READ`.toLowerCase())).length > 0;
   };
 
   const canWrite = (token?: string) => {
     if (token) {
-      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.WRITE`.toLowerCase())).length > 0;
+      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.WRITE`.toLowerCase())).length > 0;
     }
 
-    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_DOMAIN}-${RDPC_REGION}.WRITE`.toLowerCase())).length > 0;
+    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.WRITE`.toLowerCase())).length > 0;
   };
 
   const isDccMember = (token?: string) => {
