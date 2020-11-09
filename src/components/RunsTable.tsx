@@ -26,6 +26,7 @@ import Modal from "@icgc-argo/uikit/Modal";
 import { ApolloError } from "apollo-boost";
 import Button from "@icgc-argo/uikit/Button";
 import { cancelWorkflow } from "rdpc";
+import { useAuth } from "providers/Auth";
 
 export default ({
   runs,
@@ -38,6 +39,7 @@ export default ({
   const [cancelResponse, setCancelResponse] = React.useState<
     CancelResponse | ApolloError | undefined | null
   >(null);
+  const { isAdmin } = useAuth();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -113,7 +115,7 @@ export default ({
           onClick={() => onCancelClick(original.runId)}
           variant="text"
           size="sm"
-          disabled={original.state !== "RUNNING"}
+          disabled={!isAdmin() || original.state !== "RUNNING"}
         >
           Cancel
         </Button>

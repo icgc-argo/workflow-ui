@@ -28,6 +28,7 @@ import "ace-builds/src-noconflict/theme-github";
 import { css } from "emotion";
 import { ApolloError } from "apollo-client";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
+import { useAuth } from "providers/Auth";
 import { runWorkflow } from "rdpc";
 
 type RunSuccess = {
@@ -47,6 +48,7 @@ export default ({
   setLoading: (isLoading: boolean) => void;
 }) => {
   const theme = useTheme();
+  const { isAdmin } = useAuth();
 
   const [workflow_url, setWorkflowUrl] = React.useState("");
   const [workflow_params, setWorkflowParams] = React.useState("");
@@ -99,7 +101,7 @@ export default ({
 
   return (
     <>
-      <Button onClick={onNewRunClick}>new run</Button>
+      <Button disabled={!isAdmin()} onClick={onNewRunClick}>new run</Button>
       {runResponse && (
         <ModalPortal>
           <Modal
