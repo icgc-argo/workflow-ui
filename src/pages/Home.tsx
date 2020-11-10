@@ -22,13 +22,13 @@ import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
 import Typography from "@icgc-argo/uikit/Typography";
-import RunsTable from "../components/RunsTable";
-import { useAppContext } from "../context/App";
+import RunsTable from "components/RunsTable";
+import { useAppContext } from "context/App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
-import { ModalPortal } from "../App";
-import NewRunFormModal from "../components/NewRunFormModal";
-import { DashboardQueryResponse } from "../gql/types";
-import RDPCStats from "../components/RDPCStats";
+import { ModalPortal } from "App";
+import NewRunFormModal from "components/NewRunFormModal";
+import { DashboardQueryResponse } from "gql/types";
+import RDPCStats from "components/RDPCStats";
 
 export default () => {
   /**

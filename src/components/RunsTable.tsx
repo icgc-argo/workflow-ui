@@ -19,13 +19,14 @@
 import React from "react";
 import Table, { TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
-import { DashboardQueryResponse, RunCompact } from "../gql/types";
-import { parseEpochToEST } from "../utils";
-import { CancelConfirmModal, CancelResponseModal, CancelResponse } from "./CancelRun";
+import { DashboardQueryResponse, RunCompact } from "gql/types";
+import { parseEpochToEST } from "utils/time";
+import { CancelConfirmModal, CancelResponseModal, CancelResponse } from "components/CancelRun";
 import Modal from "@icgc-argo/uikit/Modal";
 import { ApolloError } from "apollo-boost";
 import Button from "@icgc-argo/uikit/Button";
-import { cancelWorkflow } from "../rdpc";
+import { cancelWorkflow } from "rdpc";
+import { useAuth } from "providers/Auth";
 
 export default ({
   runs,
@@ -38,6 +39,7 @@ export default ({
   const [cancelResponse, setCancelResponse] = React.useState<
     CancelResponse | ApolloError | undefined | null
   >(null);
+  const { isAdmin } = useAuth();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -113,7 +115,7 @@ export default ({
           onClick={() => onCancelClick(original.runId)}
           variant="text"
           size="sm"
-          disabled={original.state !== "RUNNING"}
+          disabled={!isAdmin() || original.state !== "RUNNING"}
         >
           Cancel
         </Button>

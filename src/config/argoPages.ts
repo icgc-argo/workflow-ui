@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
  *
- * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
- * You should have received a copy of the GNU Affero General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -16,16 +17,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import { AuthProvider } from "providers/Auth";
+export const ARGO_ROOT = 'https://www.icgc-argo.org';
+export const ARGO_PLATFORM_ROOT = 'https://platform.icgc-argo.org';
 
-ReactDOM.render(<AuthProvider><App /></AuthProvider>, document.getElementById('root'));
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+export const ARGO_DATA_PLATFORM_PAGE = `${ARGO_PLATFORM_ROOT}/`;
+export const ARGO_CONTACT_PAGE = `${ARGO_PLATFORM_ROOT}/contact`;
+export const ARGO_DOCS_PAGE = 'https://docs.icgc-argo.org/';
+export const ARGO_PRIVACY_PAGE = `${ARGO_ROOT}/page/2/privacy`;
+export const ARGO_TERMS_PAGE = `${ARGO_ROOT}/page/1/terms-and-conditions`;

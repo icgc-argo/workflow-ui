@@ -16,16 +16,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import { AuthProvider } from "providers/Auth";
+import { Task } from "gql/types";
 
-ReactDOM.render(<AuthProvider><App /></AuthProvider>, document.getElementById('root'));
+export const sortTasks = (tasks: Task[], reverse = false) => {
+  const stateOrder = [
+    "UNKNOWN",
+    "QUEUED",
+    "RUNNING",
+    "COMPLETE",
+    "EXECUTOR_ERROR",
+  ];
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+  const sortedTasks = tasks.sort((a, b) => {
+    const ai = stateOrder.indexOf(a.state);
+    const bi = stateOrder.indexOf(b.state);
+
+    return ai > bi ? -1 : ai < bi ? 1 : 0;
+  });
+
+  return reverse ? sortedTasks.reverse() : sortedTasks;
+};

@@ -17,15 +17,33 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
-import { AuthProvider } from "providers/Auth";
+import { css } from 'emotion';
+import { useTheme } from "@icgc-argo/uikit/ThemeProvider"
 
-ReactDOM.render(<AuthProvider><App /></AuthProvider>, document.getElementById('root'));
+interface DropdownButtonProps {
+  children?: React.ReactNode,
+  onClick?: React.MouseEventHandler,
+};
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+const DropdownButton = ({ children, onClick }: DropdownButtonProps) => {
+  const theme = useTheme();
+
+  const dropdownButtonStyle = css`
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+
+    &:hover {
+      color: ${theme.colors.accent1};
+      cursor: pointer;
+    }
+  `;
+
+  return (
+    <button className={dropdownButtonStyle} onClick={onClick}>{children}</button>
+  );
+};
+
+export default DropdownButton;

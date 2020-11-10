@@ -18,7 +18,7 @@
 
 import React from "react";
 import Button from "@icgc-argo/uikit/Button";
-import { ModalPortal } from "../App";
+import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
 import InputLabel from "@icgc-argo/uikit/form/InputLabel";
 import Input from "@icgc-argo/uikit/form/Input";
@@ -28,7 +28,8 @@ import "ace-builds/src-noconflict/theme-github";
 import { css } from "emotion";
 import { ApolloError } from "apollo-client";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
-import { runWorkflow } from "../rdpc";
+import { useAuth } from "providers/Auth";
+import { runWorkflow } from "rdpc";
 
 type RunSuccess = {
   run_id: string;
@@ -47,6 +48,7 @@ export default ({
   setLoading: (isLoading: boolean) => void;
 }) => {
   const theme = useTheme();
+  const { isAdmin } = useAuth();
 
   const [workflow_url, setWorkflowUrl] = React.useState("");
   const [workflow_params, setWorkflowParams] = React.useState("");
@@ -99,7 +101,7 @@ export default ({
 
   return (
     <>
-      <Button onClick={onNewRunClick}>new run</Button>
+      <Button disabled={!isAdmin()} onClick={onNewRunClick}>new run</Button>
       {runResponse && (
         <ModalPortal>
           <Modal

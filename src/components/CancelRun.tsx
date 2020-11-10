@@ -18,12 +18,13 @@
 
 import React from "react";
 import Button from "@icgc-argo/uikit/Button";
-import { ModalPortal } from "../App";
+import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
-import { cancelWorkflow } from "../rdpc";
+import { cancelWorkflow } from "rdpc";
 import Typography from "@icgc-argo/uikit/Typography";
 import { ApolloError } from "apollo-boost";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
+import { useAuth } from "providers/Auth";
 import { css } from "emotion";
 
 export type CancelSuccess = {
@@ -130,6 +131,7 @@ export const CancelRunButton = ({
   const [cancelResponse, setCancelResponse] = React.useState<
     CancelResponse | ApolloError | undefined | null
   >(null);
+  const { isAdmin } = useAuth();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -169,7 +171,7 @@ export const CancelRunButton = ({
         onClick={() => onCancelClick(run.runId)}
         variant={variant}
         size={size}
-        disabled={run.state !== "RUNNING"}
+        disabled={!isAdmin() || run.state !== "RUNNING"}
         className={className}
       >
         Cancel
