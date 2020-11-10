@@ -21,16 +21,14 @@ import Cookies from 'js-cookie';
 import { EGO_JWT_KEY, RDPC_POLICY_NAME } from 'config/globals';
 import { decodeToken, isValidJwt, getPermissionsFromToken, isDccMember as isDccMemberUtil } from 'utils/egoJwt';
 
-type T_EgoToken = string;
-
 type T_AuthContext = [
-  [T_EgoToken, React.Dispatch<React.SetStateAction<T_EgoToken>>],
+  [string, React.Dispatch<React.SetStateAction<string>>],
 ];
 
 export const AuthContext = React.createContext<T_AuthContext>([['', () => {}]]);
 
 export const AuthProvider = ({ children }: any) => {
-  const [token, setToken] = useState<T_EgoToken>('');
+  const [token, setToken] = useState<string>('');
 
   return (
     <AuthContext.Provider value={[[token, setToken]]}>

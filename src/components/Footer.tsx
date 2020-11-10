@@ -16,47 +16,57 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useEffect } from 'react';
+import React from "react";
+import Footer from "@icgc-argo/uikit/Footer";
 import { css } from "emotion";
-import GoogleLogin from '@icgc-argo/uikit/Button/GoogleLogin';
-import { RouteComponentProps } from 'react-router-dom';
+import { useTheme } from "@icgc-argo/uikit/ThemeProvider"
+import {
+  ARGO_DATA_PLATFORM_PAGE,
+  ARGO_CONTACT_PAGE,
+  ARGO_DOCS_PAGE,
+  ARGO_PRIVACY_PAGE,
+  ARGO_TERMS_PAGE
+} from 'config/argoPages';
 
-import { GOOGLE_AUTH_ENDPOINT } from 'config/globals';
-import { LOGGED_IN_PAGE_PATH } from 'config/pages';
-import { useAuth } from "providers/Auth";
-
-export default ({ history }: RouteComponentProps) => {
-  const { isLoggedIn } = useAuth();
-
-  // redirect users that are already logged in
-  useEffect(() => {
-    if (isLoggedIn) {
-      history.replace(LOGGED_IN_PAGE_PATH);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+export default () => {
+  const theme = useTheme();
 
   return (
-    <div
+    <Footer
       className={css`
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        margin-top: 64px;
+        padding: 0 24px;
+        background: ${theme.colors.white};
+        z-index: 1;
+        border-top: 1px solid ${theme.colors.grey_2};
+        flex-shrink: 0;
       `}
-    >
-      <h1>COLLAB RDPC</h1>
-      <p
-        className={css`
-          max-width: 480px;
-          text-align: center;
-        `}
-      >
-        Access is restricted to RDPC personnel. Please log in to access the collab RDPC workflow information.
-      </p>
-      <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />
-    </div>
-  );
+      links={[
+        {
+          displayName: 'ARGO Data Platform',
+          href: ARGO_DATA_PLATFORM_PAGE,
+          target: '_self',
+        },
+        {
+          displayName: 'Contact',
+          href: ARGO_CONTACT_PAGE,
+          target: '_self',
+        },
+        {
+          displayName: 'Documentation',
+          href: ARGO_DOCS_PAGE,
+          target: '_blank',
+        },
+        {
+          displayName: 'Privacy Policy',
+          href: ARGO_PRIVACY_PAGE,
+          target: '_blank',
+        },
+        {
+          displayName: 'Terms & Conditions',
+          href: ARGO_TERMS_PAGE,
+          target: '_blank',
+        },
+      ]}
+    />
+    );
 };

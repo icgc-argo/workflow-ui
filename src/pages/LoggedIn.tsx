@@ -23,6 +23,7 @@ import { RouteComponentProps } from 'react-router-dom';
 
 import { ModalPortal } from "App";
 import { EGO_TOKEN_ENDPOINT } from 'config/globals';
+import { HOME_PAGE_PATH, NO_ACCESS_PAGE_PATH } from 'config/pages'
 import { useAuth } from "providers/Auth";
 import { isValidJwt } from 'utils/egoJwt';
 import { getRedirectUrl, clearRedirectUrl } from "utils/redirectUrl";
@@ -36,12 +37,12 @@ export default ({ history }: RouteComponentProps) => {
       clearRedirectUrl();
       history.replace(redirectUrl);
     } else {
-      history.replace('/');
+      history.replace(HOME_PAGE_PATH);
     }
   };
 
   const accessDenied = () => {
-    history.replace('/no-access');
+    history.replace(NO_ACCESS_PAGE_PATH);
   }
   
   useEffect(() => {

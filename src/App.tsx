@@ -24,7 +24,17 @@ import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-d
 import { ThemeProvider } from "@icgc-argo/uikit";
 import Modal from "@icgc-argo/uikit/Modal";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import {
+  HOME_PAGE_PATH,
+  LOGIN_PAGE_PATH,
+  LOGGED_IN_PAGE_PATH,
+  RUNS_PAGE_PATH,
+  RUN_PAGE_PATH,
+  NO_ACCESS_PAGE_PATH,
+  API_EXPLORER_PAGE_PATH
+} from 'config/pages';
 import { AppContext, useInitialAppContextState } from 'context/App';
+import Footer from 'components/Footer';
 import NavBar from 'components/NavBar';
 import Home from "pages/Home";
 import Login from "pages/Login";
@@ -52,7 +62,7 @@ const ProtectedRoute = ({ path, ...props }: any) => {
   return (
     isLoggedIn
       ? <Route path={path} {...props} />
-      : <Route render={() => <Redirect to="/login" />} />
+      : <Route render={() => <Redirect to={LOGIN_PAGE_PATH} />} />
   );
 };
 
@@ -90,32 +100,31 @@ const App: React.FC = () => {
           <Router>
             <div
               className={css`
-                position: absolute;
-                height: 100%;
-                width: 100%;
+                flex: 1 0 auto;
               `}
             >
               <NavBar />
               <Switch>
-                <Route exact path="/" render={() => <Redirect to="/runs" />} />
-                <ProtectedRoute exact path="/runs" component={Home} />
-                <Route exact path="/login" component={Login} />
-                <Route exact path="/logged-in" component={LoggedIn} />
+                <Route exact path={HOME_PAGE_PATH} render={() => <Redirect to={RUNS_PAGE_PATH} />} />
+                <ProtectedRoute exact path={RUNS_PAGE_PATH} component={Home} />
+                <Route exact path={LOGIN_PAGE_PATH} component={Login} />
+                <Route exact path={LOGGED_IN_PAGE_PATH} component={LoggedIn} />
                 <ProtectedRoute
                   exact
-                  path="/explorer"
+                  path={API_EXPLORER_PAGE_PATH}
                   render={() => <Voyagers client={client} />}
                   />
                 <ProtectedRoute
-                  path="/runs/:id"
+                  path={RUN_PAGE_PATH}
                   component={(props: { match: { params: { id: string } } }) => (
                     <Run runId={props.match.params.id} />
                   )}
                 />
-                <Route exact path="/no-access" component={NoAccess} />
+                <Route exact path={NO_ACCESS_PAGE_PATH} component={NoAccess} />
                 <Route component={NotFound} />
               </Switch>
             </div>
+            <Footer />
             <div
               className={css`
                 position: absolute;

@@ -17,7 +17,8 @@
  */
 
 import React from 'react';
-import { css } from 'emotion';
+import { LOGIN_PAGE_PATH } from 'config/pages';
+import DropdownButton from 'components/DropdownButton';
 import { useHistory } from 'react-router-dom';
 import { useAuth } from 'providers/Auth';
 
@@ -25,26 +26,13 @@ const Logout: React.FC = () => {
   const { clearToken } = useAuth();
   const history = useHistory();
 
-  const handleClick = () => {
+  const handleClick: React.MouseEventHandler = () => {
     clearToken();
-    history.push('/login');
+    history.push(LOGIN_PAGE_PATH);
   };
 
-  const dropdownButtonStyle = css`
-    background: none;
-    border: none;
-    width: 100%;
-    padding: 12px 16px;
-    text-align: left;
-
-    &:hover {
-      color: #24dbb4;
-      cursor: pointer;
-    }
-  `;
-
   return (
-    <button className={dropdownButtonStyle} onClick={handleClick}>Log Out</button>
+    <DropdownButton onClick={handleClick}>Log Out</DropdownButton>
   );
 };
 

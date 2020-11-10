@@ -16,47 +16,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useEffect } from 'react';
-import { css } from "emotion";
-import GoogleLogin from '@icgc-argo/uikit/Button/GoogleLogin';
-import { RouteComponentProps } from 'react-router-dom';
+import React from 'react';
+import { css } from 'emotion';
+import { useTheme } from "@icgc-argo/uikit/ThemeProvider"
 
-import { GOOGLE_AUTH_ENDPOINT } from 'config/globals';
-import { LOGGED_IN_PAGE_PATH } from 'config/pages';
-import { useAuth } from "providers/Auth";
+interface DropdownButtonProps {
+  children?: React.ReactNode,
+  onClick?: React.MouseEventHandler,
+};
 
-export default ({ history }: RouteComponentProps) => {
-  const { isLoggedIn } = useAuth();
+const DropdownButton = ({ children, onClick }: DropdownButtonProps) => {
+  const theme = useTheme();
 
-  // redirect users that are already logged in
-  useEffect(() => {
-    if (isLoggedIn) {
-      history.replace(LOGGED_IN_PAGE_PATH);
+  const dropdownButtonStyle = css`
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+
+    &:hover {
+      color: ${theme.colors.accent1};
+      cursor: pointer;
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  `;
 
   return (
-    <div
-      className={css`
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        width: 100%;
-        margin-top: 64px;
-      `}
-    >
-      <h1>COLLAB RDPC</h1>
-      <p
-        className={css`
-          max-width: 480px;
-          text-align: center;
-        `}
-      >
-        Access is restricted to RDPC personnel. Please log in to access the collab RDPC workflow information.
-      </p>
-      <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />
-    </div>
+    <button className={dropdownButtonStyle} onClick={onClick}>{children}</button>
   );
 };
+
+export default DropdownButton;
