@@ -16,22 +16,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useContext, useState } from 'react';
+import egoUtils from '@icgc-argo/ego-token-utils';
+import memoize from 'lodash/memoize';
 import Cookies from 'js-cookie';
-import { EGO_JWT_KEY, RDPC_POLICY_NAME } from 'config/globals';
-import { decodeToken, isValidJwt, getPermissionsFromToken, isDccMember as isDccMemberUtil } from 'utils/egoJwt';
+import { EGO_COOKIE_KEY, EGO_JWT_KEY, EGO_PUBLIC_KEY_URL, RDPC_POLICY_NAME } from 'config/globals';
 
 type T_AuthContext = [
   [string, React.Dispatch<React.SetStateAction<string>>],
+  [string, React.Dispatch<React.SetStateAction<string>>],
 ];
 
-export const AuthContext = React.createContext<T_AuthContext>([['', () => {}]]);
+const fetchEgoPublicKey = async () => {
+  const response = fetch(EGO_PUBLIC_KEY_URL, {
+    method: 'GET',
+    mode: 'cors',
+  });
+
+  return await response;
+};
+
+export const AuthContext = React.createContext<T_AuthContext>([['', () => {}], ['', () => {}]]);
 
 export const AuthProvider = ({ children }: any) => {
   const [token, setToken] = useState<string>('');
+  const [egoPublicKey, setEgoPublicKey] = useState<string>('');
 
   return (
-    <AuthContext.Provider value={[[token, setToken]]}>
+    <AuthContext.Provider value={[[token, setToken], [egoPublicKey, setEgoPublicKey]]}>
       {children}
     </AuthContext.Provider>
   );
@@ -40,43 +52,8 @@ export const AuthProvider = ({ children }: any) => {
 export const useAuth = () => {
   const [
     [token, setTokenState],
+    [egoPublicKey, setEgoPublicKeyState],
   ] = useContext(AuthContext);
-
-  const getPermissions = (token?: string) => {
-    if (token) {
-      return getPermissionsFromToken(token) || [];
-    }
-
-    return getPermissionsFromToken(getToken()) || [];
-  };
-
-  const canRead = (token?: string) => {
-    if (token) {
-      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.READ`.toLowerCase())).length > 0;
-    }
-
-    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.READ`.toLowerCase())).length > 0;
-  };
-
-  const canWrite = (token?: string) => {
-    if (token) {
-      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.WRITE`.toLowerCase())).length > 0;
-    }
-
-    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.WRITE`.toLowerCase())).length > 0;
-  };
-
-  const isDccMember = (token?: string) => {
-    if (token) {
-      return isDccMemberUtil(getPermissions(token));
-    }
-
-    return isDccMemberUtil(getPermissions());
-  };
-
-  const isLoggedIn = (): boolean => {
-    return isValidJwt(getToken());
-  };
 
   const getToken = (): string => {
     if (!token && !Cookies.get(EGO_JWT_KEY)) {
@@ -100,6 +77,56 @@ export const useAuth = () => {
     setTokenState('');
   };
 
+  const getEgoPublicKey = (): string => {
+    if (!egoPublicKey && !Cookies.get(EGO_COOKIE_KEY)) {
+      return '';
+    }
+    
+    if (!egoPublicKey && Cookies.get(EGO_COOKIE_KEY)) {
+      return JSON.parse(Cookies.get(EGO_COOKIE_KEY) || '');
+    }
+
+    return egoPublicKey;
+  };
+
+  const setEgoPublicKey = (key: string) => {
+    Cookies.set(EGO_COOKIE_KEY, JSON.stringify(key));
+    setEgoPublicKeyState(key);
+  };
+
+  const clearEgoPublicKey = () => {
+    Cookies.remove(EGO_COOKIE_KEY);
+    setEgoPublicKeyState('');
+  };
+
+  const configureEgoPublicKey = async () => {
+    const key =
+      await fetchEgoPublicKey()
+        .then(res => res.status === 200 ? res.text() : '')
+        .then(data => {
+          // convert from multiline to single line for use with egoUtils
+          const keyData = data
+            .replace(`-----BEGIN PUBLIC KEY-----`, ``)
+            .replace(`-----END PUBLIC KEY-----`, ``)
+            .trim();
+          return `-----BEGIN PUBLIC KEY-----\n${keyData}\n-----END PUBLIC KEY-----`;
+        })
+        .catch(err => {
+          console.error('Unexpected error occured while fetching ego public key: ', err);
+          return '';
+        });
+  
+    setEgoPublicKey(key);
+  };
+
+  const getPermissions = (token?: string) => {
+    if (token) {
+      return getPermissionsFromToken(token) || [];
+    }
+
+    return getPermissionsFromToken(getToken()) || [];
+  };
+
   const getUserModel = () => {
     if (isValidJwt(getToken())) {
       const data = decodeToken(getToken());
@@ -111,15 +138,67 @@ export const useAuth = () => {
     return null;
   };
 
+  const isLoggedIn = (): boolean => {
+    return isValidJwt(getToken());
+  };
+
+  const decodeToken = memoize((egoJwt?: string) =>
+    egoJwt ? egoUtils(egoPublicKey).decodeToken(egoJwt) : null,
+  );
+
+  const isValidJwt = (egoJwt: string): boolean =>
+    !!egoJwt && !!egoUtils(getEgoPublicKey()).isValidJwt(egoJwt);
+
+  const getPermissionsFromToken: (egoJwt: string) => string[] = (egoJwt) =>
+    isValidJwt(egoJwt)
+      ? egoUtils(getEgoPublicKey()).getPermissionsFromToken(egoJwt)
+      : [];
+
+  const canRead = (token?: string) => {
+    if (token) {
+      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.READ`.toLowerCase())).length > 0;
+    }
+
+    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.READ`.toLowerCase())).length > 0;
+  };
+
+  const canWrite = (token?: string) => {
+    if (token) {
+      return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.WRITE`.toLowerCase())).length > 0;
+    }
+
+    return getPermissions().filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.WRITE`.toLowerCase())).length > 0;
+  };
+    
+  const isDccMemberUtil = (permissions: string[]): boolean =>
+    egoUtils(getEgoPublicKey()).isDccMember(permissions);
+
+  const isDccMember = (token?: string) => {
+    if (token) {
+      return isDccMemberUtil(getPermissions(token));
+    }
+
+    return isDccMemberUtil(getPermissions());
+  };
+  
+  const isRdpcMember = (permissions: string[]): boolean =>
+    egoUtils(getEgoPublicKey()).isRdpcMember(permissions);
+
   return {
     token: getToken(),
     setToken,
     clearToken,
+    egoPublicKey: getEgoPublicKey(),
+    setEgoPublicKey,
+    configureEgoPublicKey,
+    clearEgoPublicKey,
     permissions: getPermissions(),
     userModel: getUserModel(),
     isLoggedIn: isLoggedIn(),
+    isValidJwt,
     isMember: canRead,
     isAdmin: canWrite,
     isDccMember,
+    isRdpcMember,
   };
 };

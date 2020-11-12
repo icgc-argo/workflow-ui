@@ -86,12 +86,19 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 };
 
 const App: React.FC = () => {
+  const { configureEgoPublicKey } = useAuth();
+
   const client = new ApolloClient({
     uri: process.env.REACT_APP_RDPC_GATEWAY,
     cache: new InMemoryCache()
   });
 
   const globalState = useInitialAppContextState();
+
+  useEffect(() => {
+    configureEgoPublicKey();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <AppContext.Provider value={globalState}>

@@ -25,11 +25,10 @@ import { ModalPortal } from "App";
 import { EGO_TOKEN_ENDPOINT } from 'config/globals';
 import { HOME_PAGE_PATH, NO_ACCESS_PAGE_PATH } from 'config/pages'
 import { useAuth } from "providers/Auth";
-import { isValidJwt } from 'utils/egoJwt';
 import { getRedirectUrl, clearRedirectUrl } from "utils/redirectUrl";
 
 export default ({ history }: RouteComponentProps) => {
-  const { isAdmin, isDccMember, isLoggedIn, isMember, setToken } = useAuth();
+  const { isAdmin, isDccMember, isLoggedIn, isMember, setToken, isValidJwt } = useAuth();
   
   const redirect = () => {
     const redirectUrl = getRedirectUrl();

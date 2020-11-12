@@ -23,11 +23,12 @@ import { useHistory } from 'react-router-dom';
 import { useAuth } from 'providers/Auth';
 
 const Logout: React.FC = () => {
-  const { clearToken } = useAuth();
+  const { clearToken, clearEgoPublicKey } = useAuth();
   const history = useHistory();
 
   const handleClick: React.MouseEventHandler = () => {
     clearToken();
+    clearEgoPublicKey();
     history.push(LOGIN_PAGE_PATH);
   };
 
