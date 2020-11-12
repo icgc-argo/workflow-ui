@@ -188,8 +188,6 @@ export const useAuth = () => {
     token: getToken(),
     setToken,
     clearToken,
-    egoPublicKey: getEgoPublicKey(),
-    setEgoPublicKey,
     configureEgoPublicKey,
     clearEgoPublicKey,
     permissions: getPermissions(),
