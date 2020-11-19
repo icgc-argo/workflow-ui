@@ -20,7 +20,7 @@ import React, { useEffect, useContext, useState } from 'react';
 import egoUtils from '@icgc-argo/ego-token-utils';
 import memoize from 'lodash/memoize';
 import Cookies from 'js-cookie';
-import { EGO_COOKIE_KEY, EGO_JWT_KEY, EGO_PUBLIC_KEY_URL, RDPC_POLICY_NAME } from 'config/globals';
+import { EGO_JWT_KEY, EGO_PUBLIC_KEY_URL, RDPC_POLICY_NAME } from 'config/globals';
 
 type T_AuthContext = [
   [string, React.Dispatch<React.SetStateAction<string>>],
@@ -122,12 +122,8 @@ export const useAuth = () => {
   };
 
   const getEgoPublicKey = (): string => {
-    if (!egoPublicKey && !Cookies.get(EGO_COOKIE_KEY)) {
+    if (!egoPublicKey) {
       return '';
-    }
-    
-    if (!egoPublicKey && Cookies.get(EGO_COOKIE_KEY)) {
-      return JSON.parse(Cookies.get(EGO_COOKIE_KEY) || '');
     }
 
     return egoPublicKey;

@@ -18,7 +18,6 @@
 
 export const EGO_API_ROOT = process.env.REACT_APP_EGO_API_ROOT;
 export const EGO_CLIENT_ID = process.env.REACT_APP_EGO_CLIENT_ID;
-export const EGO_COOKIE_KEY = process.env.REACT_APP_EGO_COOKIE_KEY || `EGO_COOKIE`;
 export const EGO_JWT_KEY = process.env.REACT_APP_EGO_JWT_KEY || `EGO_JWT`;
 export const EGO_PUBLIC_KEY_URL = `${EGO_API_ROOT}/oauth/token/public_key`;
 export const EGO_TOKEN_ENDPOINT = `${EGO_API_ROOT}/oauth/ego-token?client_id=${EGO_CLIENT_ID}`;
