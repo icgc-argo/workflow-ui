@@ -16,7 +16,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useEffect, useContext, useState } from 'react';
 import egoUtils from '@icgc-argo/ego-token-utils';
 import memoize from 'lodash/memoize';
 import Cookies from 'js-cookie';
@@ -25,6 +25,7 @@ import { EGO_COOKIE_KEY, EGO_JWT_KEY, EGO_PUBLIC_KEY_URL, RDPC_POLICY_NAME } fro
 type T_AuthContext = [
   [string, React.Dispatch<React.SetStateAction<string>>],
   [string, React.Dispatch<React.SetStateAction<string>>],
+  [boolean, React.Dispatch<React.SetStateAction<boolean>>]
 ];
 
 const fetchEgoPublicKey = async () => {
@@ -36,14 +37,56 @@ const fetchEgoPublicKey = async () => {
   return await response;
 };
 
-export const AuthContext = React.createContext<T_AuthContext>([['', () => {}], ['', () => {}]]);
+const BEGIN_PUBLIC_KEY = `-----BEGIN PUBLIC KEY-----`;
+const END_PUBLIC_KEY = `-----END PUBLIC KEY-----`;
+
+// convert from multiline to single line for use with egoUtils
+const formatPublicKeyForEgoUtils = (key: string) => {
+  const keyData = key
+    .replace(BEGIN_PUBLIC_KEY, ``)
+    .replace(END_PUBLIC_KEY, ``)
+    .trim();
+  return `${BEGIN_PUBLIC_KEY}\n${keyData}\n${END_PUBLIC_KEY}`;
+}
+
+export const AuthContext = React.createContext<T_AuthContext>([['', () => {}], ['', () => {}], [true, () => {}]]);
 
 export const AuthProvider = ({ children }: any) => {
   const [token, setToken] = useState<string>('');
   const [egoPublicKey, setEgoPublicKey] = useState<string>('');
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const configureEgoPublicKey = async () => {
+    const key =
+      await fetchEgoPublicKey()
+        .then(res => res.status === 200 ? res.text() : '')
+        .then(data => {
+          return formatPublicKeyForEgoUtils(data);
+        })
+        .catch(err => {
+          console.error('Unexpected error occured while fetching ego public key: ', err);
+          return '';
+        });
+  
+    setEgoPublicKey(key);
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    configureEgoPublicKey();
+    setLoading(false);
+  }, []);
 
   return (
-    <AuthContext.Provider value={[[token, setToken], [egoPublicKey, setEgoPublicKey]]}>
+    <AuthContext.Provider
+      value={
+        [
+          [token, setToken],
+          [egoPublicKey, setEgoPublicKey],
+          [loading, setLoading]
+        ]
+      }
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -52,7 +95,8 @@ export const AuthProvider = ({ children }: any) => {
 export const useAuth = () => {
   const [
     [token, setTokenState],
-    [egoPublicKey, setEgoPublicKeyState],
+    [egoPublicKey, ],
+    [loading, ]
   ] = useContext(AuthContext);
 
   const getToken = (): string => {
@@ -87,36 +131,6 @@ export const useAuth = () => {
     }
 
     return egoPublicKey;
-  };
-
-  const setEgoPublicKey = (key: string) => {
-    Cookies.set(EGO_COOKIE_KEY, JSON.stringify(key));
-    setEgoPublicKeyState(key);
-  };
-
-  const clearEgoPublicKey = () => {
-    Cookies.remove(EGO_COOKIE_KEY);
-    setEgoPublicKeyState('');
-  };
-
-  const configureEgoPublicKey = async () => {
-    const key =
-      await fetchEgoPublicKey()
-        .then(res => res.status === 200 ? res.text() : '')
-        .then(data => {
-          // convert from multiline to single line for use with egoUtils
-          const keyData = data
-            .replace(`-----BEGIN PUBLIC KEY-----`, ``)
-            .replace(`-----END PUBLIC KEY-----`, ``)
-            .trim();
-          return `-----BEGIN PUBLIC KEY-----\n${keyData}\n-----END PUBLIC KEY-----`;
-        })
-        .catch(err => {
-          console.error('Unexpected error occured while fetching ego public key: ', err);
-          return '';
-        });
-  
-    setEgoPublicKey(key);
   };
 
   const getPermissions = (token?: string) => {
@@ -188,8 +202,8 @@ export const useAuth = () => {
     token: getToken(),
     setToken,
     clearToken,
-    configureEgoPublicKey,
-    clearEgoPublicKey,
+    egoPublicKey: getEgoPublicKey(),
+    loading,
     permissions: getPermissions(),
     userModel: getUserModel(),
     isLoggedIn: isLoggedIn(),
