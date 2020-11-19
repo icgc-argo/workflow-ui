@@ -57,6 +57,7 @@ export const AuthProvider = ({ children }: any) => {
   const [loading, setLoading] = useState<boolean>(true);
 
   const configureEgoPublicKey = async () => {
+    setLoading(true);
     const key =
       await fetchEgoPublicKey()
         .then(res => res.status === 200 ? res.text() : '')
@@ -69,12 +70,11 @@ export const AuthProvider = ({ children }: any) => {
         });
   
     setEgoPublicKey(key);
+    setLoading(false);
   };
 
   useEffect(() => {
-    setLoading(true);
     configureEgoPublicKey();
-    setLoading(false);
   }, []);
 
   return (
