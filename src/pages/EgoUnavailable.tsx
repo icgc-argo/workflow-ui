@@ -17,14 +17,29 @@
  */
 
 import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import { css } from "emotion";
 
-ReactDOM.render(<App />, document.getElementById('root'));
-
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+export default () => {
+  return (
+    <div
+      className={css`
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-top: 64px;
+      `}
+    >
+      <h1>Authentication Unavailable</h1>
+      <p
+        className={css`
+          max-width: 480px;
+          text-align: center;
+        `}
+      >
+        We're sorry, but Ego is unavailable at this time. Please try again, or contact your administrator if the issue persists.
+      </p>
+    </div>
+  );
+};

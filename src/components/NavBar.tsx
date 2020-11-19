@@ -33,7 +33,7 @@ const activeItemStyle = {
 };
 
 const NavBar: React.FC = () => {
-  const { isAdmin, isDccMember, isLoggedIn, isMember, userModel } = useAuth();
+  const { isAdmin, isDccMember, isLoggedIn, isMember, userModel, loading, egoPublicKey } = useAuth();
 
   const getUserTitle = () => {
     if (isAdmin()) {
@@ -85,25 +85,31 @@ const NavBar: React.FC = () => {
             )
           }
       </Section>
-      <Section>
-        <MenuGroup>
-          <MenuItem
-            dropdownMenu={UserDropdownMenu}
-          >
-            {
-              isLoggedIn ?
-                  (
-                    <UserBadge
-                      firstName={userModel?.firstName}
-                      lastName={userModel?.lastName}
-                      title={getUserTitle() || userModel?.email}
-                    />
-                  ) :
-                  <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />
-            }
-          </MenuItem>
-        </MenuGroup>
-      </Section>
+      {
+        loading || !egoPublicKey
+          ? null
+          : (
+              <Section>
+                <MenuGroup>
+                  <MenuItem
+                    dropdownMenu={UserDropdownMenu}
+                  >
+                    {
+                      isLoggedIn ?
+                          (
+                            <UserBadge
+                              firstName={userModel?.firstName}
+                              lastName={userModel?.lastName}
+                              title={getUserTitle() || userModel?.email}
+                            />
+                          ) :
+                          <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />
+                    }
+                  </MenuItem>
+                </MenuGroup>
+              </Section>
+            )
+      }
     </AppBar>
   );
 };

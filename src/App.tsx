@@ -22,6 +22,7 @@ import { ApolloProvider } from "@apollo/react-hooks";
 import { createPortal } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
 import { ThemeProvider } from "@icgc-argo/uikit";
+import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import Modal from "@icgc-argo/uikit/Modal";
 import { InMemoryCache } from "apollo-cache-inmemory";
 import {
@@ -41,9 +42,10 @@ import Login from "pages/Login";
 import LoggedIn from "pages/LoggedIn";
 import NoAccess from "pages/NoAccess";
 import NotFound from "pages/NotFound";
+import EgoUnavailable from "pages/EgoUnavailable";
 import Run from "pages/Run";
 import Voyagers from "pages/Voyagers";
-import { useAuth } from "providers/Auth";
+import { AuthProvider, useAuth } from "providers/Auth";
 import { setRedirectUrl } from "utils/redirectUrl";
 import { css } from "emotion";
 
@@ -86,6 +88,8 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 };
 
 const App: React.FC = () => {
+  const { loading, egoPublicKey } = useAuth();
+
   const client = new ApolloClient({
     uri: process.env.REACT_APP_RDPC_GATEWAY,
     cache: new InMemoryCache()
@@ -104,25 +108,32 @@ const App: React.FC = () => {
               `}
             >
               <NavBar />
-              <Switch>
-                <Route exact path={HOME_PAGE_PATH} render={() => <Redirect to={RUNS_PAGE_PATH} />} />
-                <ProtectedRoute exact path={RUNS_PAGE_PATH} component={Home} />
-                <Route exact path={LOGIN_PAGE_PATH} component={Login} />
-                <Route exact path={LOGGED_IN_PAGE_PATH} component={LoggedIn} />
-                <ProtectedRoute
-                  exact
-                  path={API_EXPLORER_PAGE_PATH}
-                  render={() => <Voyagers client={client} />}
-                  />
-                <ProtectedRoute
-                  path={RUN_PAGE_PATH}
-                  component={(props: { match: { params: { id: string } } }) => (
-                    <Run runId={props.match.params.id} />
-                  )}
-                />
-                <Route exact path={NO_ACCESS_PAGE_PATH} component={NoAccess} />
-                <Route component={NotFound} />
-              </Switch>
+              {
+                loading
+                  ? <ModalPortal><DNALoader /></ModalPortal>
+                  : egoPublicKey
+                    ? (
+                      <Switch>
+                        <Route exact path={HOME_PAGE_PATH} render={() => <Redirect to={RUNS_PAGE_PATH} />} />
+                        <ProtectedRoute exact path={RUNS_PAGE_PATH} component={Home} />
+                        <Route exact path={LOGIN_PAGE_PATH} component={Login} />
+                        <Route exact path={LOGGED_IN_PAGE_PATH} component={LoggedIn} />
+                        <ProtectedRoute
+                          exact
+                          path={API_EXPLORER_PAGE_PATH}
+                          render={() => <Voyagers client={client} />}
+                          />
+                        <ProtectedRoute
+                          path={RUN_PAGE_PATH}
+                          component={(props: { match: { params: { id: string } } }) => (
+                            <Run runId={props.match.params.id} />
+                          )}
+                        />
+                        <Route exact path={NO_ACCESS_PAGE_PATH} component={NoAccess} />
+                        <Route component={NotFound} />
+                      </Switch>
+                    ) : <EgoUnavailable />
+              }
             </div>
             <Footer />
             <div
@@ -139,4 +150,4 @@ const App: React.FC = () => {
   );
 };
 
-export default App;
+export default () => <AuthProvider><App/></AuthProvider>;
