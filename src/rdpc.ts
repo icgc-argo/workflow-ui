@@ -18,11 +18,10 @@
 
 import urlJoin from "url-join";
 import ApolloClient, { gql } from "apollo-boost";
-
-const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || "";
+import { MANAGEMENT_API, RDPC_GATEWAY } from 'config/globals';
 
 const client = new ApolloClient({
-  uri: process.env.REACT_APP_RDPC_GATEWAY,
+  uri: RDPC_GATEWAY,
 });
 
 export const runWorkflow = ({

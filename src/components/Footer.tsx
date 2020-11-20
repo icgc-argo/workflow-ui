@@ -16,7 +16,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Footer from "@icgc-argo/uikit/Footer";
 import { css } from "emotion";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider"
@@ -27,12 +27,32 @@ import {
   ARGO_PRIVACY_PAGE,
   ARGO_TERMS_PAGE
 } from 'config/argoPages';
+import { APP_VERSION, MANAGEMENT_API_STATUS_URL } from "config/globals";
 
 export default () => {
   const theme = useTheme();
+  const [apiVersion, setApiVersion] = useState(null);
+
+  useEffect(() => {
+    fetch(MANAGEMENT_API_STATUS_URL, {
+      method: 'GET',
+      mode: 'cors',
+    })
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+      console.log(data.workflow_engine_versions.nextflow);
+      setApiVersion(data.workflow_engine_versions.nextflow);
+    })
+    .catch(err => {
+      console.warn(err);
+    });
+  }, []);
 
   return (
     <Footer
+      version={APP_VERSION}
+      apiVersion={apiVersion}
       className={css`
         padding: 0 24px;
         background: ${theme.colors.white};

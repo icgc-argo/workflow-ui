@@ -25,6 +25,7 @@ import { ThemeProvider } from "@icgc-argo/uikit";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import Modal from "@icgc-argo/uikit/Modal";
 import { InMemoryCache } from "apollo-cache-inmemory";
+import { RDPC_GATEWAY } from 'config/globals';
 import {
   HOME_PAGE_PATH,
   LOGIN_PAGE_PATH,
@@ -91,7 +92,7 @@ const App: React.FC = () => {
   const { loading, egoPublicKey } = useAuth();
 
   const client = new ApolloClient({
-    uri: process.env.REACT_APP_RDPC_GATEWAY,
+    uri: RDPC_GATEWAY,
     cache: new InMemoryCache()
   });
 
