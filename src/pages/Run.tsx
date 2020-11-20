@@ -35,6 +35,7 @@ import { useAppContext } from "context/App";
 import { parseEpochToEST } from "utils/time";
 import { sortTasks } from "utils/task";
 import { CancelRunButton } from "components/CancelRun";
+import TitleBar from 'components/TitleBar';
 import { ModalPortal } from "App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 
@@ -122,6 +123,7 @@ export default ({ runId }: { runId: string }) => {
         </ModalPortal>
       )}
       {error && <div>Houston, we have a problem!</div>}
+      <TitleBar page={`Run ${run?.runId || ''}`} />
       {!dataLoading && run && (
         <div
           className={css`
