@@ -60,7 +60,7 @@ const NavBar: React.FC = () => {
   ) : null;
 
   return (
-    <AppBar>
+    <AppBar css={null}>
       <Section>
         <Link to="/">
           <img

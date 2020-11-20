@@ -97,6 +97,7 @@ export default () => {
         `}
       >
         <Container
+          css={null}
           className={css`
             padding: 10px;
             padding-bottom: 0px;
@@ -112,13 +113,14 @@ export default () => {
               align-items: center;
             `}
           >
-            <Typography variant="sectionHeader" bold color="primary">
+            <Typography variant="sectionHeader" bold color="primary" css={null}>
               Workflow runs
             </Typography>
           </div>
           <RunsTable runs={data?.runs || []} setLoading={setLoading} />
         </Container>
         <Container
+          css={null}
           className={css`
             padding: 10px;
             padding-bottom: 0px;

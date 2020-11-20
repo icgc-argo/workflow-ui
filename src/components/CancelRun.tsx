@@ -59,7 +59,7 @@ export const CancelConfirmModal = ({
       onCancelClick={onCancelCancelled}
       onActionClick={onCancelConfirmed}
     >
-      <Typography>
+      <Typography color={undefined} css={null}>
         Cancel run: <strong>{runId}</strong>
       </Typography>
     </Modal>
@@ -83,14 +83,14 @@ export const CancelResponseModal = ({
         cancelText="Ok"
       >
         {"run_id" in cancelResponse && (
-          <Typography>
+          <Typography color={undefined} css={null}>
             Run with ID: <strong>{cancelResponse.run_id}</strong> has been
             cancelled.
           </Typography>
         )}
         {"msg" in cancelResponse && (
           <>
-            <Typography>
+            <Typography color={undefined} css={null}>
               The following error was encountered trying to cancel your
               workflow:
             </Typography>

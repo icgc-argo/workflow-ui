@@ -6,7 +6,7 @@
   "dependencies": {
     "@apollo/react-hooks": "^3.1.5",
     "@icgc-argo/ego-token-utils": "^7.2.0",
-    "@icgc-argo/uikit": "^1.5.0",
+    "@icgc-argo/uikit": "^1.7.0",
     "@testing-library/jest-dom": "^5.11.0",
     "@testing-library/react": "^10.4.3",
     "@testing-library/user-event": "^12.0.11",
