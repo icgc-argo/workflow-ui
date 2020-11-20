@@ -23,11 +23,14 @@ import gql from "graphql-tag";
 import { css } from "emotion";
 import TitleBar from 'components/TitleBar';
 
+const NAVBAR_HEIGHT = '62px';
+const TITLEBAR_HEIGHT = '68px';
+
 export default ({ client }: { client: ApolloClient<any> }) => {
   return (
     <div
       className={css`
-        height: calc(100% - 62px - 68px);
+        height: calc(100% - ${NAVBAR_HEIGHT} - ${TITLEBAR_HEIGHT});
       `}
     >
       <div style={{padding: '20px 20px 0 20px', marginBottom: '-10px'}}>
