@@ -42,10 +42,10 @@ const TitleBar = ({ page }: TitleBarProps) => {
       </h1>
       <hr
         className={css`
-          height: '1px';
-          backgroundColor: ${theme.colors.grey_2};
-          margin: '0 0 10px -20px';
-          width: '100vw';
+          height: 1px;
+          background-color: ${theme.colors.grey_2};
+          margin: 0 0 10px -20px;
+          width: 100vw;
           border: 0;
         `}  
       />
