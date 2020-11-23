@@ -41,15 +41,13 @@ const TitleBar = ({ page }: TitleBarProps) => {
         <span className={css`text-transform: capitalize;`}>{RDPC_REGION}</span> RDPC: {page}
       </h1>
       <hr
-        style={
-          {
-            height: '1px',
-            backgroundColor: theme.colors.grey_2,
-            margin: '0 0 10px -20px',
-            width: '100vw',
-            border: 0
-          }
-        }  
+        className={css`
+          height: '1px';
+          backgroundColor: ${theme.colors.grey_2};
+          margin: '0 0 10px -20px';
+          width: '100vw';
+          border: 0;
+        `}  
       />
     </>
   );
