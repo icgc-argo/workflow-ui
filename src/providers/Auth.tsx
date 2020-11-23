@@ -20,7 +20,7 @@ import React, { useEffect, useContext, useState } from 'react';
 import egoUtils from '@icgc-argo/ego-token-utils';
 import memoize from 'lodash/memoize';
 import Cookies from 'js-cookie';
-import { EGO_JWT_KEY, EGO_PUBLIC_KEY_URL, RDPC_POLICY_NAME } from 'config/globals';
+import { EGO_JWT_KEY, EGO_PUBLIC_KEY_URL, RDPC_POLICY_NAME, IGNORE_EGO } from 'config/globals';
 
 type T_AuthContext = [
   [string, React.Dispatch<React.SetStateAction<string>>],
@@ -74,7 +74,7 @@ export const AuthProvider = ({ children }: any) => {
   };
 
   useEffect(() => {
-    if (process.env.REACT_APP_IGNORE_EGO) {
+    if (IGNORE_EGO) {
       setLoading(false);
     } else {
       configureEgoPublicKey();
@@ -126,7 +126,7 @@ export const useAuth = () => {
   };
 
   const getEgoPublicKey = (): string => {
-    if (process.env.REACT_APP_IGNORE_EGO) {
+    if (IGNORE_EGO) {
       return 'IGNORE_EGO=true';
     }
 
@@ -146,7 +146,7 @@ export const useAuth = () => {
   };
 
   const getUserModel = () => {
-    if (process.env.REACT_APP_IGNORE_EGO) {
+    if (IGNORE_EGO) {
       return {
         firstName: 'Admin',
         lastName: 'User',
@@ -165,7 +165,7 @@ export const useAuth = () => {
   };
 
   const isLoggedIn = (): boolean => {
-    if (process.env.REACT_APP_IGNORE_EGO) {
+    if (IGNORE_EGO) {
       return true;
     }
 
@@ -193,7 +193,7 @@ export const useAuth = () => {
   };
 
   const canWrite = (token?: string) => {
-    if (process.env.REACT_APP_IGNORE_EGO) {
+    if (IGNORE_EGO) {
       return true;
     }
 
