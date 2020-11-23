@@ -74,7 +74,11 @@ export const AuthProvider = ({ children }: any) => {
   };
 
   useEffect(() => {
-    configureEgoPublicKey();
+    if (process.env.REACT_APP_IGNORE_EGO) {
+      setLoading(false);
+    } else {
+      configureEgoPublicKey();
+    }
   }, []);
 
   return (
@@ -122,6 +126,10 @@ export const useAuth = () => {
   };
 
   const getEgoPublicKey = (): string => {
+    if (process.env.REACT_APP_IGNORE_EGO) {
+      return 'IGNORE_EGO=true';
+    }
+
     if (!egoPublicKey) {
       return '';
     }
@@ -138,6 +146,14 @@ export const useAuth = () => {
   };
 
   const getUserModel = () => {
+    if (process.env.REACT_APP_IGNORE_EGO) {
+      return {
+        firstName: 'Admin',
+        lastName: 'User',
+        email: 'admin@example.com',
+      };
+    }
+
     if (isValidJwt(getToken())) {
       const data = decodeToken(getToken());
       if (data && data.context && data.context.user) {
@@ -149,6 +165,10 @@ export const useAuth = () => {
   };
 
   const isLoggedIn = (): boolean => {
+    if (process.env.REACT_APP_IGNORE_EGO) {
+      return true;
+    }
+
     return isValidJwt(getToken());
   };
 
@@ -173,6 +193,10 @@ export const useAuth = () => {
   };
 
   const canWrite = (token?: string) => {
+    if (process.env.REACT_APP_IGNORE_EGO) {
+      return true;
+    }
+
     if (token) {
       return getPermissionsFromToken(token).filter(permission => permission.toLowerCase().startsWith(`${RDPC_POLICY_NAME}.WRITE`.toLowerCase())).length > 0;
     }
@@ -195,12 +219,10 @@ export const useAuth = () => {
     egoUtils(getEgoPublicKey()).isRdpcMember(permissions);
 
   return {
-    token: getToken(),
     setToken,
     clearToken,
     egoPublicKey: getEgoPublicKey(),
     loading,
-    permissions: getPermissions(),
     userModel: getUserModel(),
     isLoggedIn: isLoggedIn(),
     isValidJwt,
