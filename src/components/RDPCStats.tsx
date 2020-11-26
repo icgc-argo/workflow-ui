@@ -59,7 +59,7 @@ export default ({
 
   return (
     <>
-      <Typography variant="sectionHeader" bold color="primary">
+      <Typography variant="sectionHeader" bold color="primary" css={null}>
         RDPC Stats
       </Typography>
       <div
@@ -70,7 +70,7 @@ export default ({
         `}
       >
         <div>
-          <Typography variant="label" bold color="primary">
+          <Typography variant="label" bold color="primary" css={null}>
             Workflows Running:
           </Typography>
           <span
@@ -85,7 +85,7 @@ export default ({
           </span>
         </div>
         <div>
-          <Typography variant="label" bold color="primary">
+          <Typography variant="label" bold color="primary" css={null}>
             Tasks Running:
           </Typography>
           <span
@@ -100,7 +100,7 @@ export default ({
           </span>
         </div>
         <div>
-          <Typography variant="label" bold color="primary">
+          <Typography variant="label" bold color="primary" css={null}>
             Total CPU Cores Requested:
           </Typography>
           <span
@@ -127,7 +127,7 @@ export default ({
           border-top: 1px solid ${theme.colors.grey_2};
         `}
       >
-        <Typography variant="sectionHeader" bold color="primary">
+        <Typography variant="sectionHeader" bold color="primary" css={null}>
           Latest Tasks
         </Typography>
         {tasks.length === 0 && (

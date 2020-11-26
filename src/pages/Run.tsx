@@ -35,6 +35,7 @@ import { useAppContext } from "context/App";
 import { parseEpochToEST } from "utils/time";
 import { sortTasks } from "utils/task";
 import { CancelRunButton } from "components/CancelRun";
+import TitleBar from 'components/TitleBar';
 import { ModalPortal } from "App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 
@@ -122,6 +123,7 @@ export default ({ runId }: { runId: string }) => {
         </ModalPortal>
       )}
       {error && <div>Houston, we have a problem!</div>}
+      <TitleBar page={`Run ${run?.runId || ''}`} />
       {!dataLoading && run && (
         <div
           className={css`
@@ -133,22 +135,22 @@ export default ({ runId }: { runId: string }) => {
           `}
         >
           <div>
-            <Typography variant="title">
+            <Typography variant="title" css={null}>
               Workflow Repo: <strong>{run.repository}</strong>
             </Typography>
-            <Typography variant="subtitle">
+            <Typography variant="subtitle" css={null}>
               Run ID: <strong>{run.runId}</strong>
             </Typography>
-            <Typography variant="subtitle">
+            <Typography variant="subtitle" css={null}>
               Session ID: <strong>{run.sessionId}</strong>
             </Typography>
-            <Typography variant="label" as="div">
+            <Typography variant="label" as="div" css={null}>
               <strong>started:</strong> {parseEpochToEST(run.startTime)}
             </Typography>
-            <Typography variant="label" as="div">
+            <Typography variant="label" as="div" css={null}>
               <strong>completed:</strong> {parseEpochToEST(run.completeTime)}
             </Typography>
-            <Typography variant="label" as="div">
+            <Typography variant="label" as="div" css={null}>
               <strong>duration:</strong> {fmtTime(run.duration)}
             </Typography>
             <CancelRunButton
@@ -171,7 +173,7 @@ export default ({ runId }: { runId: string }) => {
                 margin: 10px 0;
               `}
             >
-              <Typography variant="label" as="div">
+              <Typography variant="label" as="div" css={null}>
                 <strong>Error Msg:</strong> {run.errorReport}
               </Typography>
             </div>
@@ -181,17 +183,20 @@ export default ({ runId }: { runId: string }) => {
       {!!run && (
         <Container
           loading={dataLoading}
+          css={null}
           className={css`
             z-index: 0; /* Ace Editor > Modal overlap fix */
           `}
         >
           <Tabs value={activeTab}>
             <Tab
+              css={null}
               label="Task Logs"
               value="logs"
               onClick={(e) => setActiveTab("logs")}
             />
             <Tab
+              css={null}
               label="Params"
               value="params"
               onClick={(e) => setActiveTab("params")}
@@ -245,6 +250,7 @@ export default ({ runId }: { runId: string }) => {
                           `}
                         >
                           <Typography
+                            css={null}
                             color={taskTextColor}
                             bold
                             variant="label"
@@ -325,6 +331,7 @@ export default ({ runId }: { runId: string }) => {
                   `}
                 >
                   <Typography
+                    css={null}
                     color={textColor}
                     bold
                     variant="label"
@@ -362,6 +369,7 @@ export default ({ runId }: { runId: string }) => {
                     `}
                   >
                     <Typography
+                      css={null}
                       color="black"
                       bold
                       variant="label"
@@ -392,6 +400,7 @@ export default ({ runId }: { runId: string }) => {
                     `}
                   >
                     <Typography
+                      css={null}
                       color="black"
                       bold
                       variant="label"

@@ -22,6 +22,7 @@ import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
 import Typography from "@icgc-argo/uikit/Typography";
+import TitleBar from 'components/TitleBar';
 import RunsTable from "components/RunsTable";
 import { useAppContext } from "context/App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
@@ -82,6 +83,7 @@ export default () => {
         </ModalPortal>
       )}
       {error && <div>Houston, we have a problem!</div>}
+      <TitleBar page={'Runs'} />
       <div
         className={css`
           margin: 10px 0px;
@@ -95,6 +97,7 @@ export default () => {
         `}
       >
         <Container
+          css={null}
           className={css`
             padding: 10px;
             padding-bottom: 0px;
@@ -110,13 +113,14 @@ export default () => {
               align-items: center;
             `}
           >
-            <Typography variant="sectionHeader" bold color="primary">
+            <Typography variant="sectionHeader" bold color="primary" css={null}>
               Workflow runs
             </Typography>
           </div>
           <RunsTable runs={data?.runs || []} setLoading={setLoading} />
         </Container>
         <Container
+          css={null}
           className={css`
             padding: 10px;
             padding-bottom: 0px;

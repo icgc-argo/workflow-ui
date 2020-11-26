@@ -16,40 +16,41 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from "react";
-import { Voyager } from "graphql-voyager";
-import ApolloClient from "apollo-client";
-import gql from "graphql-tag";
-import { css } from "emotion";
-import TitleBar from 'components/TitleBar';
+import React from 'react';
+import { css } from 'emotion';
+import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
+import { RDPC_REGION } from 'config/globals';
 
-const NAVBAR_HEIGHT = '62px';
-const TITLEBAR_HEIGHT = '68px';
+type TitleBarProps = {
+  page: string
+};
 
-export default ({ client }: { client: ApolloClient<any> }) => {
+const TitleBar = ({ page }: TitleBarProps) => {
+  const theme = useTheme();
+
   return (
-    <div
-      className={css`
-        height: calc(100% - ${NAVBAR_HEIGHT} - ${TITLEBAR_HEIGHT});
-      `}
-    >
-      <div style={{padding: '20px 20px 0 20px', marginBottom: '-10px'}}>
-        <TitleBar page={'API Explorer'} />
-      </div>
-      <link
-        rel="stylesheet"
-        href="https://cdn.jsdelivr.net/npm/graphql-voyager/dist/voyager.css"
-      />
-      <Voyager
-        workerURI={process.env.PUBLIC_URL + "/voyager.worker.js"}
-        introspection={query =>
-          client.query({
-            query: gql`
-              ${query}
-            `
-          })
+    <>
+      <h1
+        style={
+          {
+            ...theme.typography.title,
+            marginTop: 0
+          }
         }
+      >
+        <span className={css`text-transform: capitalize;`}>{RDPC_REGION}</span> RDPC: {page}
+      </h1>
+      <hr
+        className={css`
+          height: 1px;
+          background-color: ${theme.colors.grey_2};
+          margin: 0 0 10px -20px;
+          width: 100vw;
+          border: 0;
+        `}  
       />
-    </div>
+    </>
   );
 };
+
+export default TitleBar;
