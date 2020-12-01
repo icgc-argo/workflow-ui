@@ -17,7 +17,8 @@
  */
 
 import React, { useEffect } from "react";
-import ApolloClient from "apollo-boost";
+import ApolloClient from "apollo-client";
+import { createHttpLink } from 'apollo-link-http';
 import { ApolloProvider } from "@apollo/react-hooks";
 import { createPortal } from "react-dom";
 import { BrowserRouter as Router, Switch, Route, Redirect } from "react-router-dom";
@@ -89,10 +90,17 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 };
 
 const App: React.FC = () => {
-  const { loading, egoPublicKey } = useAuth();
+  const { loading, egoPublicKey, token } = useAuth();
 
   const client = new ApolloClient({
-    uri: RDPC_GATEWAY,
+    link: createHttpLink({
+      uri: RDPC_GATEWAY,
+      headers: token
+      ? {
+          authorization: `Bearer ${token}`,
+        }
+      : {},
+    }),
     cache: new InMemoryCache()
   });
 

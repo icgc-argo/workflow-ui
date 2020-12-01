@@ -22,7 +22,7 @@ import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
 import { cancelWorkflow } from "rdpc";
 import Typography from "@icgc-argo/uikit/Typography";
-import { ApolloError } from "apollo-boost";
+import ApolloClient, { ApolloError } from "apollo-client";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import { useAuth } from "providers/Auth";
 import { css } from "emotion";
@@ -115,12 +115,14 @@ export const CancelResponseModal = ({
 };
 
 export const CancelRunButton = ({
+  client,
   run,
   variant = "primary",
   size = "md",
   setLoading,
   className,
 }: {
+  client: ApolloClient<any>,
   run: { runId: string; state: string };
   variant: "text" | "primary" | "secondary";
   size: "sm" | "md";
@@ -142,7 +144,7 @@ export const CancelRunButton = ({
   >["onActionClick"] = async () => {
     setLoading(true);
     try {
-      const cancelledRun = await cancelWorkflow(run.runId);
+      const cancelledRun = await cancelWorkflow({client: client, runId: run.runId});
       setLoading(false);
       setCancelModalRunId("");
       setCancelResponse(cancelledRun);

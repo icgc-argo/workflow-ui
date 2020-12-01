@@ -23,15 +23,17 @@ import { DashboardQueryResponse, RunCompact } from "gql/types";
 import { parseEpochToEST } from "utils/time";
 import { CancelConfirmModal, CancelResponseModal, CancelResponse } from "components/CancelRun";
 import Modal from "@icgc-argo/uikit/Modal";
-import { ApolloError } from "apollo-boost";
+import ApolloClient, { ApolloError } from "apollo-client";
 import Button from "@icgc-argo/uikit/Button";
 import { cancelWorkflow } from "rdpc";
 import { useAuth } from "providers/Auth";
 
 export default ({
+  client,
   runs,
   setLoading,
 }: {
+  client: ApolloClient<any>,
   runs: RunCompact[];
   setLoading: (isLoading: boolean) => void;
 }) => {
@@ -48,7 +50,7 @@ export default ({
   const onCancelConfirmed = async (runId: string) => {
     setLoading(true);
     try {
-      const cancelledRun = await cancelWorkflow(runId);
+      const cancelledRun = await cancelWorkflow({ client, runId });
       setLoading(false);
       setCancelModalRunId("");
       setCancelResponse(cancelledRun);
