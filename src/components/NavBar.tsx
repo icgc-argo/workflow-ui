@@ -75,10 +75,22 @@ const NavBar: React.FC = () => {
           isLoggedIn &&
             (
               <MenuGroup>
-                <NavLink to="/runs" activeStyle={activeItemStyle}>
+                <NavLink
+                  className={css`
+                    text-decoration: none;
+                  `}
+                  activeStyle={activeItemStyle}
+                  to="/runs"
+                >
                   <MenuItem>Runs</MenuItem>
                 </NavLink>
-                <NavLink to="/explorer" activeStyle={activeItemStyle}>
+                <NavLink
+                  className={css`
+                    text-decoration: none;
+                  `}
+                  activeStyle={activeItemStyle}
+                  to="/explorer"
+                >
                   <MenuItem>API Explorer</MenuItem>
                 </NavLink>
               </MenuGroup>
