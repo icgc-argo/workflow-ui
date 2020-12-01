@@ -64,12 +64,12 @@ export default () => {
         {
           displayName: 'ARGO Data Platform',
           href: ARGO_DATA_PLATFORM_PAGE,
-          target: '_self',
+          target: '_blank',
         },
         {
           displayName: 'Contact',
           href: ARGO_CONTACT_PAGE,
-          target: '_self',
+          target: '_blank',
         },
         {
           displayName: 'Documentation',
