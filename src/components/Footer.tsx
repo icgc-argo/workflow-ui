@@ -40,8 +40,6 @@ export default () => {
     })
     .then(res => res.json())
     .then(data => {
-      console.log(data);
-      console.log(data.workflow_engine_versions.nextflow);
       setApiVersion(data.workflow_engine_versions.nextflow);
     })
     .catch(err => {
