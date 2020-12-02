@@ -79,7 +79,7 @@ spec:
             steps {
                 container('docker') {
                     withCredentials([usernamePassword(credentialsId:'argoContainers', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker login ghcr.io -u $USERNAME -p $PASSWORD'
                     }
                     // DNS error if --network is default
                     sh "docker build --network=host . -t ${dockerRepo}:edge -t ${dockerRepo}:${version}-${commit}"
@@ -115,7 +115,7 @@ spec:
                         sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${gitHubRepo} --tags"
                     }
                      withCredentials([usernamePassword(credentialsId:'argoContainers', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                        sh 'docker login ghcr.io -u $USERNAME -p $PASSWORD'
                     }
                     sh "docker build --network=host -f Dockerfile . -t ${dockerRepo}:latest -t ${dockerRepo}:${version}"
                     sh "docker push ${dockerRepo}:${version}"
