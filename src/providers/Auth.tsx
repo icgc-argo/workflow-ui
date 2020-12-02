@@ -219,6 +219,7 @@ export const useAuth = () => {
     egoUtils(getEgoPublicKey()).isRdpcMember(permissions);
 
   return {
+    token: getToken(),
     setToken,
     clearToken,
     egoPublicKey: getEgoPublicKey(),
