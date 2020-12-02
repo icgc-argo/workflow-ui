@@ -16,33 +16,41 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import moment from "moment-timezone";
-import { Task } from "./gql/types";
+import React from 'react';
+import { css } from 'emotion';
+import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
+import { RDPC_REGION } from 'config/globals';
 
-moment.updateLocale("en", {
-  invalidDate: "N/A",
-});
-
-export const parseEpochToEST = (milli: string) =>
-  moment(parseInt(milli))
-    .tz("America/Toronto")
-    .format("MMMM Do YYYY, h:mm:ss a");
-
-export const sortTasks = (tasks: Task[], reverse = false) => {
-  const stateOrder = [
-    "UNKNOWN",
-    "QUEUED",
-    "RUNNING",
-    "COMPLETE",
-    "EXECUTOR_ERROR",
-  ];
-
-  const sortedTasks = tasks.sort((a, b) => {
-    const ai = stateOrder.indexOf(a.state);
-    const bi = stateOrder.indexOf(b.state);
-
-    return ai > bi ? -1 : ai < bi ? 1 : 0;
-  });
-
-  return reverse ? sortedTasks.reverse() : sortedTasks;
+type TitleBarProps = {
+  page: string
 };
+
+const TitleBar = ({ page }: TitleBarProps) => {
+  const theme = useTheme();
+
+  return (
+    <>
+      <h1
+        style={
+          {
+            ...theme.typography.title,
+            marginTop: 0
+          }
+        }
+      >
+        <span className={css`text-transform: capitalize;`}>{RDPC_REGION}</span> RDPC: {page}
+      </h1>
+      <hr
+        className={css`
+          height: 1px;
+          background-color: ${theme.colors.grey_2};
+          margin: 0 0 10px -20px;
+          width: 100vw;
+          border: 0;
+        `}  
+      />
+    </>
+  );
+};
+
+export default TitleBar;

@@ -16,27 +16,40 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+import React from "react";
+import { Voyager } from "graphql-voyager";
+import ApolloClient from "apollo-client";
+import gql from "graphql-tag";
+import { css } from "emotion";
+import TitleBar from 'components/TitleBar';
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+const NAVBAR_HEIGHT = '62px';
+const TITLEBAR_HEIGHT = '68px';
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+export default ({ client }: { client: ApolloClient<any> }) => {
+  return (
+    <div
+      className={css`
+        height: calc(100% - ${NAVBAR_HEIGHT} - ${TITLEBAR_HEIGHT});
+      `}
+    >
+      <div style={{padding: '20px 20px 0 20px', marginBottom: '-10px'}}>
+        <TitleBar page={'API Explorer'} />
+      </div>
+      <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/graphql-voyager/dist/voyager.css"
+      />
+      <Voyager
+        workerURI={process.env.PUBLIC_URL + "/voyager.worker.js"}
+        introspection={query =>
+          client.query({
+            query: gql`
+              ${query}
+            `
+          })
+        }
+      />
+    </div>
+  );
+};

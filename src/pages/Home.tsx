@@ -17,18 +17,19 @@
  */
 
 import React from "react";
-import { useQuery } from "@apollo/react-hooks";
+import { ApolloConsumer, useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
 import Typography from "@icgc-argo/uikit/Typography";
-import RunsTable from "../components/RunsTable";
-import { useAppContext } from "../context/App";
+import TitleBar from 'components/TitleBar';
+import RunsTable from "components/RunsTable";
+import { useAppContext } from "context/App";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
-import { ModalPortal } from "../App";
-import NewRunFormModal from "../components/NewRunFormModal";
-import { DashboardQueryResponse } from "../gql/types";
-import RDPCStats from "../components/RDPCStats";
+import { ModalPortal } from "App";
+import NewRunFormModal from "components/NewRunFormModal";
+import { DashboardQueryResponse } from "gql/types";
+import RDPCStats from "components/RDPCStats";
 
 export default () => {
   /**
@@ -71,61 +72,70 @@ export default () => {
   const [loading, setLoading] = React.useState(false);
 
   return (
-    <div
-      className={css`
-        padding: 20px;
-      `}
-    >
-      {(dataLoading || loading) && (
-        <ModalPortal>
-          <DNALoader />
-        </ModalPortal>
-      )}
-      {error && <div>Houston, we have a problem!</div>}
-      <div
-        className={css`
-          margin: 10px 0px;
-        `}
-      >
-        <NewRunFormModal setLoading={setLoading} />
-      </div>
-      <div
-        className={css`
-          display: flex;
-        `}
-      >
-        <Container
-          className={css`
-            padding: 10px;
-            padding-bottom: 0px;
-            flex: 3 1 0;
-            margin-right: 12px;
-          `}
-        >
+    <ApolloConsumer>
+      {
+        client => (
           <div
             className={css`
-              padding-bottom: 10px;
-              display: flex;
-              justify-content: space-between;
-              align-items: center;
+              padding: 20px;
             `}
           >
-            <Typography variant="sectionHeader" bold color="primary">
-              Workflow runs
-            </Typography>
+            {(dataLoading || loading) && (
+              <ModalPortal>
+                <DNALoader />
+              </ModalPortal>
+            )}
+            {error && <div>Houston, we have a problem!</div>}
+            <TitleBar page={'Runs'} />
+            <div
+              className={css`
+                margin: 10px 0px;
+              `}
+            >
+              <NewRunFormModal setLoading={setLoading} />
+            </div>
+            <div
+              className={css`
+                display: flex;
+              `}
+            >
+              <Container
+                css={null}
+                className={css`
+                  padding: 10px;
+                  padding-bottom: 0px;
+                  flex: 3 1 0;
+                  margin-right: 12px;
+                `}
+              >
+                <div
+                  className={css`
+                    padding-bottom: 10px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                  `}
+                >
+                  <Typography variant="sectionHeader" bold color="primary" css={null}>
+                    Workflow runs
+                  </Typography>
+                </div>
+                <RunsTable client={client} runs={data?.runs || []} setLoading={setLoading} />
+              </Container>
+              <Container
+                css={null}
+                className={css`
+                  padding: 10px;
+                  padding-bottom: 0px;
+                  flex: 1 3 0;
+                `}
+              >
+                <RDPCStats runData={data?.runs || []} taskData={data?.tasks || []} />
+              </Container>
+            </div>
           </div>
-          <RunsTable runs={data?.runs || []} setLoading={setLoading} />
-        </Container>
-        <Container
-          className={css`
-            padding: 10px;
-            padding-bottom: 0px;
-            flex: 1 3 0;
-          `}
-        >
-          <RDPCStats runData={data?.runs || []} taskData={data?.tasks || []} />
-        </Container>
-      </div>
-    </div>
+        )
+      }
+    </ApolloConsumer>
   );
 };

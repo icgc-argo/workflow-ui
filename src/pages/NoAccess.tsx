@@ -16,27 +16,31 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+import React from 'react';
+import { css } from "emotion";
+import GoogleLogin from '@icgc-argo/uikit/Button/GoogleLogin';
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+import { GOOGLE_AUTH_ENDPOINT } from 'config/globals';
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+export default () => (
+  <div
+    className={css`
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      margin-top: 64px;
+    `}
+  >
+    <p
+      className={css`
+        max-width: 480px;
+        text-align: center;
+      `}
+    >
+      You do not have permissions to access this resource. Please login with the correct account, or contact your DCC representative.
+    </p>
+    <GoogleLogin link={GOOGLE_AUTH_ENDPOINT} />
+  </div>
+);

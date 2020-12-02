@@ -16,27 +16,34 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+import React from 'react';
+import { css } from 'emotion';
+import { useTheme } from "@icgc-argo/uikit/ThemeProvider"
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+interface DropdownButtonProps {
+  children?: React.ReactNode,
+  onClick?: React.MouseEventHandler,
+};
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+const DropdownButton = ({ children, onClick }: DropdownButtonProps) => {
+  const theme = useTheme();
 
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+  const dropdownButtonStyle = css`
+    background: none;
+    border: none;
+    width: 100%;
+    padding: 12px 16px;
+    text-align: left;
+
+    &:hover {
+      color: ${theme.colors.accent1};
+      cursor: pointer;
+    }
+  `;
+
+  return (
+    <button className={dropdownButtonStyle} onClick={onClick}>{children}</button>
+  );
+};
+
+export default DropdownButton;

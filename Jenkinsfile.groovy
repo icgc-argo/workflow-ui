@@ -16,9 +16,9 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-def dockerHubRepo = "icgcargo/workflow-ui"
+def dockerRepo = "ghcr.io/icgc-argo/workflow-ui"
 def gitHubRepo = "icgc-argo/workflow-ui"
-def chartVersion = "0.3.0"
+def chartVersion = "0.5.0"
 def commit = "UNKNOWN"
 def version = "UNKNOWN"
 
@@ -78,13 +78,13 @@ spec:
             }
             steps {
                 container('docker') {
-                    withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                    withCredentials([usernamePassword(credentialsId:'argoContainers', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh 'docker login ghcr.io -u $USERNAME -p $PASSWORD'
                     }
                     // DNS error if --network is default
-                    sh "docker build --network=host . -t ${dockerHubRepo}:edge -t ${dockerHubRepo}:${version}-${commit}"
-                    sh "docker push ${dockerHubRepo}:${version}-${commit}"
-                    sh "docker push ${dockerHubRepo}:edge"
+                    sh "docker build --network=host . -t ${dockerRepo}:edge -t ${dockerRepo}:${version}-${commit}"
+                    sh "docker push ${dockerRepo}:${version}-${commit}"
+                    sh "docker push ${dockerRepo}:edge"
                 }
             }
         }
@@ -114,12 +114,12 @@ spec:
                         sh "git tag ${version}"
                         sh "git push https://${GIT_USERNAME}:${GIT_PASSWORD}@github.com/${gitHubRepo} --tags"
                     }
-                    withCredentials([usernamePassword(credentialsId:'argoDockerHub', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
-                        sh 'docker login -u $USERNAME -p $PASSWORD'
+                     withCredentials([usernamePassword(credentialsId:'argoContainers', usernameVariable: 'USERNAME', passwordVariable: 'PASSWORD')]) {
+                        sh 'docker login ghcr.io -u $USERNAME -p $PASSWORD'
                     }
-                    sh "docker build --network=host -f Dockerfile . -t ${dockerHubRepo}:latest -t ${dockerHubRepo}:${version}"
-                    sh "docker push ${dockerHubRepo}:${version}"
-                    sh "docker push ${dockerHubRepo}:latest"
+                    sh "docker build --network=host -f Dockerfile . -t ${dockerRepo}:latest -t ${dockerRepo}:${version}"
+                    sh "docker push ${dockerRepo}:${version}"
+                    sh "docker push ${dockerRepo}:latest"
                 }
             }
         }
@@ -140,30 +140,30 @@ spec:
         }
 
     }
-    post {
-        unsuccessful {
-            // i used node container since it has curl already
-            container("node") {
-                script {
-                    if (env.BRANCH_NAME == "master" || env.BRANCH_NAME == "develop") {
-                    withCredentials([string(credentialsId: 'JenkinsFailuresSlackChannelURL', variable: 'JenkinsFailuresSlackChannelURL')]) { 
-                            sh "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Build Failed: ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL}) \"}' ${JenkinsFailuresSlackChannelURL}"
-                        }
-                    }
-                }
-            }
-        }
-        fixed {
-            // i used node container since it has curl already
-            container("node") {
-                script {
-                    if (env.BRANCH_NAME == "master" || env.BRANCH_NAME == "develop") {
-                    withCredentials([string(credentialsId: 'JenkinsFailuresSlackChannelURL', variable: 'JenkinsFailuresSlackChannelURL')]) { 
-                            sh "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Build Fixed: ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL}) \"}' ${JenkinsFailuresSlackChannelURL}"
-                        }
-                    }
-                }
-            }
-        }
-    }
+    // post {
+    //     unsuccessful {
+    //         // i used node container since it has curl already
+    //         container("node") {
+    //             script {
+    //                 if (env.BRANCH_NAME == "master" || env.BRANCH_NAME == "develop") {
+    //                 withCredentials([string(credentialsId: 'JenkinsFailuresSlackChannelURL', variable: 'JenkinsFailuresSlackChannelURL')]) { 
+    //                         sh "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Build Failed: ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL}) \"}' ${JenkinsFailuresSlackChannelURL}"
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     fixed {
+    //         // i used node container since it has curl already
+    //         container("node") {
+    //             script {
+    //                 if (env.BRANCH_NAME == "master" || env.BRANCH_NAME == "develop") {
+    //                 withCredentials([string(credentialsId: 'JenkinsFailuresSlackChannelURL', variable: 'JenkinsFailuresSlackChannelURL')]) { 
+    //                         sh "curl -X POST -H 'Content-type: application/json' --data '{\"text\":\"Build Fixed: ${env.JOB_NAME} [${env.BUILD_NUMBER}] (${env.BUILD_URL}) \"}' ${JenkinsFailuresSlackChannelURL}"
+    //                     }
+    //                 }
+    //             }
+    //         }
+    //     }
+    // }
 }

@@ -16,27 +16,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+import React from 'react';
+import { LOGIN_PAGE_PATH } from 'config/pages';
+import DropdownButton from 'components/DropdownButton';
+import { useHistory } from 'react-router-dom';
+import { useAuth } from 'providers/Auth';
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+const Logout: React.FC = () => {
+  const { clearToken } = useAuth();
+  const history = useHistory();
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+  const handleClick: React.MouseEventHandler = () => {
+    clearToken();
+    history.push(LOGIN_PAGE_PATH);
+  };
 
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+  return (
+    <DropdownButton onClick={handleClick}>Log Out</DropdownButton>
+  );
+};
+
+export default Logout;

@@ -16,27 +16,19 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+import packageJson from './../../package.json';
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+export const APP_VERSION = packageJson.version;
+export const EGO_API_ROOT = process.env.REACT_APP_EGO_API_ROOT;
+export const EGO_CLIENT_ID = process.env.REACT_APP_EGO_CLIENT_ID;
+export const EGO_JWT_KEY = process.env.REACT_APP_EGO_JWT_KEY || `EGO_JWT`;
+export const EGO_PUBLIC_KEY_URL = `${EGO_API_ROOT}/oauth/token/public_key`;
+export const EGO_TOKEN_ENDPOINT = `${EGO_API_ROOT}/oauth/ego-token?client_id=${EGO_CLIENT_ID}`;
+export const GOOGLE_AUTH_ENDPOINT = `${EGO_API_ROOT}/oauth/login/google?client_id=${EGO_CLIENT_ID}`;
+export const RDPC_DOMAIN = process.env.REACT_APP_RDPC_DOMAIN || `RDPC`;
+export const RDPC_REGION = process.env.REACT_APP_RDPC_REGION || 'collab';
+export const RDPC_POLICY_NAME = `${RDPC_DOMAIN}-${RDPC_REGION}`;
+export const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || ``;
+export const MANAGEMENT_API_STATUS_URL = `${MANAGEMENT_API}/service-info`;
+export const RDPC_GATEWAY = process.env.REACT_APP_RDPC_GATEWAY || ``;
+export const IGNORE_EGO = process.env.REACT_APP_IGNORE_EGO;

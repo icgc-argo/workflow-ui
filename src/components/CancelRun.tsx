@@ -18,12 +18,13 @@
 
 import React from "react";
 import Button from "@icgc-argo/uikit/Button";
-import { ModalPortal } from "../App";
+import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
-import { cancelWorkflow } from "../rdpc";
+import { cancelWorkflow } from "rdpc";
 import Typography from "@icgc-argo/uikit/Typography";
-import { ApolloError } from "apollo-boost";
+import ApolloClient, { ApolloError } from "apollo-client";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
+import { useAuth } from "providers/Auth";
 import { css } from "emotion";
 
 export type CancelSuccess = {
@@ -58,7 +59,7 @@ export const CancelConfirmModal = ({
       onCancelClick={onCancelCancelled}
       onActionClick={onCancelConfirmed}
     >
-      <Typography>
+      <Typography color={undefined} css={null}>
         Cancel run: <strong>{runId}</strong>
       </Typography>
     </Modal>
@@ -82,14 +83,14 @@ export const CancelResponseModal = ({
         cancelText="Ok"
       >
         {"run_id" in cancelResponse && (
-          <Typography>
+          <Typography color={undefined} css={null}>
             Run with ID: <strong>{cancelResponse.run_id}</strong> has been
             cancelled.
           </Typography>
         )}
         {"msg" in cancelResponse && (
           <>
-            <Typography>
+            <Typography color={undefined} css={null}>
               The following error was encountered trying to cancel your
               workflow:
             </Typography>
@@ -114,12 +115,14 @@ export const CancelResponseModal = ({
 };
 
 export const CancelRunButton = ({
+  client,
   run,
   variant = "primary",
   size = "md",
   setLoading,
   className,
 }: {
+  client: ApolloClient<any>,
   run: { runId: string; state: string };
   variant: "text" | "primary" | "secondary";
   size: "sm" | "md";
@@ -130,6 +133,7 @@ export const CancelRunButton = ({
   const [cancelResponse, setCancelResponse] = React.useState<
     CancelResponse | ApolloError | undefined | null
   >(null);
+  const { isAdmin } = useAuth();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -140,7 +144,7 @@ export const CancelRunButton = ({
   >["onActionClick"] = async () => {
     setLoading(true);
     try {
-      const cancelledRun = await cancelWorkflow(run.runId);
+      const cancelledRun = await cancelWorkflow({client: client, runId: run.runId});
       setLoading(false);
       setCancelModalRunId("");
       setCancelResponse(cancelledRun);
@@ -169,7 +173,7 @@ export const CancelRunButton = ({
         onClick={() => onCancelClick(run.runId)}
         variant={variant}
         size={size}
-        disabled={run.state !== "RUNNING"}
+        disabled={!isAdmin() || run.state !== "RUNNING"}
         className={className}
       >
         Cancel

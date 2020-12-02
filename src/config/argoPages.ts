@@ -1,9 +1,10 @@
 /*
  * Copyright (c) 2020 The Ontario Institute for Cancer Research. All rights reserved
  *
- * This program and the accompanying materials are made available under the terms of the GNU Affero General Public License v3.0.
- * You should have received a copy of the GNU Affero General Public License along with
- * this program. If not, see <http://www.gnu.org/licenses/>.
+ * This program and the accompanying materials are made available under the terms of
+ * the GNU Affero General Public License v3.0. You should have received a copy of the
+ * GNU Affero General Public License along with this program.
+ *  If not, see <http://www.gnu.org/licenses/>.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY
  * EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
@@ -16,27 +17,11 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+export const ARGO_ROOT = 'https://www.icgc-argo.org';
+export const ARGO_PLATFORM_ROOT = 'https://platform.icgc-argo.org';
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+export const ARGO_DATA_PLATFORM_PAGE = `${ARGO_PLATFORM_ROOT}/`;
+export const ARGO_CONTACT_PAGE = `${ARGO_PLATFORM_ROOT}/contact`;
+export const ARGO_DOCS_PAGE = 'https://docs.icgc-argo.org/';
+export const ARGO_PRIVACY_PAGE = `${ARGO_ROOT}/page/2/privacy`;
+export const ARGO_TERMS_PAGE = `${ARGO_ROOT}/page/1/terms-and-conditions`;

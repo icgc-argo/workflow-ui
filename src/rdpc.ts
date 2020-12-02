@@ -17,13 +17,9 @@
  */
 
 import urlJoin from "url-join";
-import ApolloClient, { gql } from "apollo-boost";
-
-const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || "";
-
-const client = new ApolloClient({
-  uri: process.env.REACT_APP_RDPC_GATEWAY,
-});
+import ApolloClient from 'apollo-client';
+import gql from "graphql-tag";
+import { MANAGEMENT_API } from 'config/globals';
 
 export const runWorkflow = ({
   workflow_url,
@@ -44,7 +40,7 @@ export const runWorkflow = ({
     }),
   }).then(async (res) => res.json());
 
-export const cancelWorkflow = (runId: String): Promise<{ run_id: string }> =>
+export const cancelWorkflow = ({ client, runId }: {client: ApolloClient<any>, runId: String}): Promise<{ run_id: string }> =>
   fetch(urlJoin(MANAGEMENT_API, `/runs/${runId}/cancel`), {
     method: "POST",
     headers: { "Content-Type": "application/json" },

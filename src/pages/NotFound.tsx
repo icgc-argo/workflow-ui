@@ -16,27 +16,30 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+import React from 'react';
+import { css } from "emotion";
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+export default () => {
+  return (
+    <div
+      className={css`
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        margin-top: 64px;
+      `}
+    >
+      <h1>Not Found</h1>
+      <p
+        className={css`
+          max-width: 480px;
+          text-align: center;
+        `}
+      >
+        We're sorry, but the page you're looking for was not found.
+      </p>
+    </div>
+  );
+};

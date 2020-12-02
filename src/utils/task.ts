@@ -16,27 +16,23 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
- html,
- body {
-   height: 100%;
- }
+import { Task } from "gql/types";
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+export const sortTasks = (tasks: Task[], reverse = false) => {
+  const stateOrder = [
+    "UNKNOWN",
+    "QUEUED",
+    "RUNNING",
+    "COMPLETE",
+    "EXECUTOR_ERROR",
+  ];
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
+  const sortedTasks = tasks.sort((a, b) => {
+    const ai = stateOrder.indexOf(a.state);
+    const bi = stateOrder.indexOf(b.state);
 
-#root {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
+    return ai > bi ? -1 : ai < bi ? 1 : 0;
+  });
+
+  return reverse ? sortedTasks.reverse() : sortedTasks;
+};

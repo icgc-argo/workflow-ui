@@ -19,18 +19,21 @@
 import React from "react";
 import Table, { TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
-import { DashboardQueryResponse, RunCompact } from "../gql/types";
-import { parseEpochToEST } from "../utils";
-import { CancelConfirmModal, CancelResponseModal, CancelResponse } from "./CancelRun";
+import { DashboardQueryResponse, RunCompact } from "gql/types";
+import { parseEpochToEST } from "utils/time";
+import { CancelConfirmModal, CancelResponseModal, CancelResponse } from "components/CancelRun";
 import Modal from "@icgc-argo/uikit/Modal";
-import { ApolloError } from "apollo-boost";
+import ApolloClient, { ApolloError } from "apollo-client";
 import Button from "@icgc-argo/uikit/Button";
-import { cancelWorkflow } from "../rdpc";
+import { cancelWorkflow } from "rdpc";
+import { useAuth } from "providers/Auth";
 
 export default ({
+  client,
   runs,
   setLoading,
 }: {
+  client: ApolloClient<any>,
   runs: RunCompact[];
   setLoading: (isLoading: boolean) => void;
 }) => {
@@ -38,6 +41,7 @@ export default ({
   const [cancelResponse, setCancelResponse] = React.useState<
     CancelResponse | ApolloError | undefined | null
   >(null);
+  const { isAdmin } = useAuth();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -46,7 +50,7 @@ export default ({
   const onCancelConfirmed = async (runId: string) => {
     setLoading(true);
     try {
-      const cancelledRun = await cancelWorkflow(runId);
+      const cancelledRun = await cancelWorkflow({ client, runId });
       setLoading(false);
       setCancelModalRunId("");
       setCancelResponse(cancelledRun);
@@ -113,7 +117,7 @@ export default ({
           onClick={() => onCancelClick(original.runId)}
           variant="text"
           size="sm"
-          disabled={original.state !== "RUNNING"}
+          disabled={!isAdmin() || original.state !== "RUNNING"}
         >
           Cancel
         </Button>
