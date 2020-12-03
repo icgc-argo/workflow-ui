@@ -133,7 +133,7 @@ export const CancelRunButton = ({
   const [cancelResponse, setCancelResponse] = React.useState<
     CancelResponse | ApolloError | undefined | null
   >(null);
-  const { isAdmin } = useAuth();
+  const { isAdmin, token } = useAuth();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -144,7 +144,7 @@ export const CancelRunButton = ({
   >["onActionClick"] = async () => {
     setLoading(true);
     try {
-      const cancelledRun = await cancelWorkflow({client: client, runId: run.runId});
+      const cancelledRun = await cancelWorkflow({client: client, runId: run.runId, token: token});
       setLoading(false);
       setCancelModalRunId("");
       setCancelResponse(cancelledRun);
