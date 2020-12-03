@@ -25,14 +25,19 @@ export const runWorkflow = ({
   workflow_url,
   workflow_params,
   workflow_engine_params,
+  token,
 }: {
   workflow_url: string;
   workflow_params: string;
   workflow_engine_params: string;
+  token: string;
 }): Promise<{ run_id: string }> =>
   fetch(urlJoin(MANAGEMENT_API, "/runs"), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
     body: JSON.stringify({
       workflow_url,
       workflow_params,
@@ -40,10 +45,13 @@ export const runWorkflow = ({
     }),
   }).then(async (res) => res.json());
 
-export const cancelWorkflow = ({ client, runId }: {client: ApolloClient<any>, runId: String}): Promise<{ run_id: string }> =>
+export const cancelWorkflow = ({ client, runId, token }: {client: ApolloClient<any>, runId: String, token: string}): Promise<{ run_id: string }> =>
   fetch(urlJoin(MANAGEMENT_API, `/runs/${runId}/cancel`), {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    },
   }).then(async (res) => {
     // Cancelling takes a little bit of time so we want to
     // query until we get the cancelled state back and

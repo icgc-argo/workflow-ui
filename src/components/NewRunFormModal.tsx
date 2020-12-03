@@ -48,7 +48,7 @@ export default ({
   setLoading: (isLoading: boolean) => void;
 }) => {
   const theme = useTheme();
-  const { isAdmin } = useAuth();
+  const { isAdmin, token } = useAuth();
 
   const [workflow_url, setWorkflowUrl] = React.useState("");
   const [workflow_params, setWorkflowParams] = React.useState("");
@@ -82,6 +82,7 @@ export default ({
           workflow_engine_params.length > 0
             ? JSON.parse(workflow_engine_params.trim())
             : {},
+        token: token,
       });
       setLoading(false);
       setNewRunModalShown(false);
