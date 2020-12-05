@@ -114,3 +114,13 @@ export type GraphQLError = {
   locations: any;
   path: any;
 };
+
+export type CancelRunRequest = {
+  runId: string;
+};
+
+export type CancelRunResponse = {
+  cancelRun: {
+    runId: string;
+  }
+};

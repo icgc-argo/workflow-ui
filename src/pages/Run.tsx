@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import { ApolloConsumer, useQuery } from "@apollo/react-hooks";
+import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import AceEditor from "react-ace";
 import "ace-builds/src-noconflict/mode-json";
@@ -112,331 +112,324 @@ export default ({ runId }: { runId: string }) => {
     `${(ms / 1000 / 3600).toFixed(2)} hours (${Math.floor(ms / 1000)} seconds)`;
 
   return (
-    <ApolloConsumer>
-      {
-        client => (
+    <div
+      className={css`
+        padding: 20px;
+      `}
+    >
+      {(dataLoading || loading) && (
+        <ModalPortal>
+          <DNALoader />
+        </ModalPortal>
+      )}
+      {error && <div>Houston, we have a problem!</div>}
+      <TitleBar page={`Run ${run?.runId || ''}`} />
+      {!dataLoading && run && (
+        <div
+          className={css`
+            margin: 0 0 12px;
+
+            > div {
+              margin: 0 0 12px;
+            }
+          `}
+        >
+          <div>
+            <Typography variant="title" css={null}>
+              Workflow Repo: <strong>{run.repository}</strong>
+            </Typography>
+            <Typography variant="subtitle" css={null}>
+              Run ID: <strong>{run.runId}</strong>
+            </Typography>
+            <Typography variant="subtitle" css={null}>
+              Session ID: <strong>{run.sessionId}</strong>
+            </Typography>
+            <Typography variant="label" as="div" css={null}>
+              <strong>started:</strong> {parseEpochToEST(run.startTime)}
+            </Typography>
+            <Typography variant="label" as="div" css={null}>
+              <strong>completed:</strong> {parseEpochToEST(run.completeTime)}
+            </Typography>
+            <Typography variant="label" as="div" css={null}>
+              <strong>duration:</strong> {fmtTime(run.duration)}
+            </Typography>
+            <CancelRunButton
+              variant="primary"
+              size="md"
+              run={{ runId: run.runId, state: run.state }}
+              setLoading={setLoading}
+              className={css`
+                margin: 16px 0;
+              `}
+            />
+          </div>
+          {run?.errorReport && (
+            <div
+              className={css`
+                padding: 12px;
+                background: ${theme.colors.error_3};
+                border-radius: 8px;
+                border: 1px solid ${theme.colors.error};
+                margin: 10px 0;
+              `}
+            >
+              <Typography variant="label" as="div" css={null}>
+                <strong>Error Msg:</strong> {run.errorReport}
+              </Typography>
+            </div>
+          )}
+        </div>
+      )}
+      {!!run && (
+        <Container
+          loading={dataLoading}
+          css={null}
+          className={css`
+            z-index: 0; /* Ace Editor > Modal overlap fix */
+          `}
+        >
+          <Tabs value={activeTab}>
+            <Tab
+              css={null}
+              label="Task Logs"
+              value="logs"
+              onClick={(e) => setActiveTab("logs")}
+            />
+            <Tab
+              css={null}
+              label="Params"
+              value="params"
+              onClick={(e) => setActiveTab("params")}
+            />
+          </Tabs>
           <div
             className={css`
-              padding: 20px;
+              padding: 10px;
             `}
           >
-            {(dataLoading || loading) && (
-              <ModalPortal>
-                <DNALoader />
-              </ModalPortal>
-            )}
-            {error && <div>Houston, we have a problem!</div>}
-            <TitleBar page={`Run ${run?.runId || ''}`} />
-            {!dataLoading && run && (
-              <div
-                className={css`
-                  margin: 0 0 12px;
+            {activeTab === "logs" && (
+              <div>
+                {Object.entries(groupBy(run.tasks, "taskId"))
+                  .sort(
+                    ([taskId], [otherTaskId]) =>
+                      parseInt(taskId) - parseInt(otherTaskId)
+                  )
+                  .reverse()
+                  .map(([taskId, tasks]) => {
+                    const lastTask = sortTasks(tasks)[0];
 
-                  > div {
-                    margin: 0 0 12px;
-                  }
-                `}
-              >
-                <div>
-                  <Typography variant="title" css={null}>
-                    Workflow Repo: <strong>{run.repository}</strong>
-                  </Typography>
-                  <Typography variant="subtitle" css={null}>
-                    Run ID: <strong>{run.runId}</strong>
-                  </Typography>
-                  <Typography variant="subtitle" css={null}>
-                    Session ID: <strong>{run.sessionId}</strong>
-                  </Typography>
-                  <Typography variant="label" as="div" css={null}>
-                    <strong>started:</strong> {parseEpochToEST(run.startTime)}
-                  </Typography>
-                  <Typography variant="label" as="div" css={null}>
-                    <strong>completed:</strong> {parseEpochToEST(run.completeTime)}
-                  </Typography>
-                  <Typography variant="label" as="div" css={null}>
-                    <strong>duration:</strong> {fmtTime(run.duration)}
-                  </Typography>
-                  <CancelRunButton
-                    client={client}
-                    variant="primary"
-                    size="md"
-                    run={{ runId: run.runId, state: run.state }}
-                    setLoading={setLoading}
-                    className={css`
-                      margin: 16px 0;
-                    `}
-                  />
-                </div>
-                {run?.errorReport && (
-                  <div
-                    className={css`
-                      padding: 12px;
-                      background: ${theme.colors.error_3};
-                      border-radius: 8px;
-                      border: 1px solid ${theme.colors.error};
-                      margin: 10px 0;
-                    `}
-                  >
-                    <Typography variant="label" as="div" css={null}>
-                      <strong>Error Msg:</strong> {run.errorReport}
-                    </Typography>
-                  </div>
-                )}
+                    const [taskHighlightColor, taskTextColor] =
+                      lastTask.state === "EXECUTOR_ERROR"
+                        ? [theme.colors.error_1, theme.colors.error]
+                        : lastTask.state === "COMPLETE"
+                        ? [theme.colors.success, theme.colors.success_dark]
+                        : [theme.colors.primary_4, theme.colors.primary];
+
+                    return (
+                      <div
+                        className={css`
+                          overflow: hidden;
+                          margin: 10px;
+                          background: ${taskHighlightColor};
+                          display: flex;
+                          border: solid 1px ${taskHighlightColor};
+                        `}
+                      >
+                        <div
+                          className={css`
+                            display: flex;
+                            align-items: center;
+                          `}
+                        >
+                          <Icon name="checkmark" fill="white" height="12px" />
+                        </div>
+                        <div
+                          className={css`
+                            flex: 1;
+                            background: white;
+                          `}
+                        >
+                          <Typography
+                            css={null}
+                            color={taskTextColor}
+                            bold
+                            variant="label"
+                            className={css`
+                              padding: 2px;
+                              padding-left: 5px;
+                              display: flex;
+                              flex-direction: column;
+                              align-items: flex-start;
+
+                              span {
+                                color: black;
+                              }
+                            `}
+                          >
+                            <div>
+                              <span>Name: </span>
+                              {lastTask.name}
+                            </div>
+                            <div>
+                              <span>State: </span>
+                              {lastTask.state}
+                            </div>
+                            <div>
+                              <span>Container: </span>
+                              {lastTask.container}
+                            </div>
+                            <div>
+                              <span>Process: </span>
+                              {lastTask.process}
+                            </div>
+                            <div>
+                              <span>Tag: </span>
+                              {lastTask.tag}
+                            </div>
+                            <div>
+                              <span>Duration: </span>
+                              {fmtTime(lastTask.duration)}
+                            </div>
+                            <div>
+                              <span>Realtime: </span>
+                              {fmtTime(lastTask.realtime)}
+                            </div>
+                          </Typography>
+                          <pre
+                            className={css`
+                              margin: 0px;
+                              padding: 3px;
+                              resize: vertical;
+                              overflow: auto;
+                              background: ${theme.colors.primary};
+                              color: ${theme.colors.white};
+                            `}
+                          >
+                            {lastTask.script}
+                          </pre>
+                        </div>
+                      </div>
+                    );
+                  })}
               </div>
             )}
-            {!!run && (
-              <Container
-                loading={dataLoading}
-                css={null}
+            {activeTab === "params" && (
+              <div
                 className={css`
-                  z-index: 0; /* Ace Editor > Modal overlap fix */
+                  overflow: hidden;
+                  margin: 10px;
+                  background: ${highlightColor};
+                  display: flex;
+                  flex-direction: column;
+                  border: solid 1px ${highlightColor};
                 `}
               >
-                <Tabs value={activeTab}>
-                  <Tab
-                    css={null}
-                    label="Task Logs"
-                    value="logs"
-                    onClick={(e) => setActiveTab("logs")}
-                  />
-                  <Tab
-                    css={null}
-                    label="Params"
-                    value="params"
-                    onClick={(e) => setActiveTab("params")}
-                  />
-                </Tabs>
                 <div
                   className={css`
-                    padding: 10px;
+                    flex: 1;
+                    background: white;
                   `}
                 >
-                  {activeTab === "logs" && (
+                  <Typography
+                    css={null}
+                    color={textColor}
+                    bold
+                    variant="label"
+                    className={css`
+                      padding: 2px;
+                      padding-left: 5px;
+                      display: flex;
+                      flex-direction: column;
+                      align-items: flex-start;
+
+                      span {
+                        color: black;
+                      }
+                    `}
+                  >
                     <div>
-                      {Object.entries(groupBy(run.tasks, "taskId"))
-                        .sort(
-                          ([taskId], [otherTaskId]) =>
-                            parseInt(taskId) - parseInt(otherTaskId)
-                        )
-                        .reverse()
-                        .map(([taskId, tasks]) => {
-                          const lastTask = sortTasks(tasks)[0];
-
-                          const [taskHighlightColor, taskTextColor] =
-                            lastTask.state === "EXECUTOR_ERROR"
-                              ? [theme.colors.error_1, theme.colors.error]
-                              : lastTask.state === "COMPLETE"
-                              ? [theme.colors.success, theme.colors.success_dark]
-                              : [theme.colors.primary_4, theme.colors.primary];
-
-                          return (
-                            <div
-                              className={css`
-                                overflow: hidden;
-                                margin: 10px;
-                                background: ${taskHighlightColor};
-                                display: flex;
-                                border: solid 1px ${taskHighlightColor};
-                              `}
-                            >
-                              <div
-                                className={css`
-                                  display: flex;
-                                  align-items: center;
-                                `}
-                              >
-                                <Icon name="checkmark" fill="white" height="12px" />
-                              </div>
-                              <div
-                                className={css`
-                                  flex: 1;
-                                  background: white;
-                                `}
-                              >
-                                <Typography
-                                  css={null}
-                                  color={taskTextColor}
-                                  bold
-                                  variant="label"
-                                  className={css`
-                                    padding: 2px;
-                                    padding-left: 5px;
-                                    display: flex;
-                                    flex-direction: column;
-                                    align-items: flex-start;
-
-                                    span {
-                                      color: black;
-                                    }
-                                  `}
-                                >
-                                  <div>
-                                    <span>Name: </span>
-                                    {lastTask.name}
-                                  </div>
-                                  <div>
-                                    <span>State: </span>
-                                    {lastTask.state}
-                                  </div>
-                                  <div>
-                                    <span>Container: </span>
-                                    {lastTask.container}
-                                  </div>
-                                  <div>
-                                    <span>Process: </span>
-                                    {lastTask.process}
-                                  </div>
-                                  <div>
-                                    <span>Tag: </span>
-                                    {lastTask.tag}
-                                  </div>
-                                  <div>
-                                    <span>Duration: </span>
-                                    {fmtTime(lastTask.duration)}
-                                  </div>
-                                  <div>
-                                    <span>Realtime: </span>
-                                    {fmtTime(lastTask.realtime)}
-                                  </div>
-                                </Typography>
-                                <pre
-                                  className={css`
-                                    margin: 0px;
-                                    padding: 3px;
-                                    resize: vertical;
-                                    overflow: auto;
-                                    background: ${theme.colors.primary};
-                                    color: ${theme.colors.white};
-                                  `}
-                                >
-                                  {lastTask.script}
-                                </pre>
-                              </div>
-                            </div>
-                          );
-                        })}
+                      <span>Workflow Repository: </span>
+                      {run.repository}
                     </div>
-                  )}
-                  {activeTab === "params" && (
-                    <div
+                    <div>
+                      <span>Workflow Version: </span>
+                      {run.engineParameters.revision}
+                    </div>
+                  </Typography>
+                </div>
+                <div
+                  className={css`
+                    display: flex;
+                    flex-direction: row;
+                  `}
+                >
+                  <div
+                    className={css`
+                      width: 50%;
+                    `}
+                  >
+                    <Typography
+                      css={null}
+                      color="black"
+                      bold
+                      variant="label"
                       className={css`
-                        overflow: hidden;
-                        margin: 10px;
-                        background: ${highlightColor};
+                        padding: 2px;
+                        padding-left: 5px;
                         display: flex;
                         flex-direction: column;
-                        border: solid 1px ${highlightColor};
+                        align-items: flex-start;
+                        border-right: 3px solid ${theme.colors.accent1_dark};
                       `}
                     >
-                      <div
-                        className={css`
-                          flex: 1;
-                          background: white;
-                        `}
-                      >
-                        <Typography
-                          css={null}
-                          color={textColor}
-                          bold
-                          variant="label"
-                          className={css`
-                            padding: 2px;
-                            padding-left: 5px;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: flex-start;
-
-                            span {
-                              color: black;
-                            }
-                          `}
-                        >
-                          <div>
-                            <span>Workflow Repository: </span>
-                            {run.repository}
-                          </div>
-                          <div>
-                            <span>Workflow Version: </span>
-                            {run.engineParameters.revision}
-                          </div>
-                        </Typography>
-                      </div>
-                      <div
-                        className={css`
-                          display: flex;
-                          flex-direction: row;
-                        `}
-                      >
-                        <div
-                          className={css`
-                            width: 50%;
-                          `}
-                        >
-                          <Typography
-                            css={null}
-                            color="black"
-                            bold
-                            variant="label"
-                            className={css`
-                              padding: 2px;
-                              padding-left: 5px;
-                              display: flex;
-                              flex-direction: column;
-                              align-items: flex-start;
-                              border-right: 3px solid ${theme.colors.accent1_dark};
-                            `}
-                          >
-                            Workflow Params
-                          </Typography>
-                          <AceEditor
-                            aria-label="workflow_params"
-                            name="workflow_params"
-                            mode="json"
-                            theme="solarized_dark"
-                            value={JSON.stringify(run.parameters, null, "\t")}
-                            readOnly
-                            width="100%"
-                          />
-                        </div>
-                        <div
-                          className={css`
-                            width: 50%;
-                          `}
-                        >
-                          <Typography
-                            css={null}
-                            color="black"
-                            bold
-                            variant="label"
-                            className={css`
-                              padding: 2px;
-                              padding-left: 5px;
-                              display: flex;
-                              flex-direction: column;
-                              align-items: flex-start;
-                            `}
-                          >
-                            Workflow Engine Params
-                          </Typography>
-                          <AceEditor
-                            aria-label="workflow_engine_params"
-                            name="workflow_engine_params"
-                            mode="json"
-                            theme="solarized_dark"
-                            value={JSON.stringify(run.engineParameters, null, "\t")}
-                            readOnly
-                            width="100%"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                      Workflow Params
+                    </Typography>
+                    <AceEditor
+                      aria-label="workflow_params"
+                      name="workflow_params"
+                      mode="json"
+                      theme="solarized_dark"
+                      value={JSON.stringify(run.parameters, null, "\t")}
+                      readOnly
+                      width="100%"
+                    />
+                  </div>
+                  <div
+                    className={css`
+                      width: 50%;
+                    `}
+                  >
+                    <Typography
+                      css={null}
+                      color="black"
+                      bold
+                      variant="label"
+                      className={css`
+                        padding: 2px;
+                        padding-left: 5px;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: flex-start;
+                      `}
+                    >
+                      Workflow Engine Params
+                    </Typography>
+                    <AceEditor
+                      aria-label="workflow_engine_params"
+                      name="workflow_engine_params"
+                      mode="json"
+                      theme="solarized_dark"
+                      value={JSON.stringify(run.engineParameters, null, "\t")}
+                      readOnly
+                      width="100%"
+                    />
+                  </div>
                 </div>
-              </Container>
+              </div>
             )}
           </div>
-        )
-      }
-    </ApolloConsumer>
+        </Container>
+      )}
+    </div>
   );
 };
