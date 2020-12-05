@@ -92,3 +92,25 @@ export type EngineParameters = {
   revision: string;
   workDir: string;
 };
+
+export type RunsRequestMutationVariables = {
+  workflowUrl: string;
+  workflowParams?: JSON | null | undefined;
+  workflowEngineParams?: object | null | undefined;
+};
+
+export type RunsRequest = {
+  request: RunsRequestMutationVariables;
+};
+
+export type RunsResponse = {
+  startRun: {
+    runId: string;
+  }
+};
+
+export type GraphQLError = {
+  message: string;
+  locations: any;
+  path: any;
+};
