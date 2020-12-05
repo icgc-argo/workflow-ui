@@ -20,6 +20,7 @@ import React from "react";
 import Button from "@icgc-argo/uikit/Button";
 import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
+import FormControl from "@icgc-argo/uikit/form/FormControl";
 import InputLabel from "@icgc-argo/uikit/form/InputLabel";
 import Input from "@icgc-argo/uikit/form/Input";
 import AceEditor from "react-ace";
@@ -147,46 +148,55 @@ export default ({
         <ModalPortal>
           <Modal
             title="Execute a Nextflow Workflow"
+            actionButtonText="Submit Run"
             onCancelClick={onNewRunCanceled}
+            onCloseClick={onNewRunCanceled}
             onActionClick={onNewRunConfirmed}
+            actionDisabled={!workflow_url.trim().length}
           >
-            <p>
-              This will kick off any nextflow workflow publicly available on
-              Github. We currently do not support file-uploads as part of the
-              workflow execution step, therefore any files required by the
-              workflow being run must be downloaded/uploaded as part of the
-              workflow.
-            </p>
-            <InputLabel>Workflow URL</InputLabel>
-            <Input
-              aria-label="workflow_url"
-              value={workflow_url}
-              onChange={(e) => setWorkflowUrl(e.target.value)}
-            />
-            <InputLabel>
-              Workflow Params (equivalent to -params-file)
-            </InputLabel>
-            <AceEditor
-              aria-label="workflow_params"
-              name="workflow_params"
-              mode="json"
-              theme="github"
-              height="200px"
-              value={workflow_params}
-              onChange={setWorkflowParams}
-            />
-            <InputLabel>
-              Workflow Engine Params (revision, resume, etc)
-            </InputLabel>
-            <AceEditor
-              aria-label="workflow_engine_params"
-              name="workflow_engine_params"
-              mode="json"
-              theme="github"
-              height="200px"
-              value={workflow_engine_params}
-              onChange={setWorkflowEngineParams}
-            />
+            <form>
+              <FormControl required={true}>
+                <p>
+                  This will kick off any nextflow workflow publicly available on
+                  Github. We currently do not support file-uploads as part of the
+                  workflow execution step, therefore any files required by the
+                  workflow being run must be downloaded/uploaded as part of the
+                  workflow.
+                </p>
+                <InputLabel htmlFor="workflow-url-input">Workflow URL</InputLabel>
+                <Input
+                  aria-label="workflow_url"
+                  id="worflow-url-input"
+                  required={true}
+                  value={workflow_url}
+                  onChange={(e) => setWorkflowUrl(e.target.value)}
+                />
+                <InputLabel>
+                  Workflow Params (equivalent to -params-file)
+                </InputLabel>
+                <AceEditor
+                  aria-label="workflow_params"
+                  name="workflow_params"
+                  mode="json"
+                  theme="github"
+                  height="200px"
+                  value={workflow_params}
+                  onChange={setWorkflowParams}
+                />
+                <InputLabel>
+                  Workflow Engine Params (revision, resume, etc)
+                </InputLabel>
+                <AceEditor
+                  aria-label="workflow_engine_params"
+                  name="workflow_engine_params"
+                  mode="json"
+                  theme="github"
+                  height="200px"
+                  value={workflow_engine_params}
+                  onChange={setWorkflowEngineParams}
+                />
+              </FormControl>
+            </form>
           </Modal>
         </ModalPortal>
       )}
