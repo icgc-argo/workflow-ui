@@ -17,6 +17,7 @@
  */
 
 import React from "react";
+import get from "lodash/get";
 import Button from "@icgc-argo/uikit/Button";
 import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
@@ -106,9 +107,9 @@ export default ({
             onCancelClick={onRunAcknowledge}
             cancelText="Ok"
           >
-            {runResponse && runResponse.startRun && runResponse.startRun.runId && (
+            {runResponse && get(runResponse, 'runResponse.startRun.runId') && (
               <p>
-                A run with ID: <strong>{runResponse.startRun.runId}</strong> has been
+                A run with ID: <strong>{get(runResponse, 'runResponse.startRun.runId')}</strong> has been
                 initiated, it will appear in the list momentarily.
               </p>
             )}
