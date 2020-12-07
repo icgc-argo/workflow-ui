@@ -17,6 +17,7 @@
  */
 
 import React from "react";
+import get from "lodash/get";
 import Button from "@icgc-argo/uikit/Button";
 import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
@@ -74,9 +75,9 @@ export const CancelResponseModal = ({
         onCancelClick={onCancelAcknowledge}
         cancelText="Ok"
       >
-        {cancelResponse && cancelResponse.cancelRun && cancelResponse.cancelRun.runId && (
+        {cancelResponse && get(cancelResponse, 'cancelResponse.cancelRun.runId') && (
           <Typography color={undefined} css={null}>
-            Run with ID: <strong>{cancelResponse.cancelRun.runId}</strong> has been
+            Run with ID: <strong>{get(cancelResponse, 'cancelResponse.cancelRun.runId')}</strong> has been
             cancelled.
           </Typography>
         )}
