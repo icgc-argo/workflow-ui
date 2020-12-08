@@ -18,44 +18,22 @@
 
 import { useMutation } from "@apollo/react-hooks";
 import gql from "graphql-tag";
-import { RunsRequestMutationVariables, RunsRequest, RunsResponse } from './../gql/types';
+import { CancelRunRequest, CancelRunResponse } from './../gql/types';
 
-const START_RUN_MUTATION = gql`
-  mutation START_RUN_MUTATION($request: RunsRequest!) {
-    startRun(request: $request) {
+const CANCEL_RUN_MUTATION = gql`
+  mutation CANCEL_RUN_MUTATION($runId: ID!) {
+    cancelRun(runId: $runId) {
       runId
     }
   }
 `;
 
-const generateRunsRequest = ({
-    workflowUrl,
-    workflowParams,
-    workflowEngineParams,
-  }: RunsRequestMutationVariables): RunsRequest => {
-  return {
-    request: {
-      workflowUrl: workflowUrl,
-      ...(!!workflowParams && {workflowParams: workflowParams}),
-      ...(!!workflowEngineParams && {workflowEngineParams: workflowEngineParams}),
-    }
-  };
-};
-
 export default () => {
-  const [startWorkflow] = useMutation<RunsResponse, RunsRequest>(START_RUN_MUTATION);
+  const [cancelRun] = useMutation<CancelRunResponse, CancelRunRequest>(CANCEL_RUN_MUTATION);
 
-  return ({
-    workflowUrl,
-    workflowParams,
-    workflowEngineParams,
-  }: RunsRequestMutationVariables) => startWorkflow({
+  return (runId: string) => cancelRun({
     variables: {
-      ...generateRunsRequest({
-        workflowUrl,
-        workflowParams,
-        workflowEngineParams,
-      })
+      runId: runId
     }
   });
 };

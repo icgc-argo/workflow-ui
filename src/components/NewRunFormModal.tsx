@@ -156,14 +156,14 @@ export default ({
             actionDisabled={!workflow_url.trim().length}
           >
             <form>
+              <p>
+                This will kick off any nextflow workflow publicly available on
+                Github. We currently do not support file-uploads as part of the
+                workflow execution step, therefore any files required by the
+                workflow being run must be downloaded/uploaded as part of the
+                workflow.
+              </p>
               <FormControl required={true}>
-                <p>
-                  This will kick off any nextflow workflow publicly available on
-                  Github. We currently do not support file-uploads as part of the
-                  workflow execution step, therefore any files required by the
-                  workflow being run must be downloaded/uploaded as part of the
-                  workflow.
-                </p>
                 <InputLabel htmlFor="workflow-url-input">Workflow URL</InputLabel>
                 <Input
                   aria-label="workflow_url"
@@ -172,31 +172,31 @@ export default ({
                   value={workflow_url}
                   onChange={(e) => setWorkflowUrl(e.target.value)}
                 />
-                <InputLabel>
-                  Workflow Params (equivalent to -params-file)
-                </InputLabel>
-                <AceEditor
-                  aria-label="workflow_params"
-                  name="workflow_params"
-                  mode="json"
-                  theme="github"
-                  height="200px"
-                  value={workflow_params}
-                  onChange={setWorkflowParams}
-                />
-                <InputLabel>
-                  Workflow Engine Params (revision, resume, etc)
-                </InputLabel>
-                <AceEditor
-                  aria-label="workflow_engine_params"
-                  name="workflow_engine_params"
-                  mode="json"
-                  theme="github"
-                  height="200px"
-                  value={workflow_engine_params}
-                  onChange={setWorkflowEngineParams}
-                />
               </FormControl>
+              <InputLabel>
+                Workflow Params (equivalent to -params-file)
+              </InputLabel>
+              <AceEditor
+                aria-label="workflow_params"
+                name="workflow_params"
+                mode="json"
+                theme="github"
+                height="200px"
+                value={workflow_params}
+                onChange={setWorkflowParams}
+              />
+              <InputLabel>
+                Workflow Engine Params (revision, resume, etc)
+              </InputLabel>
+              <AceEditor
+                aria-label="workflow_engine_params"
+                name="workflow_engine_params"
+                mode="json"
+                theme="github"
+                height="200px"
+                value={workflow_engine_params}
+                onChange={setWorkflowEngineParams}
+              />
             </form>
           </Modal>
         </ModalPortal>
