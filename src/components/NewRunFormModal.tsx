@@ -17,9 +17,11 @@
  */
 
 import React from "react";
+import get from "lodash/get";
 import Button from "@icgc-argo/uikit/Button";
 import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
+import FormControl from "@icgc-argo/uikit/form/FormControl";
 import InputLabel from "@icgc-argo/uikit/form/InputLabel";
 import Input from "@icgc-argo/uikit/form/Input";
 import AceEditor from "react-ace";
@@ -29,18 +31,8 @@ import { css } from "emotion";
 import { ApolloError } from "apollo-client";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import { useAuth } from "providers/Auth";
-import { runWorkflow } from "rdpc";
-
-type RunSuccess = {
-  run_id: string;
-};
-
-type RunError = {
-  msg: String;
-  status_code: Number;
-};
-
-type RunResponse = RunSuccess | RunError;
+import useStartRunMutation from './../hooks/useStartRunMutation';
+import { GraphQLError, RunsResponse } from './../gql/types';
 
 export default ({
   setLoading,
@@ -48,16 +40,16 @@ export default ({
   setLoading: (isLoading: boolean) => void;
 }) => {
   const theme = useTheme();
-  const { isAdmin, token } = useAuth();
+  const { isAdmin } = useAuth();
+  const startRun = useStartRunMutation();
 
   const [workflow_url, setWorkflowUrl] = React.useState("");
   const [workflow_params, setWorkflowParams] = React.useState("");
   const [workflow_engine_params, setWorkflowEngineParams] = React.useState("");
   
   const [newRunModalShown, setNewRunModalShown] = React.useState(false);
-  const [runResponse, setRunResponse] = React.useState<
-    RunResponse | ApolloError | undefined | null
-  >(null);
+  const [runResponse, setRunResponse] = React.useState<RunsResponse | undefined | null>(null);
+  const [runError, setRunError] = React.useState<ApolloError | GraphQLError[] | undefined | null>(null);
 
   const onNewRunClick: React.ComponentProps<typeof Button>["onClick"] = () => {
     setNewRunModalShown(true);
@@ -67,6 +59,7 @@ export default ({
     typeof Button
   >["onClick"] = () => {
     setRunResponse(null);
+    setRunError(null);
   };
 
   const onNewRunConfirmed: React.ComponentProps<
@@ -74,23 +67,26 @@ export default ({
   >["onActionClick"] = async () => {
     setLoading(true);
     try {
-      const run = await runWorkflow({
-        workflow_url: workflow_url,
-        workflow_params:
-          workflow_params.length > 0 ? JSON.parse(workflow_params.trim()) : {},
-        workflow_engine_params:
+      const { data, errors } = await startRun({
+        workflowUrl: workflow_url,
+        workflowParams:
+          workflow_params.length > 0 ? JSON.parse(workflow_params.trim()) : undefined,
+        workflowEngineParams:
           workflow_engine_params.length > 0
             ? JSON.parse(workflow_engine_params.trim())
-            : {},
-        token: token,
+            : undefined,
       });
       setLoading(false);
       setNewRunModalShown(false);
-      setRunResponse(run);
+      if (errors && errors.length > 0) {
+        setRunError(errors);
+      } else {
+        setRunResponse(data);
+      }
     } catch (error) {
       setLoading(false);
       setNewRunModalShown(false);
-      setRunResponse(error);
+      setRunError(error);
     }
   };
 
@@ -111,13 +107,13 @@ export default ({
             onCancelClick={onRunAcknowledge}
             cancelText="Ok"
           >
-            {"run_id" in runResponse && (
+            {runResponse && get(runResponse, 'runResponse.startRun.runId') && (
               <p>
-                A run with ID: <strong>{runResponse.run_id}</strong> has been
+                A run with ID: <strong>{get(runResponse, 'runResponse.startRun.runId')}</strong> has been
                 initiated, it will appear in the list momentarily.
               </p>
             )}
-            {"msg" in runResponse && (
+            {runError && (
               <>
                 <p>
                   The following error was encountered trying to run your
@@ -131,10 +127,18 @@ export default ({
                     padding: 0 10px;
                   `}
                 >
-                  <p>
-                    <strong>Status:</strong> {runResponse.status_code}
-                    <strong>Msg:</strong> {runResponse.msg}
-                  </p>
+                  {runError instanceof ApolloError && (
+                    <p>
+                      <strong>Msg:</strong> {runError.message}
+                    </p>
+                  )}
+                  {runError instanceof Array && (
+                    <ul>
+                      {runError.map((error, i) => (
+                        <li key={`run-error-${i}`}>{error.message}</li>
+                      ))}
+                    </ul>
+                  )}
                 </div>
               </>
             )}
@@ -145,46 +149,55 @@ export default ({
         <ModalPortal>
           <Modal
             title="Execute a Nextflow Workflow"
+            actionButtonText="Submit Run"
             onCancelClick={onNewRunCanceled}
+            onCloseClick={onNewRunCanceled}
             onActionClick={onNewRunConfirmed}
+            actionDisabled={!workflow_url.trim().length}
           >
-            <p>
-              This will kick off any nextflow workflow publicly available on
-              Github. We currently do not support file-uploads as part of the
-              workflow execution step, therefore any files required by the
-              workflow being run must be downloaded/uploaded as part of the
-              workflow.
-            </p>
-            <InputLabel>Workflow URL</InputLabel>
-            <Input
-              aria-label="workflow_url"
-              value={workflow_url}
-              onChange={(e) => setWorkflowUrl(e.target.value)}
-            />
-            <InputLabel>
-              Workflow Params (equivalent to -params-file)
-            </InputLabel>
-            <AceEditor
-              aria-label="workflow_params"
-              name="workflow_params"
-              mode="json"
-              theme="github"
-              height="200px"
-              value={workflow_params}
-              onChange={setWorkflowParams}
-            />
-            <InputLabel>
-              Workflow Engine Params (revision, resume, etc)
-            </InputLabel>
-            <AceEditor
-              aria-label="workflow_engine_params"
-              name="workflow_engine_params"
-              mode="json"
-              theme="github"
-              height="200px"
-              value={workflow_engine_params}
-              onChange={setWorkflowEngineParams}
-            />
+            <form>
+              <p>
+                This will kick off any nextflow workflow publicly available on
+                Github. We currently do not support file-uploads as part of the
+                workflow execution step, therefore any files required by the
+                workflow being run must be downloaded/uploaded as part of the
+                workflow.
+              </p>
+              <FormControl required={true}>
+                <InputLabel htmlFor="workflow-url-input">Workflow URL</InputLabel>
+                <Input
+                  aria-label="workflow_url"
+                  id="worflow-url-input"
+                  required={true}
+                  value={workflow_url}
+                  onChange={(e) => setWorkflowUrl(e.target.value)}
+                />
+              </FormControl>
+              <InputLabel>
+                Workflow Params (equivalent to -params-file)
+              </InputLabel>
+              <AceEditor
+                aria-label="workflow_params"
+                name="workflow_params"
+                mode="json"
+                theme="github"
+                height="200px"
+                value={workflow_params}
+                onChange={setWorkflowParams}
+              />
+              <InputLabel>
+                Workflow Engine Params (revision, resume, etc)
+              </InputLabel>
+              <AceEditor
+                aria-label="workflow_engine_params"
+                name="workflow_engine_params"
+                mode="json"
+                theme="github"
+                height="200px"
+                value={workflow_engine_params}
+                onChange={setWorkflowEngineParams}
+              />
+            </form>
           </Modal>
         </ModalPortal>
       )}
