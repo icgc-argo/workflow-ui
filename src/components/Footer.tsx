@@ -28,8 +28,10 @@ import {
   ARGO_TERMS_PAGE
 } from 'config/argoPages';
 import { APP_VERSION, MANAGEMENT_API_STATUS_URL } from "config/globals";
+import { useAuth } from "providers/Auth";
 
 export default () => {
+  const { token } = useAuth();
   const theme = useTheme();
   const [apiVersion, setApiVersion] = useState(null);
 
@@ -37,6 +39,10 @@ export default () => {
     fetch(MANAGEMENT_API_STATUS_URL, {
       method: 'GET',
       mode: 'cors',
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
     })
     .then(res => res.json())
     .then(data => {
@@ -45,7 +51,7 @@ export default () => {
     .catch(err => {
       console.warn(err);
     });
-  }, []);
+  }, [token]);
 
   return (
     <Footer
