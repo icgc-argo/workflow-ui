@@ -21,7 +21,7 @@ import { css } from "emotion";
 import GoogleLogin from '@icgc-argo/uikit/Button/GoogleLogin';
 import { RouteComponentProps } from 'react-router-dom';
 
-import { GOOGLE_AUTH_ENDPOINT } from 'config/globals';
+import { GOOGLE_AUTH_ENDPOINT, RDPC_REGION } from 'config/globals';
 import { LOGGED_IN_PAGE_PATH } from 'config/pages';
 import { useAuth } from "providers/Auth";
 
@@ -47,7 +47,7 @@ export default ({ history }: RouteComponentProps) => {
         margin-top: 64px;
       `}
     >
-      <h1>COLLAB RDPC</h1>
+      <h1>RDPC {RDPC_REGION}</h1>
       <p
         className={css`
           max-width: 480px;

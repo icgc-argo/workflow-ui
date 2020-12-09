@@ -38,7 +38,7 @@ const TitleBar = ({ page }: TitleBarProps) => {
           }
         }
       >
-        <span className={css`text-transform: capitalize;`}>{RDPC_REGION}</span> RDPC: {page}
+        RDPC <span className={css`text-transform: capitalize;`}>{RDPC_REGION}</span>: {page}
       </h1>
       <hr
         className={css`
