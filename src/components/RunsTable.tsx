@@ -19,29 +19,31 @@
 import React from "react";
 import Table, { TableColumnConfig } from "@icgc-argo/uikit/Table";
 import { Link } from "react-router-dom";
-import { DashboardQueryResponse, RunCompact } from "gql/types";
+import { DashboardQueryResponse, RunCompact, GraphQLError, CancelRunResponse } from "gql/types";
 import { parseEpochToEST } from "utils/time";
-import { CancelConfirmModal, CancelResponseModal, CancelResponse } from "components/CancelRun";
+import { CancelConfirmModal, CancelResponseModal } from "components/CancelRun";
 import Modal from "@icgc-argo/uikit/Modal";
-import ApolloClient, { ApolloError } from "apollo-client";
+import { ApolloError } from "apollo-client";
 import Button from "@icgc-argo/uikit/Button";
-import { cancelWorkflow } from "rdpc";
+import useCancelRunMutation from "./../hooks/useCancelRunMutation";
 import { useAuth } from "providers/Auth";
 
 export default ({
-  client,
   runs,
   setLoading,
 }: {
-  client: ApolloClient<any>,
   runs: RunCompact[];
   setLoading: (isLoading: boolean) => void;
 }) => {
   const [cancelModalRunId, setCancelModalRunId] = React.useState<string>("");
   const [cancelResponse, setCancelResponse] = React.useState<
-    CancelResponse | ApolloError | undefined | null
+    CancelRunResponse | undefined | null
   >(null);
-  const { isAdmin, token } = useAuth();
+  const [cancelError, setCancelError] = React.useState<
+    ApolloError | GraphQLError[] |  undefined | null
+  >(null);
+  const { isAdmin } = useAuth();
+  const cancelRun = useCancelRunMutation();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -50,14 +52,18 @@ export default ({
   const onCancelConfirmed = async (runId: string) => {
     setLoading(true);
     try {
-      const cancelledRun = await cancelWorkflow({ client, runId, token });
+      const { data, errors } = await cancelRun(runId);
       setLoading(false);
       setCancelModalRunId("");
-      setCancelResponse(cancelledRun);
+      if (errors && errors.length > 0) {
+        setCancelError(errors);
+      } else {
+        setCancelResponse(data);
+      }
     } catch (error) {
       setLoading(false);
       setCancelModalRunId("");
-      setCancelResponse(error);
+      setCancelError(error);
     }
   };
 
@@ -71,6 +77,7 @@ export default ({
     typeof Button
   >["onClick"] = () => {
     setCancelResponse(null);
+    setCancelError(null);
   };
 
   const columns: TableColumnConfig<RunCompact> = [
@@ -137,6 +144,7 @@ export default ({
       {cancelResponse && (
         <CancelResponseModal
           cancelResponse={cancelResponse}
+          cancelError={cancelError}
           onCancelAcknowledge={onCancelAcknowledge}
         />
       )}

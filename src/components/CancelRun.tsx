@@ -17,26 +17,17 @@
  */
 
 import React from "react";
+import get from "lodash/get";
 import Button from "@icgc-argo/uikit/Button";
 import { ModalPortal } from "App";
 import Modal from "@icgc-argo/uikit/Modal";
-import { cancelWorkflow } from "rdpc";
+import useCancelRunMutation from "./../hooks/useCancelRunMutation";
 import Typography from "@icgc-argo/uikit/Typography";
-import ApolloClient, { ApolloError } from "apollo-client";
+import { ApolloError } from "apollo-client";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
 import { useAuth } from "providers/Auth";
 import { css } from "emotion";
-
-export type CancelSuccess = {
-  run_id: string;
-};
-
-export type CancelError = {
-  msg: String;
-  status_code: Number;
-};
-
-export type CancelResponse = CancelSuccess | CancelError;
+import { GraphQLError, CancelRunResponse } from './../gql/types';
 
 type ModalAction =
   | ((e: React.SyntheticEvent<HTMLButtonElement, Event>) => any)
@@ -68,9 +59,11 @@ export const CancelConfirmModal = ({
 
 export const CancelResponseModal = ({
   cancelResponse,
+  cancelError,
   onCancelAcknowledge,
 }: {
-  cancelResponse: CancelResponse | ApolloError;
+  cancelResponse: CancelRunResponse | undefined | null;
+  cancelError: ApolloError | GraphQLError[] | undefined | null;
   onCancelAcknowledge: ModalAction;
 }) => {
   const theme = useTheme();
@@ -82,13 +75,13 @@ export const CancelResponseModal = ({
         onCancelClick={onCancelAcknowledge}
         cancelText="Ok"
       >
-        {"run_id" in cancelResponse && (
+        {cancelResponse && get(cancelResponse, 'cancelResponse.cancelRun.runId') && (
           <Typography color={undefined} css={null}>
-            Run with ID: <strong>{cancelResponse.run_id}</strong> has been
+            Run with ID: <strong>{get(cancelResponse, 'cancelResponse.cancelRun.runId')}</strong> has been
             cancelled.
           </Typography>
         )}
-        {"msg" in cancelResponse && (
+        {cancelError && (
           <>
             <Typography color={undefined} css={null}>
               The following error was encountered trying to cancel your
@@ -102,10 +95,18 @@ export const CancelResponseModal = ({
                 padding: 0 10px;
               `}
             >
-              <p>
-                <strong>Status:</strong> {cancelResponse.status_code}
-                <strong>Msg:</strong> {cancelResponse.msg}
-              </p>
+              {cancelError instanceof ApolloError && (
+                <p>
+                  <strong>Msg:</strong> {cancelError.message}
+                </p>
+              )}
+              {cancelError instanceof Array && (
+                <ul>
+                  {cancelError.map((error, i) => (
+                    <li key={`cancel-error-${i}`}>{error.message}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           </>
         )}
@@ -115,14 +116,12 @@ export const CancelResponseModal = ({
 };
 
 export const CancelRunButton = ({
-  client,
   run,
   variant = "primary",
   size = "md",
   setLoading,
   className,
 }: {
-  client: ApolloClient<any>,
   run: { runId: string; state: string };
   variant: "text" | "primary" | "secondary";
   size: "sm" | "md";
@@ -130,10 +129,12 @@ export const CancelRunButton = ({
   className?: string;
 }) => {
   const [cancelModalRunId, setCancelModalRunId] = React.useState<string>("");
-  const [cancelResponse, setCancelResponse] = React.useState<
-    CancelResponse | ApolloError | undefined | null
+  const [cancelResponse, setCancelResponse] = React.useState<CancelRunResponse | undefined | null>(null);
+  const [cancelError, setCancelError] = React.useState<
+    ApolloError | GraphQLError[] |  undefined | null
   >(null);
-  const { isAdmin, token } = useAuth();
+  const { isAdmin } = useAuth();
+  const cancelRun = useCancelRunMutation();
 
   const onCancelClick = (runId: string) => {
     setCancelModalRunId(runId);
@@ -144,14 +145,18 @@ export const CancelRunButton = ({
   >["onActionClick"] = async () => {
     setLoading(true);
     try {
-      const cancelledRun = await cancelWorkflow({client: client, runId: run.runId, token: token});
+      const { data, errors } = await cancelRun(run.runId);
       setLoading(false);
       setCancelModalRunId("");
-      setCancelResponse(cancelledRun);
+      if (errors && errors.length > 0) {
+        setCancelError(errors);
+      } else {
+        setCancelResponse(data);
+      }
     } catch (error) {
       setLoading(false);
       setCancelModalRunId("");
-      setCancelResponse(error);
+      setCancelError(error);
     }
   };
 
@@ -165,6 +170,7 @@ export const CancelRunButton = ({
     typeof Button
   >["onClick"] = () => {
     setCancelResponse(null);
+    setCancelError(null);
   };
 
   return (
@@ -185,9 +191,10 @@ export const CancelRunButton = ({
           onCancelConfirmed={onCancelConfirmed}
         />
       )}
-      {cancelResponse && (
+      {(cancelResponse || cancelError) && (
         <CancelResponseModal
           cancelResponse={cancelResponse}
+          cancelError={cancelError}
           onCancelAcknowledge={onCancelAcknowledge}
         />
       )}

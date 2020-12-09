@@ -16,41 +16,24 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { css } from 'emotion';
-import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
-import { RDPC_REGION } from 'config/globals';
+import { useMutation } from "@apollo/react-hooks";
+import gql from "graphql-tag";
+import { CancelRunRequest, CancelRunResponse } from './../gql/types';
 
-type TitleBarProps = {
-  page: string
+const CANCEL_RUN_MUTATION = gql`
+  mutation CANCEL_RUN_MUTATION($runId: ID!) {
+    cancelRun(runId: $runId) {
+      runId
+    }
+  }
+`;
+
+export default () => {
+  const [cancelRun] = useMutation<CancelRunResponse, CancelRunRequest>(CANCEL_RUN_MUTATION);
+
+  return (runId: string) => cancelRun({
+    variables: {
+      runId: runId
+    }
+  });
 };
-
-const TitleBar = ({ page }: TitleBarProps) => {
-  const theme = useTheme();
-
-  return (
-    <>
-      <h1
-        style={
-          {
-            ...theme.typography.title,
-            marginTop: 0
-          }
-        }
-      >
-        RDPC <span className={css`text-transform: capitalize;`}>{RDPC_REGION}</span>: {page}
-      </h1>
-      <hr
-        className={css`
-          height: 1px;
-          background-color: ${theme.colors.grey_2};
-          margin: 0 0 10px -20px;
-          width: 100vw;
-          border: 0;
-        `}  
-      />
-    </>
-  );
-};
-
-export default TitleBar;

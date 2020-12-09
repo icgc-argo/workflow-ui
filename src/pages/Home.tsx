@@ -17,7 +17,7 @@
  */
 
 import React from "react";
-import { ApolloConsumer, useQuery } from "@apollo/react-hooks";
+import { useQuery } from "@apollo/react-hooks";
 import gql from "graphql-tag";
 import Container from "@icgc-argo/uikit/Container";
 import { css } from "emotion";
@@ -72,70 +72,64 @@ export default () => {
   const [loading, setLoading] = React.useState(false);
 
   return (
-    <ApolloConsumer>
-      {
-        client => (
+    <div
+      className={css`
+        padding: 20px;
+      `}
+    >
+      {(dataLoading || loading) && (
+        <ModalPortal>
+          <DNALoader />
+        </ModalPortal>
+      )}
+      {error && <div>Houston, we have a problem!</div>}
+      <TitleBar page={'Runs'} />
+      <div
+        className={css`
+          margin: 10px 0px;
+        `}
+      >
+        <NewRunFormModal setLoading={setLoading} />
+      </div>
+      <div
+        className={css`
+          display: flex;
+        `}
+      >
+        <Container
+          css={null}
+          className={css`
+            padding: 10px;
+            padding-bottom: 0px;
+            flex: 3 1 0;
+            margin-right: 12px;
+          `}
+        >
           <div
             className={css`
-              padding: 20px;
+              padding-bottom: 10px;
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
             `}
           >
-            {(dataLoading || loading) && (
-              <ModalPortal>
-                <DNALoader />
-              </ModalPortal>
-            )}
-            {error && <div>Houston, we have a problem!</div>}
-            <TitleBar page={'Runs'} />
-            <div
-              className={css`
-                margin: 10px 0px;
-              `}
-            >
-              <NewRunFormModal setLoading={setLoading} />
-            </div>
-            <div
-              className={css`
-                display: flex;
-              `}
-            >
-              <Container
-                css={null}
-                className={css`
-                  padding: 10px;
-                  padding-bottom: 0px;
-                  flex: 3 1 0;
-                  margin-right: 12px;
-                `}
-              >
-                <div
-                  className={css`
-                    padding-bottom: 10px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                  `}
-                >
-                  <Typography variant="sectionHeader" bold color="primary" css={null}>
-                    Workflow runs
-                  </Typography>
-                </div>
-                <RunsTable client={client} runs={data?.runs || []} setLoading={setLoading} />
-              </Container>
-              <Container
-                css={null}
-                className={css`
-                  padding: 10px;
-                  padding-bottom: 0px;
-                  flex: 1 3 0;
-                `}
-              >
-                <RDPCStats runData={data?.runs || []} taskData={data?.tasks || []} />
-              </Container>
-            </div>
+            <Typography variant="sectionHeader" bold color="primary" css={null}>
+              Workflow runs
+            </Typography>
           </div>
-        )
-      }
-    </ApolloConsumer>
+          <RunsTable runs={data?.runs || []} setLoading={setLoading} />
+        </Container>
+        <Container
+          css={null}
+          className={css`
+            padding: 10px;
+            padding-bottom: 0px;
+            flex: 1 3 0;
+          `}
+        >
+          <RDPCStats runData={data?.runs || []} taskData={data?.tasks || []} />
+        </Container>
+      </div>
+    </div>
   );
 };

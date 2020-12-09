@@ -16,41 +16,46 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
-import { css } from 'emotion';
-import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
-import { RDPC_REGION } from 'config/globals';
+import { useMutation } from "@apollo/react-hooks";
+import gql from "graphql-tag";
+import { RunsRequestMutationVariables, RunsRequest, RunsResponse } from './../gql/types';
 
-type TitleBarProps = {
-  page: string
+const START_RUN_MUTATION = gql`
+  mutation START_RUN_MUTATION($request: RunsRequest!) {
+    startRun(request: $request) {
+      runId
+    }
+  }
+`;
+
+const generateRunsRequest = ({
+    workflowUrl,
+    workflowParams,
+    workflowEngineParams,
+  }: RunsRequestMutationVariables): RunsRequest => {
+  return {
+    request: {
+      workflowUrl: workflowUrl,
+      ...(!!workflowParams && {workflowParams: workflowParams}),
+      ...(!!workflowEngineParams && {workflowEngineParams: workflowEngineParams}),
+    }
+  };
 };
 
-const TitleBar = ({ page }: TitleBarProps) => {
-  const theme = useTheme();
+export default () => {
+  const [startWorkflow] = useMutation<RunsResponse, RunsRequest>(START_RUN_MUTATION);
 
-  return (
-    <>
-      <h1
-        style={
-          {
-            ...theme.typography.title,
-            marginTop: 0
-          }
-        }
-      >
-        RDPC <span className={css`text-transform: capitalize;`}>{RDPC_REGION}</span>: {page}
-      </h1>
-      <hr
-        className={css`
-          height: 1px;
-          background-color: ${theme.colors.grey_2};
-          margin: 0 0 10px -20px;
-          width: 100vw;
-          border: 0;
-        `}  
-      />
-    </>
-  );
+  return ({
+    workflowUrl,
+    workflowParams,
+    workflowEngineParams,
+  }: RunsRequestMutationVariables) => startWorkflow({
+    variables: {
+      ...generateRunsRequest({
+        workflowUrl,
+        workflowParams,
+        workflowEngineParams,
+      })
+    }
+  });
 };
-
-export default TitleBar;
