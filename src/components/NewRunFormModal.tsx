@@ -107,9 +107,9 @@ export default ({
             onCancelClick={onRunAcknowledge}
             cancelText="Ok"
           >
-            {runResponse && get(runResponse, 'runResponse.startRun.runId') && (
+            {runResponse && get(runResponse, 'startRun.runId') && (
               <p>
-                A run with ID: <strong>{get(runResponse, 'runResponse.startRun.runId')}</strong> has been
+                A run with ID: <strong>{get(runResponse, 'startRun.runId')}</strong> has been
                 initiated, it will appear in the list momentarily.
               </p>
             )}

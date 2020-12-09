@@ -75,9 +75,9 @@ export const CancelResponseModal = ({
         onCancelClick={onCancelAcknowledge}
         cancelText="Ok"
       >
-        {cancelResponse && get(cancelResponse, 'cancelResponse.cancelRun.runId') && (
+        {cancelResponse && get(cancelResponse, 'cancelRun.runId') && (
           <Typography color={undefined} css={null}>
-            Run with ID: <strong>{get(cancelResponse, 'cancelResponse.cancelRun.runId')}</strong> has been
+            Run with ID: <strong>{get(cancelResponse, 'cancelRun.runId')}</strong> has been
             cancelled.
           </Typography>
         )}
