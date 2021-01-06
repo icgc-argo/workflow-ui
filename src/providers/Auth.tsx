@@ -135,13 +135,14 @@ export const useAuth = () => {
     setTokenState('');
   };
 
-  const refreshToken = () =>
+  const getRefreshToken = (): Promise<string> =>
+    // using queue to prevent parallel refreshes, as seen in platform-ui
     queue.add(() => {
       return fetch(REFRESH_TOKEN_ENDPOINT, {
         credentials: 'include',
         headers: {
           accept: '*/*',
-          authorization: getToken(),
+          authorization: `Bearer ${getToken()}`,
         },
         method: 'POST',
       })
@@ -149,8 +150,11 @@ export const useAuth = () => {
         .then(newJwt => {
           if (isValidJwt(newJwt)) {
             setToken(newJwt);
+            return newJwt;
+          } else {
+            clearToken();
+            return '';
           }
-          return newJwt;
         });
     });
 
@@ -251,6 +255,7 @@ export const useAuth = () => {
     token: getToken(),
     setToken,
     clearToken,
+    getRefreshToken,
     egoPublicKey: getEgoPublicKey(),
     loading,
     userModel: getUserModel(),

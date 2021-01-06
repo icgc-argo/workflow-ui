@@ -33,7 +33,16 @@ const activeItemStyle = {
 };
 
 const NavBar: React.FC = () => {
-  const { isAdmin, isDccMember, isLoggedIn, isMember, userModel, loading, egoPublicKey } = useAuth();
+  const {
+    token,
+    isAdmin,
+    isDccMember,
+    isLoggedIn,
+    isMember,
+    userModel,
+    loading,
+    egoPublicKey,
+  } = useAuth();
 
   const getUserTitle = () => {
     if (isAdmin()) {
@@ -47,7 +56,7 @@ const NavBar: React.FC = () => {
     }
   };
 
-  const UserDropdownMenu = isLoggedIn ? (
+  const UserDropdownMenu = token && isLoggedIn ? (
     <DropdownMenu>
       <DropdownMenuItem
         style={{
@@ -72,7 +81,7 @@ const NavBar: React.FC = () => {
           />
         </Link>
         {
-          isLoggedIn &&
+          token && isLoggedIn &&
             (
               <MenuGroup>
                 <NavLink
@@ -107,7 +116,7 @@ const NavBar: React.FC = () => {
                     dropdownMenu={UserDropdownMenu}
                   >
                     {
-                      isLoggedIn ?
+                      token && isLoggedIn ?
                           (
                             <UserBadge
                               firstName={userModel?.firstName}

@@ -16,7 +16,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import ApolloClient from "apollo-client";
 import { createHttpLink } from 'apollo-link-http';
 import { ApolloProvider } from "@apollo/react-hooks";
@@ -54,17 +54,27 @@ import { css } from "emotion";
 const modalPortalRef = React.createRef<HTMLDivElement>();
 
 const ProtectedRoute = ({ path, ...props }: any) => {
-  const { isLoggedIn } = useAuth();
+  const { token , isLoggedIn, getRefreshToken } = useAuth();
+  const [refreshToken, setRefreshToken] = useState('');
+
+  const checkRefreshToken = async () => {
+    const res = await getRefreshToken()
+      .catch(err => console.warn('Unexpected error while refreshing token: ', err));
+    if (res) {
+      setRefreshToken(res);
+    }
+  }
 
   useEffect(() => {
     if (!isLoggedIn) {
       setRedirectUrl(props.location.pathname);
+      checkRefreshToken();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isLoggedIn]);
 
   return (
-    isLoggedIn
+    token && (isLoggedIn || refreshToken)
       ? <Route path={path} {...props} />
       : <Route render={() => <Redirect to={LOGIN_PAGE_PATH} />} />
   );
