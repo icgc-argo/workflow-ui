@@ -90,7 +90,7 @@ export default ({
     {
       Header: "Run ID",
       accessor: "runId",
-      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) => (
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"]["content"][0] }) => (
         <Link to={`/runs/${original.runId}`}>{original.runId}</Link>
       ),
     },
@@ -101,25 +101,25 @@ export default ({
     {
       Header: "Start",
       accessor: "startTime",
-      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) =>
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"]["content"][0] }) =>
         parseEpochToEST(original.startTime),
     },
     {
       Header: "Complete",
       accessor: "completeTime",
-      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) =>
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"]["content"][0] }) =>
         parseEpochToEST(original.completeTime),
     },
     {
       Header: "Repository",
       accessor: "repository",
-      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) => (
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"]["content"][0] }) => (
         <div>{original.repository}</div>
       ),
     },
     {
       Header: "Action",
-      Cell: ({ original }: { original: DashboardQueryResponse["runs"][0] }) => (
+      Cell: ({ original }: { original: DashboardQueryResponse["runs"]["content"][0] }) => (
         <Button
           onClick={() => onCancelClick(original.runId)}
           variant="text"
