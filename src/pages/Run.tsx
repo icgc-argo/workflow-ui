@@ -49,43 +49,45 @@ export default ({ runId }: { runId: string }) => {
     gql`
       query SINGLE_RUN_QUERY($runId: String!) {
         runs(filter: { runId: $runId }) {
-          runId
-          sessionId
-          commandLine
-          completeTime
-          duration
-          engineParameters {
-            launchDir
-            projectDir
-            resume
-            revision
-            workDir
-          }
-          errorReport
-          exitStatus
-          parameters
-          repository
-          startTime
-          state
-          success
-          tasks {
-            taskId
+          content {
             runId
-            attempt
+            sessionId
+            commandLine
             completeTime
-            container
-            cpus
             duration
-            exit
-            memory
-            name
-            process
-            realtime
-            script
+            engineParameters {
+              launchDir
+              projectDir
+              resume
+              revision
+              workDir
+            }
+            errorReport
+            exitStatus
+            parameters
+            repository
             startTime
             state
-            submitTime
-            tag
+            success
+            tasks {
+              taskId
+              runId
+              attempt
+              completeTime
+              container
+              cpus
+              duration
+              exit
+              memory
+              name
+              process
+              realtime
+              script
+              startTime
+              state
+              submitTime
+              tag
+            }
           }
         }
       }
@@ -100,7 +102,7 @@ export default ({ runId }: { runId: string }) => {
 
   const [loading, setLoading] = React.useState(false);
 
-  const run = data?.runs[0];
+  const run = data?.runs?.content[0];
 
   const theme = useTheme();
   const [highlightColor, textColor] = run?.errorReport
