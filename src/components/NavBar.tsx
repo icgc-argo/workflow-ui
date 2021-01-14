@@ -16,7 +16,7 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, NavLink } from "react-router-dom";
 import AppBar, { Section, MenuGroup, MenuItem, UserBadge, DropdownMenu, DropdownMenuItem } from '@icgc-argo/uikit/AppBar';
 import GoogleLogin from '@icgc-argo/uikit/Button/GoogleLogin';
@@ -34,15 +34,16 @@ const activeItemStyle = {
 
 const NavBar: React.FC = () => {
   const {
+    egoPublicKey,
+    isLoggedIn,
+    loading,
     token,
+    userModel,
     isAdmin,
     isDccMember,
-    isLoggedIn,
     isMember,
-    userModel,
-    loading,
-    egoPublicKey,
   } = useAuth();
+  const [hasAuth, setHasAuth] = useState(false);
 
   const getUserTitle = () => {
     if (isAdmin()) {
@@ -56,7 +57,17 @@ const NavBar: React.FC = () => {
     }
   };
 
-  const UserDropdownMenu = token && isLoggedIn ? (
+  useEffect(() => {
+    if (!loading && egoPublicKey) {
+      if (token && isLoggedIn) {
+        setHasAuth(true);
+      } else {
+        setHasAuth(false);
+      }
+    }
+  }, [egoPublicKey, loading, token, isLoggedIn, userModel]);
+
+  const UserDropdownMenu = hasAuth ? (
     <DropdownMenu>
       <DropdownMenuItem
         style={{
@@ -81,7 +92,7 @@ const NavBar: React.FC = () => {
           />
         </Link>
         {
-          token && isLoggedIn &&
+          hasAuth &&
             (
               <MenuGroup>
                 <NavLink
@@ -116,7 +127,7 @@ const NavBar: React.FC = () => {
                     dropdownMenu={UserDropdownMenu}
                   >
                     {
-                      token && isLoggedIn ?
+                      hasAuth ?
                           (
                             <UserBadge
                               firstName={userModel?.firstName}

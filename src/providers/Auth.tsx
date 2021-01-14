@@ -88,6 +88,16 @@ export const AuthProvider = ({ children }: any) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!token && !Cookies.get(EGO_JWT_KEY)) {
+      setToken('');
+    }
+
+    if (!token && Cookies.get(EGO_JWT_KEY)) {
+      setToken(Cookies.get(EGO_JWT_KEY) || '');
+    }
+  }, [token]);
+
   return (
     <AuthContext.Provider
       value={
@@ -107,7 +117,7 @@ export const useAuth = () => {
   const [
     [token, setTokenState],
     [egoPublicKey, ],
-    [loading, ]
+    [loading, setLoading]
   ] = useContext(AuthContext);
   const MAX_CONCURRENT = 1;
   const MAX_QUEUE = Infinity;
@@ -157,6 +167,23 @@ export const useAuth = () => {
           }
         });
     });
+
+  const fetchWithEgoToken = async (uri: string, options: any) => {
+    const modifiedOption = {
+      ...(options || {}),
+      headers: { ...((options && options.headers) || {}), authorization: `Bearer ${getToken()}` },
+    };
+
+    if (getToken() && !isValidJwt(getToken())) {
+      const newJwt = await getRefreshToken();
+      return fetch(uri, {
+        ...modifiedOption,
+        headers: { ...modifiedOption.headers, authorization: `Bearer ${newJwt}` },
+      });
+    } else {
+      return fetch(uri, modifiedOption);
+    }
+  };
 
   const getEgoPublicKey = (): string => {
     if (IGNORE_EGO) {
@@ -252,12 +279,14 @@ export const useAuth = () => {
     egoUtils(getEgoPublicKey()).isRdpcMember(permissions);
 
   return {
-    token: getToken(),
+    token,
     setToken,
     clearToken,
     getRefreshToken,
+    fetchWithEgoToken,
     egoPublicKey: getEgoPublicKey(),
     loading,
+    setLoading,
     userModel: getUserModel(),
     isLoggedIn: isLoggedIn(),
     isValidJwt,

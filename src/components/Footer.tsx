@@ -31,27 +31,33 @@ import { APP_VERSION, MANAGEMENT_API_STATUS_URL } from "config/globals";
 import { useAuth } from "providers/Auth";
 
 export default () => {
-  const { token } = useAuth();
+  const {
+    egoPublicKey,
+    loading,
+    token,
+    fetchWithEgoToken
+  } = useAuth();
   const theme = useTheme();
   const [apiVersion, setApiVersion] = useState(null);
 
   useEffect(() => {
-    fetch(MANAGEMENT_API_STATUS_URL, {
-      method: 'GET',
-      mode: 'cors',
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
-      },
-    })
-    .then(res => res.json())
-    .then(data => {
-      setApiVersion(data.workflow_engine_versions.nextflow);
-    })
-    .catch(err => {
-      console.warn(err);
-    });
-  }, [token]);
+    if (!loading && egoPublicKey && token) {
+      fetchWithEgoToken(MANAGEMENT_API_STATUS_URL, {
+        method: 'GET',
+        mode: 'cors',
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
+      .then(res => res.json())
+      .then(data => {
+        setApiVersion(data.workflow_engine_versions.nextflow);
+      })
+      .catch(err => {
+        console.warn(err);
+      });
+    }
+  }, [egoPublicKey, loading, token, fetchWithEgoToken]);
 
   return (
     <Footer

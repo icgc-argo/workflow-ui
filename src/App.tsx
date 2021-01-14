@@ -48,21 +48,30 @@ import EgoUnavailable from "pages/EgoUnavailable";
 import Run from "pages/Run";
 import Voyagers from "pages/Voyagers";
 import { AuthProvider, useAuth } from "providers/Auth";
-import { setRedirectUrl } from "utils/redirectUrl";
+import { setRedirectUrl, clearRedirectUrl } from "utils/redirectUrl";
 import { css } from "emotion";
 
 const modalPortalRef = React.createRef<HTMLDivElement>();
 
 const ProtectedRoute = ({ path, ...props }: any) => {
-  const { token , isLoggedIn, getRefreshToken } = useAuth();
+  const {
+    loading,
+    isLoggedIn,
+    token,
+    getRefreshToken,
+    setLoading
+  } = useAuth();
   const [refreshToken, setRefreshToken] = useState('');
 
   const checkRefreshToken = async () => {
+    setLoading(true);
     const res = await getRefreshToken()
       .catch(err => console.warn('Unexpected error while refreshing token: ', err));
     if (res) {
       setRefreshToken(res);
+      clearRedirectUrl();
     }
+    setLoading(false);
   }
 
   useEffect(() => {
@@ -71,12 +80,14 @@ const ProtectedRoute = ({ path, ...props }: any) => {
       checkRefreshToken();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isLoggedIn]);
+  }, [token, isLoggedIn]);
 
   return (
-    token && (isLoggedIn || refreshToken)
-      ? <Route path={path} {...props} />
-      : <Route render={() => <Redirect to={LOGIN_PAGE_PATH} />} />
+    loading
+      ? null
+      : token && (isLoggedIn || refreshToken)
+        ? <Route path={path} {...props} />
+        : <Route render={() => <Redirect to={LOGIN_PAGE_PATH} />} />
   );
 };
 
@@ -100,16 +111,12 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 };
 
 const App: React.FC = () => {
-  const { loading, egoPublicKey, token } = useAuth();
+  const { loading, egoPublicKey, fetchWithEgoToken } = useAuth();
 
   const client = new ApolloClient({
     link: createHttpLink({
       uri: RDPC_GATEWAY,
-      headers: token
-      ? {
-          authorization: `Bearer ${token}`,
-        }
-      : {},
+      fetch: fetchWithEgoToken,
     }),
     cache: new InMemoryCache()
   });
