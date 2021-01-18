@@ -70,7 +70,7 @@ export const CancelResponseModal = ({
   return (
     <ModalPortal>
       <Modal
-        title="Workflow Run Cancelled"
+        title={cancelResponse ? `Workflow Run Cancelled` : `Cancel Run Error`}
         actionVisible={false}
         onCancelClick={onCancelAcknowledge}
         cancelText="Ok"
@@ -95,7 +95,7 @@ export const CancelResponseModal = ({
                 padding: 0 10px;
               `}
             >
-              {cancelError instanceof ApolloError && (
+              {cancelError instanceof Error && (
                 <p>
                   <strong>Msg:</strong> {cancelError.message}
                 </p>
