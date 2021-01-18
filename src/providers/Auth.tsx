@@ -20,7 +20,14 @@ import React, { useEffect, useContext, useState } from 'react';
 import egoUtils from '@icgc-argo/ego-token-utils';
 import memoize from 'lodash/memoize';
 import Cookies from 'js-cookie';
-import { EGO_JWT_KEY, EGO_PUBLIC_KEY_URL, RDPC_POLICY_NAME, IGNORE_EGO } from 'config/globals';
+import Queue from 'promise-queue';
+import {
+  EGO_JWT_KEY,
+  EGO_PUBLIC_KEY_URL,
+  REFRESH_TOKEN_ENDPOINT,
+  RDPC_POLICY_NAME,
+  IGNORE_EGO
+} from 'config/globals';
 
 type T_AuthContext = [
   [string, React.Dispatch<React.SetStateAction<string>>],
@@ -81,6 +88,16 @@ export const AuthProvider = ({ children }: any) => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!token && !Cookies.get(EGO_JWT_KEY)) {
+      setToken('');
+    }
+
+    if (!token && Cookies.get(EGO_JWT_KEY)) {
+      setToken(Cookies.get(EGO_JWT_KEY) || '');
+    }
+  }, [token]);
+
   return (
     <AuthContext.Provider
       value={
@@ -100,8 +117,11 @@ export const useAuth = () => {
   const [
     [token, setTokenState],
     [egoPublicKey, ],
-    [loading, ]
+    [loading, setLoading]
   ] = useContext(AuthContext);
+  const MAX_CONCURRENT = 1;
+  const MAX_QUEUE = Infinity;
+  const queue = new Queue(MAX_CONCURRENT, MAX_QUEUE);
 
   const getToken = (): string => {
     if (!token && !Cookies.get(EGO_JWT_KEY)) {
@@ -123,6 +143,46 @@ export const useAuth = () => {
   const clearToken = () => {
     Cookies.remove(EGO_JWT_KEY);
     setTokenState('');
+  };
+
+  const getRefreshToken = (): Promise<string> =>
+    // using queue to prevent parallel refreshes, as seen in platform-ui
+    queue.add(() => {
+      return fetch(REFRESH_TOKEN_ENDPOINT, {
+        credentials: 'include',
+        headers: {
+          accept: '*/*',
+          authorization: `Bearer ${getToken()}`,
+        },
+        method: 'POST',
+      })
+        .then(res => res.text())
+        .then(newJwt => {
+          if (isValidJwt(newJwt)) {
+            setToken(newJwt);
+            return newJwt;
+          } else {
+            clearToken();
+            return '';
+          }
+        });
+    });
+
+  const fetchWithEgoToken = async (uri: string, options: any) => {
+    const modifiedOption = {
+      ...(options || {}),
+      headers: { ...((options && options.headers) || {}), authorization: `Bearer ${getToken()}` },
+    };
+
+    if (getToken() && !isValidJwt(getToken())) {
+      const newJwt = await getRefreshToken();
+      return fetch(uri, {
+        ...modifiedOption,
+        headers: { ...modifiedOption.headers, authorization: `Bearer ${newJwt}` },
+      });
+    } else {
+      return fetch(uri, modifiedOption);
+    }
   };
 
   const getEgoPublicKey = (): string => {
@@ -219,11 +279,14 @@ export const useAuth = () => {
     egoUtils(getEgoPublicKey()).isRdpcMember(permissions);
 
   return {
-    token: getToken(),
+    token,
     setToken,
     clearToken,
+    getRefreshToken,
+    fetchWithEgoToken,
     egoPublicKey: getEgoPublicKey(),
     loading,
+    setLoading,
     userModel: getUserModel(),
     isLoggedIn: isLoggedIn(),
     isValidJwt,

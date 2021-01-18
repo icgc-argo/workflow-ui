@@ -16,13 +16,17 @@
  * ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+type SearchResult<T> = {
+  content: T[]
+}
+
 type RunsQuery<RT = Run> = {
-  runs: RT[];
+  runs: SearchResult<RT>
 };
 
 type RunsTaskQuery<RT = Run, TT = Task> = {
-  runs: RT[];
-  tasks: TT[];
+  runs: SearchResult<RT>,    
+  tasks:  SearchResult<TT>,
 };
 
 export type DashboardQueryResponse = RunsTaskQuery<RunCompact, DashboardTask>;

@@ -41,22 +41,26 @@ export default () => {
     gql`
       query($pageFrom: Int!, $pageSize: Int!) {
         runs(page: { from: $pageFrom, size: $pageSize }) {
-          runId
-          sessionId
-          state
-          startTime
-          completeTime
-          repository
-          engineParameters {
-            revision
+          content {
+            runId
+            sessionId
+            state
+            startTime
+            completeTime
+            repository
+            engineParameters {
+              revision
+            }
           }
         }
         tasks(filter: {state: "RUNNING"}, page: {from: 0, size: 500}) {
-          process
-          runId
-          cpus
-          state
-          startTime
+          content {
+            process
+            runId
+            cpus
+            state
+            startTime
+          }
         }
       }
     `,
@@ -117,7 +121,7 @@ export default () => {
               Workflow runs
             </Typography>
           </div>
-          <RunsTable runs={data?.runs || []} setLoading={setLoading} />
+          <RunsTable runs={data?.runs?.content || []} setLoading={setLoading} />
         </Container>
         <Container
           css={null}
@@ -127,7 +131,7 @@ export default () => {
             flex: 1 3 0;
           `}
         >
-          <RDPCStats runData={data?.runs || []} taskData={data?.tasks || []} />
+          <RDPCStats runData={data?.runs?.content || []} taskData={data?.tasks?.content || []} />
         </Container>
       </div>
     </div>
