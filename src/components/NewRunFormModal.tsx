@@ -99,10 +99,10 @@ export default ({
   return (
     <>
       <Button disabled={!isAdmin()} onClick={onNewRunClick}>new run</Button>
-      {runResponse && (
+      {(runResponse || runError) && (
         <ModalPortal>
           <Modal
-            title="Workflow Run Initiated"
+            title={`Workflow Run ${runResponse ? 'Initiated' : 'Error'}`}
             actionVisible={false}
             onCancelClick={onRunAcknowledge}
             cancelText="Ok"
@@ -127,7 +127,7 @@ export default ({
                     padding: 0 10px;
                   `}
                 >
-                  {runError instanceof ApolloError && (
+                  {runError instanceof Error && (
                     <p>
                       <strong>Msg:</strong> {runError.message}
                     </p>
