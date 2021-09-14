@@ -33,3 +33,4 @@ export const MANAGEMENT_API = process.env.REACT_APP_MANAGEMENT_API || ``;
 export const MANAGEMENT_API_STATUS_URL = `${MANAGEMENT_API}/service-info`;
 export const RDPC_GATEWAY = process.env.REACT_APP_RDPC_GATEWAY || ``;
 export const IGNORE_EGO = process.env.REACT_APP_IGNORE_EGO;
+export const ENABLE_GQL_PLAYGROUND = process.env.REACT_APP_ENABLE_GQL_PLAYGROUND === 'true' || false;

@@ -24,7 +24,7 @@ import { css } from "emotion";
 
 import Logo from "assets/rdpc-logo.svg";
 import Logout from 'components/Logout';
-import { GOOGLE_AUTH_ENDPOINT } from 'config/globals';
+import { ENABLE_GQL_PLAYGROUND, GOOGLE_AUTH_ENDPOINT } from 'config/globals';
 import { useAuth } from "providers/Auth";
 
 const activeItemStyle = {
@@ -113,6 +113,17 @@ const NavBar: React.FC = () => {
                 >
                   <MenuItem>API Explorer</MenuItem>
                 </NavLink>
+                {ENABLE_GQL_PLAYGROUND && (
+                  <NavLink
+                    className={css`
+                      text-decoration: none;
+                    `}
+                    activeStyle={activeItemStyle}
+                    to='/playground'
+                  >
+                    <MenuItem>GQL Playground</MenuItem>
+                  </NavLink>
+                )}
               </MenuGroup>
             )
           }

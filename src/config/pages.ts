@@ -34,3 +34,4 @@ export const RUNS_PAGE_PATH = '/runs';
 export const RUN_PAGE_PATH = '/runs/:id';
 export const NO_ACCESS_PAGE_PATH = '/no-access';
 export const API_EXPLORER_PAGE_PATH = '/explorer';
+export const GQL_PLAYGROUND_PAGE_PATH = '/playground';
