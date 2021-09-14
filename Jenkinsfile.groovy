@@ -105,7 +105,7 @@ spec:
             }
             steps {
                 build(job: "/provision/helm", parameters: [
-                    [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'qa' ],
+                    [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'dev' ],
                     [$class: 'StringParameterValue', name: 'TARGET_RELEASE', value: 'workflow-ui'],
                     [$class: 'StringParameterValue', name: 'NEW_APP_VERSION', value: "${version}-${commit}" ]
                 ])
