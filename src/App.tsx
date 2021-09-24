@@ -26,7 +26,7 @@ import { ThemeProvider } from "@icgc-argo/uikit";
 import DNALoader from "@icgc-argo/uikit/DnaLoader";
 import Modal from "@icgc-argo/uikit/Modal";
 import { InMemoryCache } from "apollo-cache-inmemory";
-import { RDPC_GATEWAY } from 'config/globals';
+import { ENABLE_GQL_PLAYGROUND, RDPC_GATEWAY } from 'config/globals';
 import {
   HOME_PAGE_PATH,
   LOGIN_PAGE_PATH,
@@ -34,7 +34,8 @@ import {
   RUNS_PAGE_PATH,
   RUN_PAGE_PATH,
   NO_ACCESS_PAGE_PATH,
-  API_EXPLORER_PAGE_PATH
+  API_EXPLORER_PAGE_PATH,
+  GQL_PLAYGROUND_PAGE_PATH
 } from 'config/pages';
 import { AppContext, useInitialAppContextState } from 'context/App';
 import Footer from 'components/Footer';
@@ -50,6 +51,7 @@ import Voyagers from "pages/Voyagers";
 import { AuthProvider, useAuth } from "providers/Auth";
 import { setRedirectUrl, clearRedirectUrl } from "utils/redirectUrl";
 import { css } from "emotion";
+import GqlPlayground from 'pages/GqlPlayground';
 
 const modalPortalRef = React.createRef<HTMLDivElement>();
 
@@ -111,7 +113,7 @@ export const ModalPortal: React.ComponentType = ({ children }) => {
 };
 
 const App: React.FC = () => {
-  const { loading, egoPublicKey, fetchWithEgoToken } = useAuth();
+  const { loading, egoPublicKey, fetchWithEgoToken, token } = useAuth();
 
   const client = new ApolloClient({
     link: createHttpLink({
@@ -155,6 +157,13 @@ const App: React.FC = () => {
                             <Run runId={props.match.params.id} />
                           )}
                         />
+                        {ENABLE_GQL_PLAYGROUND && (
+                          <ProtectedRoute
+                            exact
+                            path={GQL_PLAYGROUND_PAGE_PATH}
+                            render={() => <GqlPlayground token={token} />}
+                          />
+                        )}
                         <Route exact path={NO_ACCESS_PAGE_PATH} component={NoAccess} />
                         <Route component={NotFound} />
                       </Switch>

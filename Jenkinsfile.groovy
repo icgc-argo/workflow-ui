@@ -34,17 +34,27 @@ spec:
   - name: node
     image: node:12.6.0
     tty: true
+  - name: dind-daemon
+    image: docker:18.06-dind
+    securityContext:
+      privileged: true
+      runAsUser: 0
+    volumeMounts:
+      - name: docker-graph-storage
+        mountPath: /var/lib/docker
   - name: docker
     image: docker:18-git
     tty: true
-    volumeMounts:
-    - mountPath: /var/run/docker.sock
-      name: docker-sock
+    env:
+    - name: DOCKER_HOST
+      value: tcp://localhost:2375
+    - name: HOME
+      value: /home/jenkins/agent
+  securityContext:
+    runAsUser: 1000
   volumes:
-  - name: docker-sock
-    hostPath:
-      path: /var/run/docker.sock
-      type: File
+  - name: docker-graph-storage
+    emptyDir: {}
 """
         }
     }
@@ -94,12 +104,10 @@ spec:
                 branch "develop"
             }
             steps {
-                build(job: "/provision/helm", parameters: [
-                    [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'dev' ],
-                    [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-ui'],
-                    [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'ui'],
-                    [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
-                    [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}-${commit}" ]
+                build(job: "/provision/update-app-version", parameters: [
+                    [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'dev' ],
+                    [$class: 'StringParameterValue', name: 'TARGET_RELEASE', value: 'workflow-ui'],
+                    [$class: 'StringParameterValue', name: 'NEW_APP_VERSION', value: "${version}-${commit}" ]
                 ])
             }
         }
@@ -129,12 +137,10 @@ spec:
                 branch "master"
             }
             steps {
-                build(job: "/provision/helm", parameters: [
-                    [$class: 'StringParameterValue', name: 'AP_RDPC_ENV', value: 'qa' ],
-                    [$class: 'StringParameterValue', name: 'AP_CHART_NAME', value: 'workflow-ui'],
-                    [$class: 'StringParameterValue', name: 'AP_RELEASE_NAME', value: 'ui'],
-                    [$class: 'StringParameterValue', name: 'AP_HELM_CHART_VERSION', value: "${chartVersion}"],
-                    [$class: 'StringParameterValue', name: 'AP_ARGS_LINE', value: "--set-string image.tag=${version}" ]
+                build(job: "/provision/update-app-version", parameters: [
+                    [$class: 'StringParameterValue', name: 'RDPC_ENV', value: 'qa' ],
+                    [$class: 'StringParameterValue', name: 'TARGET_RELEASE', value: 'workflow-ui'],
+                    [$class: 'StringParameterValue', name: 'NEW_APP_VERSION', value: "${version}" ]
                 ])
             }
         }
