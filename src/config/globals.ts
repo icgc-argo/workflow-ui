@@ -35,4 +35,5 @@ export const RDPC_GATEWAY = process.env.REACT_APP_RDPC_GATEWAY || ``;
 export const IGNORE_EGO = process.env.REACT_APP_IGNORE_EGO;
 export const ENABLE_GQL_PLAYGROUND =
   process.env.REACT_APP_ENABLE_GQL_PLAYGROUND === 'true' || false;
-export const AVAILABLE_CORES = process.env.REACT_APP_K8_AVAILABLE_CORES || 1535;
+export const AVAILABLE_CORES =
+  Number(process.env.REACT_APP_K8_AVAILABLE_CORES) || 1535;
