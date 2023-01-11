@@ -22,6 +22,7 @@ import { Link } from "react-router-dom";
 import { DashboardTask, RunCompact } from "gql/types";
 import Typography from "@icgc-argo/uikit/Typography";
 import { useTheme } from "@icgc-argo/uikit/ThemeProvider";
+import { AVAILABLE_CORES } from "config/globals";
 
 export default ({
   runData,
@@ -50,8 +51,9 @@ export default ({
     .filter((task) => activeRunIds.includes(task.runId))
     .sort(sortByDate);
 
-
-  const totalCPUs = 1535; // TODO either get this from somewhere or move to env
+  // `totalCPUs` is read from config, so it must be maintained if hte cluster CPUs number changes.
+  // Ideally a service would read this dynamically
+  const totalCPUs = AVAILABLE_CORES;
   const cpusInUse = tasks.reduce((acc, curr) => (acc += curr.cpus), 0);
   const cpusInUseAsPerc = parseFloat(
     ((cpusInUse / totalCPUs) * 100).toFixed(2)
