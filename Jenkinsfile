@@ -5,5 +5,5 @@ pipelineRDPCWorkflowUi(
     dockerRepo: "icgc-argo/workflow-ui",
     gitRepo: "icgc-argo/workflow-ui",
     testCommand: "npm ci && npm run test",
-    helmRelease: "workflow-ui"
+    helmRelease: "ui"
 )
